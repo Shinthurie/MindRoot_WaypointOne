@@ -6,7 +6,7 @@ import DriverMap from "../components/DriverMap";
 import { LANGS } from "../i18n";
 import { AlertTriangle, ArrowLeftRight, Camera, Car, Check, CloudOff, DoorOpen, Map, MapPinOff, Mic, Navigation, Package, PackageMinus, PenLine, Phone, ShieldCheck, Snowflake, Thermometer, Timer, TrafficCone, Truck, Wrench, X, Disc3, Construction, MessageSquare } from "lucide-react";
 import { useApp } from "../state";
-import { fmt, fuelThisWeek, plan, runMin, runsOf, stopKey, toMin } from "../data/model";
+import { RUN_DATE, fmt, fuelThisWeek, plan, runMin, runsOf, stopKey, toMin } from "../data/model";
 import { storeName } from "../data/accounts";
 import { BrandTile, Chip, MobileFrame, OfflineBanner, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Split, Stepper, TopBar, useClock, PhotoButton, SignatureButton } from "../components/ui";
 
@@ -131,12 +131,15 @@ function DeliverySteps({ step }) {
 
 /* Main action for the next stop: start the run once at the depot, then "I've arrived" at each shop. */
 function useNextAction(s) {
-  const { t, runStarted, stopProgress, dispatch } = useApp();
+  const { t, runStarted, stopProgress, dispatch, fd } = useApp();
   const nav = useNavigate();
+  const clock = useClock();
   const { t1, veh } = useTrip();
   const started = runStarted[`${veh}:${t1?.run}`];
   const arrived = stopProgress[stopKey(veh, s?.outlet)]?.arrivedAt;
   if (!s) return null;
+  // The evening before (the plan is published then), the run cannot start yet.
+  if (!started && runMin(clock) < 0) return { label: `${t("leaves")} ${fd ? fd(RUN_DATE) : RUN_DATE} · ${t1.start}`, icon: Timer, disabled: true, go: () => {} };
   if (!started) return { label: `${t("startRun")} · ${t("trip")} ${t1.run}`, icon: Navigation, go: () => { dispatch({ type: "startRun", vehicle: veh, run: t1.run }); dispatch({ type: "log", who: veh, role: `Driver · ${veh}`, what: `Left the depot on run ${t1.run}` }); nav(`/driver/map/${s.n}`); } };
   return { label: `${arrived ? t("continueStep") : t("iArrived")} · ${s.outlet}`, go: () => { if (!arrived) dispatch({ type: "arrive", vehicle: veh, outlet: s.outlet }); nav(`/driver/deliver/${s.n}`); } };
 }
@@ -180,7 +183,7 @@ function StopPanel({ s, wide }) {
         )}
       </div>
       <div className="dock">
-        {action && <button className="btn primary field block" onClick={action.go}>{action.icon && <action.icon size={20} />} {action.label}</button>}
+        {action && <button className="btn primary field block" disabled={action.disabled} onClick={action.go}>{action.icon && <action.icon size={20} />} {action.label}</button>}
       </div>
     </>
   );
@@ -306,7 +309,7 @@ function DriverTripScreen() {
         <TripList />
         <div className="dock">
           {next && !cancelled && action
-            ? <button className="btn primary field block" onClick={action.go}>{action.icon && <action.icon size={20} />} {action.label}</button>
+            ? <button className="btn primary field block" disabled={action.disabled} onClick={action.go}>{action.icon && <action.icon size={20} />} {action.label}</button>
             : <button className="btn primary field block" onClick={() => nav("/driver/sync")}>{t("sync")}</button>}
         </div>
         <DriverNav />
@@ -420,10 +423,24 @@ export function VehicleProblem() {
   );
 }
 
-/* Before the dispatcher publishes, the driver sees "plan not ready" instead of stops. */
+/* Before the dispatcher publishes, the trip pages show "plan not ready"; the menu, account, sync and vehicle problem
+   work as usual. */
 function Gate({ children }) {
-  const { published, user } = useApp();
-  return published ? children : <PlanNotReady title={`${user?.name || "Driver"} · ${user?.vehicle || ""}`} sub="Driver · Peliyagoda" />;
+  const { published, user, t } = useApp();
+  if (published) return children;
+  return (
+    <MobileFrame>
+      <div className="screen">
+        <TopBar title={`${user?.name || "Driver"} · ${user?.vehicle || ""}`} sub={t("navTrip")} problem="/driver/problem" />
+        <div className="body field" style={{ justifyContent: "center", alignItems: "center", textAlign: "center" }}>
+          <span className="shape" style={{ width: 72, height: 72, borderRadius: 22, background: "var(--planned)" }}><Timer size={34} /></span>
+          <h2 style={{ margin: "8px 0 0" }}>{t("planNotReady")}</h2>
+          <p className="muted" style={{ maxWidth: 340, lineHeight: 1.6, margin: 0 }}>{t("planNotReadyText")}</p>
+        </div>
+        <DriverNav />
+      </div>
+    </MobileFrame>
+  );
 }
 export const DriverTrip = () => <Gate><DriverTripScreen /></Gate>;
 export const StopDetails = () => <Gate><StopDetailsScreen /></Gate>;
@@ -639,7 +656,7 @@ function MapScreen() {
           </div>
         </div>
         <div className="dock fit">
-          {action && <button className="btn primary field block" onClick={action.go}>{action.icon && <action.icon size={20} />} {action.label}</button>}
+          {action && <button className="btn primary field block" disabled={action.disabled} onClick={action.go}>{action.icon && <action.icon size={20} />} {action.label}</button>}
         </div>
       <DriverNav /></div>
     </MobileFrame>

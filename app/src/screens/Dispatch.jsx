@@ -806,7 +806,7 @@ function SmsSheet({ sms, onClose }) {
 }
 
 export function Live() {
-  const { scenario, dispatch, log, delivered, loadedTrucks, storeReports, loaderReports, driverReports, smsSent, user, setToast, stopProgress, fleet, depot, tracked } = useApp();
+  const { scenario, dispatch, log, delivered, loadedTrucks, storeReports, loaderReports, driverReports, smsSent, user, setToast, stopProgress, fleet, depot, tracked, fleetEdits, published } = useApp();
   const [picked, setPicked] = useState(null); // truck selected on the map or in the list
   const [sms, setSms] = useState(null);
   const by = (text) => log.find((e) => e.what.startsWith(text))?.who;
@@ -847,6 +847,11 @@ export function Live() {
   storeReports.forEach((r, i) => problems.push(r.decision
     ? { key: r.id || `store-${i}`, ok: true, title: `Store report · ${r.name}`, text: `${r.outlet}: ${r.what} · ${r.decidedBy} ${r.decision === "resend" ? "is sending them on the next run" : "credited the store"} (${r.decidedAt})` }
     : { key: r.id || `store-${i}`, title: `Store report · ${r.name}`, text: r.kind === "notArrived" ? `${r.outlet}: ${r.what} · reported ${r.at} by ${r.by} · truck ${r.vehicle}` : `${r.outlet}: ${r.what} · reported ${r.at} by ${r.by} · driver's photo and signature attached`, store: r.id ? r : null }));
+  // A truck sent to the workshop (Fleet page) that still has stops to deliver: its orders need another truck.
+  if (published) plan.lanes.filter((l) => fleetEdits?.[l.vehicle.id]?.status === "in_workshop").forEach((l) => {
+    const left = l.runs.flatMap((r) => r.stops).filter((s) => !delivered[`${l.vehicle.id}:${s.outlet}`]).length;
+    if (left) problems.push({ key: `ws-${l.vehicle.id}`, title: `In the workshop · ${l.vehicle.id}`, text: `${l.vehicle.id} is in the workshop but still has ${left} stop${left > 1 ? "s" : ""} on the plan · re-plan without it`, to: `/dispatch/replan/${l.vehicle.id}` });
+  });
   if (scenario.dead === "complaint") problems.push({ key: "dead", title: "Store report", text: "OUT074: “dry order not arrived?” · waiting for VEH010 to sync", to: "/store/dispute" });
   const openProblems = problems.filter((p) => !p.ok).length;
   // The dispatcher's answer to a loader report goes back to the dock; "send short" also tells the store.

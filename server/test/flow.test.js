@@ -310,7 +310,7 @@ test("safety: a switched-off account is signed out at once; deliveries and repor
   assert.equal((await call("/api/state", { token: drv })).status, 200);
   // A driver cannot hand over a stop that is not on their truck's plan.
   r = await send(drv, { type: "deliver", vehicle: "VEH020", outlet: "OUT099", outcome: "all", online: true });
-  assert.match(r.body.results[0].error, /not a stop of VEH020|not published/);
+  assert.match(r.body.results[0].error, /not a stop of VEH020|not published|cannot be delivered yet/);
   // A report cannot claim more cases than the order has.
   const disp = await signIn("WP-DSP-001", config.seedPassword);
   const st = (await call("/api/state", { token: disp })).body.state;

@@ -326,7 +326,14 @@ export const isS1Run = (s) => (s.runDate || S1_RUN) === S1_RUN;
    store order for a run that was skipped over) goes first on the new run. Going back (e.g. to the S1 day) just
    opens that run. */
 const RUN_KEYS = Object.keys(DAY_RESET);
-const runPart = (s) => Object.fromEntries(RUN_KEYS.map((k) => [k, s[k]]));
+/* A run put aside keeps its records without the photo and signature images (they stay in the command log),
+   so the shared state stays small. */
+const noImage = (x) => (x && (x.photo || x.signature) ? { ...x, photo: null, signature: null, proofArchived: true } : x);
+const runPart = (s) => {
+  const r = Object.fromEntries(RUN_KEYS.map((k) => [k, s[k]]));
+  return { ...r, delivered: Object.fromEntries(Object.entries(r.delivered || {}).map(([k, d]) => [k, noImage(d)])),
+    loaderReports: (r.loaderReports || []).map(noImage), storeReports: (r.storeReports || []).map(noImage) };
+};
 
 /* Orders of a saved run that still need delivering: not on its published plan, or planned but not handed over
    (no delivery record, or the driver recorded "not delivered"). */

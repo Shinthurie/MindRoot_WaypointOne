@@ -44,14 +44,23 @@ export async function validate(dayId, state, a, user) {
       if (!r.ok) throw new Invalid(`The plan breaks ${r.errors.length} rule(s); fix them before publishing: ${r.errors[0]}`, r.errors);
       return;
     }
+    case "startRun":
+    case "arrive":
+      if (!state.published) throw new Invalid("The plan for this run is not published yet");
+      if (clockAt(state.clock).date < state.runDate) throw new Invalid(`This run is on ${state.runDate}: it cannot start yet`);
+      return;
     case "deliver": {
       if (!["all", "some", "none"].includes(a.outcome)) throw new Invalid("Hand-over outcome must be all, some or none");
+      if (state.runDate && clockAt(state.clock).date < state.runDate) throw new Invalid(`This run is on ${state.runDate}: it cannot be delivered yet`);
       if ((a.missing || 0) < 0) throw new Invalid("Missing cases cannot be negative");
       // Only a stop on the published plan can be handed over.
       if (!state.published) throw new Invalid("The plan for this run is not published yet");
       const d = await loadDay(dayId);
       const alloc = effectiveAlloc(state);
-      if (!runOrders(d, state).some((o) => o.outlet === a.outlet && alloc[o.ref]?.vehicle === a.vehicle)) throw new Invalid(`${a.outlet} is not a stop of ${a.vehicle} on this run`);
+      const stop = runOrders(d, state).filter((o) => o.outlet === a.outlet && alloc[o.ref]?.vehicle === a.vehicle);
+      if (!stop.length) throw new Invalid(`${a.outlet} is not a stop of ${a.vehicle} on this run`);
+      const units = stop.reduce((n, o) => n + (state.adjusted?.[o.ref]?.units ?? o.units), 0);
+      if ((a.missing || 0) > units) throw new Invalid(`${a.outlet} has only ${units} cases on ${a.vehicle}`);
       return;
     }
     case "loaderReport":
@@ -83,6 +92,11 @@ export async function validate(dayId, state, a, user) {
       const x = (state.storeOrders || []).find((o) => o.ref === a.ref);
       if (!x) throw new Invalid(`Unknown order ${a.ref}`);
       if (user?.role === "store" && x.outlet !== user.outlet) throw new Invalid(`Order ${a.ref} belongs to ${x.outlet}`);
+      // Orders for a run close at 4 PM the day before: after that the dispatcher plans and the dock loads them.
+      const now = clockAt(state.clock);
+      const [y, m, dd] = x.run.split("-").map(Number);
+      const cut = new Date(Date.UTC(y, m - 1, dd - 1)).toISOString().slice(0, 10);
+      if (now.date > cut || (now.date === cut && now.time >= "16:00")) throw new Invalid(`Order ${a.ref} closed at 4:00 PM on ${cut}: ask the dispatcher`);
       return;
     }
     case "fleetStatus": {
