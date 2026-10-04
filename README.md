@@ -98,7 +98,16 @@ plan is not yet published.
 
 All 185 seeded accounts work the same way: `WP-DSP-00x` (dispatchers), `WP-DRV-001`…`060` (one per vehicle),
 `STORE-OUT001`…`OUT120`, `DEPOT-PELIYAGODA`, `DEPOT-KANDY`. Five wrong tries lock an account for 15 minutes.
-`WP-DRV-027` is a new, not-yet-activated account for the first sign-in flow.
+`WP-DRV-027` is a new, not-yet-activated account: sign in with the temporary password `waypoint@mr2026` and the app
+asks you to set your own 6-digit PIN (first sign-in). Admin's *New account* and *Reset sign-in* give a temporary
+password the same way. Everyone can change their own password or PIN on their profile.
+
+### The day's clock
+
+Every portal follows one clock. It **keeps running** like a real clock. Only the **dispatcher** can change it, in the
+**date and time** menu at the top right of Orders or the Live board: *Use real time* (Sri Lanka time), set any date
+and time (it runs on from there), or jump to a step of the S1 day. The seeded orders belong to the S1 day (Thu 8 Jan
+2026), so the walkthrough uses those steps.
 
 ---
 
@@ -181,6 +190,18 @@ docker-compose.yml, Dockerfile, .env.example
 ```
 
 ---
+
+## What is real, and what is not connected yet
+
+Real: accounts and passwords (bcrypt, lockout, first sign-in, password change, admin create/reset), role permissions
+checked by the server, the planning engine, the shared day with live updates, offline outbox with duplicate-free
+replay, delivery photos (phone camera) and signatures, the running clock (dispatcher-controlled).
+
+Not connected yet (shown honestly in the app where it matters): sending SMS (store notices and the one-time codes
+at first sign-in and *Forgot password*: any 6 digits are accepted at first sign-in), voice notes, phone calls from the
+app, and live GPS (positions follow the plan and the drivers' recorded steps). The seeded data has one delivery day
+(S1); store orders for later runs are recorded but not yet planned by the engine. The bad days portal (`/#/bad-days`)
+is a demo tool that plays every role of a story; switch it off with `DEMO_MODE=false`.
 
 ## Departures from the Designathon submission
 
