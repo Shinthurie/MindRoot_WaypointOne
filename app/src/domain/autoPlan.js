@@ -7,7 +7,7 @@ let planner = null;
 export async function autoPlan({ fleetEdits = {}, storeEdits = {} } = {}) {
   if (SERVER_MODE) {
     const s = session.get();
-    return api.autoPlan(s?.token, { tries: 300 });
+    return api.autoPlan(s?.token);
   }
   planner ??= createPlanner({ districts: data.districts, allowance: data.allowance });
   const fleet = Object.fromEntries(data.fleetAll.map((v) => [v.id, v]));
@@ -19,7 +19,7 @@ export async function autoPlan({ fleetEdits = {}, storeEdits = {} } = {}) {
   const t0 = performance.now();
   // Let the spinner paint before the search runs.
   await new Promise((r) => setTimeout(r, 50));
-  const result = planner.plan({ orders, vehicles, fuelLeft }, { tries: 300 });
+  const result = planner.plan({ orders, vehicles, fuelLeft }, { tries: 150 });
   const check = planner.check({ orders, vehicles, alloc: result.alloc, fuelLeft });
   return { ...result, check, ms: Math.round(performance.now() - t0), vehicles: vehicles.length };
 }

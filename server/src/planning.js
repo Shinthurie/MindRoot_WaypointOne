@@ -56,14 +56,24 @@ export function effectiveAlloc(state) {
   return alloc;
 }
 
+/* The engine's answer depends only on the orders, the store rules and which vehicles are available, so it is
+   kept per input: Auto-plan answers at once unless something changed (a truck to the workshop, a store rule).
+   150 tries reach the best plan on S1 (measured); more add time, not quality. */
+const engineCache = new Map();
 export async function runEngine(dayId, state, opts = {}) {
   const d = await loadDay(dayId);
   const vehicles = availableVehicles(d, state);
   const orders = ordersWithRules(d, state);
+  const tries = opts.tries ?? 150;
+  const key = JSON.stringify([dayId, tries, vehicles.map((v) => v.id), state?.storeEdits || {}]);
+  if (engineCache.has(key)) return { ...engineCache.get(key), cached: true };
   const t0 = Date.now();
-  const result = d.planner.plan({ orders, vehicles, fuelLeft: d.fuelLeft }, { tries: opts.tries ?? 300 });
+  const result = d.planner.plan({ orders, vehicles, fuelLeft: d.fuelLeft }, { tries });
   const check = d.planner.check({ orders, vehicles, alloc: result.alloc, fuelLeft: d.fuelLeft });
-  return { ...result, check, ms: Date.now() - t0, vehicles: vehicles.length };
+  const out = { ...result, check, ms: Date.now() - t0, vehicles: vehicles.length };
+  if (engineCache.size > 20) engineCache.clear();
+  engineCache.set(key, out);
+  return out;
 }
 
 export async function checkAlloc(dayId, state, alloc = effectiveAlloc(state)) {

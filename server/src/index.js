@@ -73,7 +73,7 @@ app.get("/api/commands", requireAuth, requireRole("admin", "dispatcher"), wrap(a
 // ---------- Planning ----------
 app.post("/api/plan/auto", requireAuth, requireRole("dispatcher", "demo"), wrap(async (req, res) => {
   const { state } = await getState(DAY);
-  const r = await runEngine(DAY, state, { tries: Math.min(Number(req.body?.tries) || 300, 2000) });
+  const r = await runEngine(DAY, state, req.body?.tries ? { tries: Math.min(Number(req.body.tries), 2000) } : {});
   const planId = await savePlan(DAY, "engine", req.user.id, r);
   res.json({ planId, ...r });
 }));
@@ -108,7 +108,12 @@ export async function start() {
   await waitForDb();
   await getState(DAY);
   return new Promise((resolve) => {
-    const server = app.listen(config.port, () => { console.log(`Waypoint One API on :${config.port} (day ${DAY}, demo mode ${config.demoMode ? "on" : "off"})`); resolve(server); });
+    const server = app.listen(config.port, () => {
+      console.log(`Waypoint One API on :${config.port} (day ${DAY}, demo mode ${config.demoMode ? "on" : "off"})`);
+      resolve(server);
+      // Work out tonight's engine plan in the background, so the dispatcher's Auto-plan answers at once.
+      setTimeout(() => getState(DAY).then(({ state }) => runEngine(DAY, state)).then((r) => console.log(`engine plan ready: ${r.summary.served} of ${r.summary.orders} served (${r.ms} ms)`)).catch((e) => console.error("engine warm-up failed", e.message)), 500);
+    });
   });
 }
 export { app };
