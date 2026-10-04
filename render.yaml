@@ -23,6 +23,6 @@ services:
       - key: DEMO_MODE
         value: "true"
       - key: SEED_PASSWORD
-        value: Waypoint@2026
+        value: waypoint@mr2026
       - key: SEED_PIN
-        value: "246810"
+        value: waypoint@mr2026

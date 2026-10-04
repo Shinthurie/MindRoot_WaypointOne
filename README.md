@@ -54,8 +54,8 @@ All settings are environment variables; see [.env.example](.env.example).
 |---|---|---|
 | `DATABASE_URL` | set by compose | PostgreSQL connection |
 | `JWT_SECRET` | `change-me-in-production` | signs session tokens: set a long random value |
-| `DEMO_MODE` | `true` | shared demo clock, bad days portal, demo sign-in tiles, "Reset demo". `false` = real sign-in only |
-| `SEED_PASSWORD` / `SEED_PIN` | `Waypoint@2026` / `246810` | secrets for all seeded accounts |
+| `DEMO_MODE` | `true` | the shared demo clock, the bad days portal and "Reset demo day". `false` = a real deployment (no one can move the clock) |
+| `SEED_PASSWORD` / `SEED_PIN` | `waypoint@mr2026` | password for all seeded accounts (change and restart to update them) |
 | `PORT` | `8080` | port of the app |
 | `CORS_ORIGIN` | `*` | allowed origins when the app is hosted separately |
 | `VITE_API_URL` | unset | (build time) API URL for a separately hosted web app |
@@ -90,11 +90,11 @@ plan is not yet published.
 
 | Role | Account ID | Secret | Who |
 |---|---|---|---|
-| Dispatcher | `WP-DSP-001` | `Waypoint@2026` | Nimal, Peliyagoda planning office |
-| Loader (shared depot account) | `DEPOT-PELIYAGODA` | PIN `246810` | Suresh, Kamal, Mohamed tap their name |
-| Driver | `WP-DRV-003` | PIN `246810` | Ruwan, reefer truck VEH003 |
-| Store manager (shared store account) | `STORE-OUT074` | `Waypoint@2026` | Waypoint Fresh Chilaw (Ruwan's first stop) |
-| Admin | `WP-ADM-001` | `Waypoint@2026` | accounts and fleet |
+| Dispatcher | `WP-DSP-001` | `waypoint@mr2026` | Nimal, Peliyagoda planning office |
+| Loader (shared depot account) | `DEPOT-PELIYAGODA` | `waypoint@mr2026` | Suresh, Kamal, Mohamed tap their name |
+| Driver | `WP-DRV-003` | `waypoint@mr2026` | Ruwan, reefer truck VEH003 |
+| Store manager (shared store account) | `STORE-OUT074` | `waypoint@mr2026` | Waypoint Fresh Chilaw (Ruwan's first stop) |
+| Admin | `WP-ADM-001` | `waypoint@mr2026` | accounts and fleet |
 
 All 185 seeded accounts work the same way: `WP-DSP-00x` (dispatchers), `WP-DRV-001`…`060` (one per vehicle),
 `STORE-OUT001`…`OUT120`, `DEPOT-PELIYAGODA`, `DEPOT-KANDY`. Five wrong tries lock an account for 15 minutes.
@@ -109,7 +109,7 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Dispatcher, evening before (Wed 7 Jan 19:00)**
 
-1. Sign in as `WP-DSP-001` / `Waypoint@2026`. **Orders** shows the 85 orders: 26 chilled, 10 shops skipped yesterday
+1. Sign in as `WP-DSP-001` / `waypoint@mr2026`. **Orders** shows the 85 orders: 26 chilled, 10 shops skipped yesterday
    (they must not be skipped again), one Style order of 40.7 m³ that is bigger than any truck, and today's real limit:
    every reefer trip is already used.
 2. Press **Auto-plan**. The planning engine runs on the server: it shows its plan (served, deferred, shops skipped
@@ -123,9 +123,10 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Loader, at the dock (Thu 8 Jan 03:00)**
 
-5. Move the day forward: **Demo** (bottom-left) → **Time** → *03:00 · Loading at the dock*. Every portal follows the
+5. Move the day forward: in the dispatcher's window, click the **date and time** at the top right → *03:00 · Loading at
+   the dock*. Every portal follows the
    shared clock.
-6. In a phone-sized window, sign in as `DEPOT-PELIYAGODA` / `246810`. **Home** shows the next load. Open
+6. In a phone-sized window, sign in as `DEPOT-PELIYAGODA` / `waypoint@mr2026`. **Home** shows the next load. Open
    **Today's loads** → **VEH003** → tap **Suresh** ("Who is loading VEH003?"). The dispatcher's bell shows
    *Loading started*.
 7. Tick the **reefer check (2–5 °C)**, tick **S1-083** (load in reverse stop order), press **All loaded · Hand to
@@ -133,7 +134,7 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Driver, on the road (05:30)**
 
-8. **Demo → Time → 05:30 · Trucks on the road.** Sign in as `WP-DRV-003` / `246810` in a phone-sized window (the
+8. **Dispatcher's date and time → 05:30 · Trucks on the road.** Sign in as `WP-DRV-003` / `waypoint@mr2026` in a phone-sized window (the
    screens are in Sinhala for Ruwan; tap **EN** at the top for English). The trip shows *Loaded by Suresh*.
 9. **Start run · Trip 1** → the route map opens inside the app → **I've arrived · OUT074** → **All given** → **Take
    photo** → **Sign here** → **Slide to finish**. The dispatcher's **Live board** shows the stop done.
@@ -142,14 +143,14 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Store manager, receiving (08:00)**
 
-11. **Demo → Time → 08:00 · Stores receive.** Sign in as `STORE-OUT074` / `Waypoint@2026`. **Deliveries** shows the
+11. **Dispatcher's date and time → 08:00 · Stores receive.** Sign in as `STORE-OUT074` / `waypoint@mr2026`. **Deliveries** shows the
     chilled order delivered with the driver's proof (time, receiver, photo, signature).
 12. **Check delivery** → **Everything is OK ✓** (or report missing, damaged or warm cases with a photo; it goes to
     the dispatcher). That completes the order's journey.
 
 **Bad days (degradation and recovery)**
 
-13. Sign out and press **Bad days portal** on the sign-in page. Each story runs step by step and changes the real
+13. Open the **bad days portal**: `/#/bad-days` (e.g. https://mindroot-waypointone-app.onrender.com/#/bad-days). Each story runs step by step and changes the real
     portals (open them with the links on the right):
     - **Short at the Dock**: the loader reports 2 broken chilled cases; the dispatcher replaces them or sends the
       truck short with a replacement order; the store is told before it opens.
@@ -157,7 +158,8 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
       truck for chilled goods, and every store sees its new truck and time.
     - **Dead Zone**: the VEH010 driver loses signal, records the delivery offline, the store says "not delivered",
       the dispatcher sees the truck as offline (not lost), and the proof syncs when the signal returns.
-14. **Demo → Reset demo** puts the seeded day back to the start (for the next judge).
+14. **Reset demo day** (in the dispatcher's date and time menu, or on the Admin page) puts the seeded day back to the
+    start for the next judge.
 
 ---
 

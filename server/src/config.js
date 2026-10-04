@@ -12,8 +12,8 @@ export const config = {
   corsOrigin: env.CORS_ORIGIN || "*",
   dataDir: env.DATA_DIR || here("../../data"),
   staticDir: env.STATIC_DIR || here("../../app/dist"),
-  seedPassword: env.SEED_PASSWORD || "Waypoint@2026",
-  seedPin: env.SEED_PIN || "246810",
+  seedPassword: env.SEED_PASSWORD || "waypoint@mr2026",
+  seedPin: env.SEED_PIN || "waypoint@mr2026",
   dayId: env.DAY_ID || "S1",
 };
 if (config.jwtSecret === "dev-only-secret-change-me" && env.NODE_ENV === "production") {

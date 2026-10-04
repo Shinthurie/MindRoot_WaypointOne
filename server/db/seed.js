@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { parse } from "csv-parse/sync";
 import { parse as parseStream } from "csv-parse";
 import bcrypt from "bcryptjs";
+import { createHash } from "node:crypto";
 import { pool, q, tx, waitForDb } from "../src/db.js";
 import { config } from "../src/config.js";
 import { migrate } from "./migrate.js";
@@ -50,11 +51,27 @@ async function insertMany(client, table, cols, rows, chunk = 1000) {
   }
 }
 
+/* The seeded accounts sign in with SEED_PASSWORD (office) and SEED_PIN (field). When either setting changes,
+   the seeded accounts take the new secrets on the next start; accounts an admin created later are left alone. */
+const SEED_IDS = () => [...SEED_ACCOUNTS.map((a) => a.id), "WP-ADM-001"];
+const fingerprint = () => createHash("sha256").update(`${config.seedPassword}|${config.seedPin}`).digest("hex");
+export async function syncSeedSecrets() {
+  const fp = fingerprint();
+  const { rows } = await q("SELECT value FROM app_meta WHERE key = 'seed_secrets'");
+  if (rows[0]?.value === fp) return false;
+  const [pw, pin] = await Promise.all([bcrypt.hash(config.seedPassword, 10), bcrypt.hash(config.seedPin, 10)]);
+  await q(`UPDATE accounts SET secret_hash = CASE WHEN role IN ('driver', 'loader') THEN $2 ELSE $1 END, failed_attempts = 0, locked_until = NULL
+    WHERE id = ANY($3)`, [pw, pin, SEED_IDS()]);
+  await q(`INSERT INTO app_meta (key, value) VALUES ('seed_secrets', $1) ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = now()`, [fp]);
+  console.log("seed: seeded accounts now use the current SEED_PASSWORD / SEED_PIN");
+  return true;
+}
+
 export async function seed({ ifEmpty = false } = {}) {
   await migrate();
   if (ifEmpty) {
     const { rows } = await q("SELECT count(*)::int AS n FROM delivery_days");
-    if (rows[0].n > 0) { console.log("seed: database already has data, skipping"); return; }
+    if (rows[0].n > 0) { console.log("seed: database already has data, skipping"); await syncSeedSecrets(); return; }
   }
   const t0 = Date.now();
   const G = "General Data", T = "Test Data", R = "Training Data";
@@ -122,6 +139,7 @@ export async function seed({ ifEmpty = false } = {}) {
     const start = { ...sharedOf(initial), clock: START_CLOCK, published: false, publishedBy: null };
     await c.query("INSERT INTO day_state (day_id, seq, state, seed_state) VALUES ($1, 0, $2, $2)", [DAY.id, JSON.stringify(start)]);
   });
+  await q(`INSERT INTO app_meta (key, value) VALUES ('seed_secrets', $1) ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = now()`, [fingerprint()]);
   const count = async (t) => (await q(`SELECT count(*)::int AS n FROM ${t}`)).rows[0].n;
   console.log(`seed: ${await count("outlets")} outlets, ${await count("vehicles")} vehicles, ${await count("orders")} orders for ${DAY.id}, ` +
     `${await count("accounts")} accounts, ${await count("delivery_history")} past deliveries, ${await count("route_legs")} route legs (${((Date.now() - t0) / 1000).toFixed(1)} s)`);
