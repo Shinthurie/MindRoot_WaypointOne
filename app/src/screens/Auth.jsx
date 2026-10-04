@@ -153,7 +153,7 @@ function Landing({ form, onPickLang }) {
           ))}
         </ul>
       </section>
-      <div className="landing-status"><MapPin size={16} /> <span><b>Peliyagoda Depot</b><small><i className="dot-live" /> {t("systemsReady")}</small></span></div>
+      <div className="landing-status"><MapPin size={16} /> <span><b>Peliyagoda &amp; Kandy Depots</b><small><i className="dot-live" /> {t("systemsReady")}</small></span></div>
       <div className="landing-overlay" onClick={() => setOpen(false)} aria-hidden="true" />
       <aside id="signin-panel" ref={panel} className="landing-panel" role="dialog" aria-modal="true" aria-label={t("signIn")} aria-hidden={!open}>
         <button className="landing-close" onClick={() => setOpen(false)} aria-label="Close"><X size={18} /></button>
