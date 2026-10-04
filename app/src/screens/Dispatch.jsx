@@ -10,7 +10,7 @@ import { outletsAll } from "../data/accounts";
 import LiveMap from "../components/LiveMap";
 import {
   MAX_TRUCK_M3, REEFER_TRIPS, vehicles, brandCounts, byRef, chilledM3, districts, liveStatus, n, orders, outlook, plan, protectedCount,
-  reeferDown, round1, runsOf, workshopReefers, buildPlan, checkMove, moveOptions, tripOf, RUN_DATE, IS_S1,
+  reeferDown, round1, runMin, runsOf, workshopReefers, buildPlan, checkMove, moveOptions, tripOf, RUN_DATE, IS_S1,
 } from "../data/model";
 import { nextOperatingDay } from "../runs.js";
 import { BrandChip, Chip, DayPill, DeskShell, DepotPill, formatDate, useClock, useRuns } from "../components/ui";
@@ -810,7 +810,7 @@ export function Live() {
   const by = (text) => log.find((e) => e.what.startsWith(text))?.who;
   const nav = useNavigate();
   const clock = useClock();
-  const rows = liveStatus(scenario, delivered, clock.time, tracked);
+  const rows = liveStatus(scenario, delivered, runMin(clock), tracked);
   const risks = rows.filter((r) => r.state !== "offline" && r.state !== "problem").flatMap((r) => r.risks.map((k) => ({ ...k, vehicle: r.lane.vehicle.id })));
   const offline = rows.filter((r) => r.state === "offline").length;
   const onRoad = rows.filter((r) => !["waiting", "done"].includes(r.state));
@@ -869,7 +869,7 @@ export function Live() {
           </div>
         </div>
         <div className="map-wrap">
-          <LiveMap rows={rows} now={clock.time} depot={depot} selected={picked} onSelect={setPicked} progress={stopProgress} />
+          <LiveMap rows={rows} now={runMin(clock)} depot={depot} selected={picked} onSelect={setPicked} progress={stopProgress} />
           {(() => {
             const r = rows.find((x) => x.lane.vehicle.id === picked);
             if (!r) return <div className="map-hint small">Click a truck on the map or in the list to follow it.</div>;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Camera, Check, ClipboardCheck, CloudOff, Info, ListOrdered, MessageSquare, PackageX, Pencil, Phone, PlusCircle, RotateCcw, ShieldCheck, Snowflake, Split as SplitIcon, Thermometer, Timer, Truck, UserRound, Bell, CalendarClock, Clock, X } from "lucide-react";
 import { useApp } from "../state";
-import { RUN_DATE, downPlan, n, orders, outletOrders, plan, round1, stopKey, toMin, tripOf, unitsOf, vehicleOf } from "../data/model";
+import { IS_S1, RUN_DATE, downPlan, n, orders, outletOrders, plan, round1, runMin, stopKey, toMin, tripOf, unitsOf, vehicleOf } from "../data/model";
 import { outletsAll, storeName } from "../data/accounts";
 import { BrandTile, Chip, MobileFrame, Pic, Stepper, TopBar, nextOperatingDay, useClock, useRuns, useWho, PhotoButton } from "../components/ui";
 
@@ -65,7 +65,8 @@ function orderInfo(o, scenario) {
    (all given, some missing, or not delivered); other trucks follow the plan's times at the clock. */
 export function deliveryOf(info, outlet, delivered, now, tracked = { VEH003: true }) {
   if (!info.vehicle) return null;
-  if (tracked[info.vehicle]) {
+  // Real runs: delivered only when the driver recorded it. The S1 reference day plays the plan for untracked trucks.
+  if (!IS_S1 || tracked[info.vehicle]) {
     const d = delivered[stopKey(info.vehicle, outlet)];
     return d?.synced ? { at: d.at, by: d.receivedBy || null, outcome: d.outcome, missing: d.missing || 0, reason: d.reason, photo: d.photo || null, signature: d.signature || null } : null;
   }
@@ -126,7 +127,7 @@ function OrderCard({ o }) {
   // The dispatcher moved this order after publishing: say so, with the new truck and time.
   const change = [...planEdits].reverse().find((e) => e.afterPublish && e.ref === o.ref && e.to);
   // Window closed and nothing yet: the store can ask where it is.
-  const overdue = !got && toMin(clock.time) > toMin(o.close);
+  const overdue = !got && runMin(clock) > toMin(o.close);
   const asked = storeReports.find((r) => r.ref === o.ref && r.kind === "notArrived");
   const notArrived = () => who.ask(tf("Report a problem"), (name) => {
     dispatch({ type: "storeReport", report: { outlet: o.outlet, name: storeName[o.outlet] || o.outlet, ref: o.ref, vehicle, kind: "notArrived", what: `${o.ref} not arrived (window closed ${o.close})`, by: name } });

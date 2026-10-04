@@ -6,7 +6,7 @@ import DriverMap from "../components/DriverMap";
 import { LANGS } from "../i18n";
 import { AlertTriangle, ArrowLeftRight, Camera, Car, Check, CloudOff, DoorOpen, Map, MapPinOff, Mic, Navigation, Package, PackageMinus, PenLine, Phone, ShieldCheck, Snowflake, Thermometer, Timer, TrafficCone, Truck, Wrench, X, Disc3, Construction, MessageSquare } from "lucide-react";
 import { useApp } from "../state";
-import { fmt, fuelThisWeek, plan, runsOf, stopKey, toMin } from "../data/model";
+import { fmt, fuelThisWeek, plan, runMin, runsOf, stopKey, toMin } from "../data/model";
 import { storeName } from "../data/accounts";
 import { BrandTile, Chip, MobileFrame, OfflineBanner, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Split, Stepper, TopBar, useClock, PhotoButton, SignatureButton } from "../components/ui";
 
@@ -84,7 +84,7 @@ function TripList({ active }) {
       </div>
       {view === "map" && (
         <>
-          <DriverMap run={t1} now={clock.time} depot={user?.depot || "Peliyagoda"} doneOutlets={new Set(t1.stops.filter(done).map((s) => s.outlet))} arrived={arrivedMap} nextOutlet={next?.outlet} />
+          <DriverMap run={t1} now={runMin(clock)} depot={user?.depot || "Peliyagoda"} doneOutlets={new Set(t1.stops.filter(done).map((s) => s.outlet))} arrived={arrivedMap} nextOutlet={next?.outlet} />
           {!online && <div className="banner offline"><CloudOff size={18} /> {t("mapNeedsSignal")}</div>}
         </>
       )}
@@ -568,7 +568,7 @@ function AccountScreen() {
   const nav = useNavigate();
   const { veh, driver } = useVeh();
   const v = fleet.find((x) => x.id === veh) || {};
-  const f = fuelThisWeek(veh, clock.time, delivered, tracked);
+  const f = fuelThisWeek(veh, runMin(clock), delivered, tracked);
   const pct = f ? Math.min(100, (f.total / f.quota) * 100) : 0;
   return (
     <MobileFrame caption={CAPTION}>
@@ -631,7 +631,7 @@ function MapScreen() {
       <div className="screen">
         <TopBar title={`${t("trip")} ${t1.run} · ${t1.district}`} sub={`${veh} · ${target.outlet} · ETA ${target.eta}`} back="/driver" problem="/driver/problem" />
         <div className="body field fit" style={{ paddingBottom: 8 }}>
-          <DriverMap run={t1} now={clock.time} depot={user?.depot || "Peliyagoda"} doneOutlets={new Set(t1.stops.filter(done).map((s) => s.outlet))} arrived={arrived} nextOutlet={target.outlet} height="calc(100dvh - 330px)" />
+          <DriverMap run={t1} now={runMin(clock)} depot={user?.depot || "Peliyagoda"} doneOutlets={new Set(t1.stops.filter(done).map((s) => s.outlet))} arrived={arrived} nextOutlet={target.outlet} height="calc(100dvh - 330px)" />
           {!online && <div className="banner offline"><CloudOff size={18} /> {t("mapNeedsSignal")}</div>}
           <div className="stop" style={{ boxShadow: "none" }}>
             <OrderTag refs={target.orders.map((o) => o.ref)} size="sm" />

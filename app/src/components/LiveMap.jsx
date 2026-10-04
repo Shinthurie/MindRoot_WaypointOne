@@ -29,7 +29,7 @@ const frac = (now, from, to) => (to <= from ? 1 : Math.min(1, Math.max(0, (now -
 /* Where a truck is at the clock time, along depot → stops → depot, from the plan's times. */
 export function truckPosition(run, now, depot, progress = {}) {
   const pts = run.stops.map((s) => shopPoint(s.outlet, s.district || run.district));
-  const t = toMin(now);
+  const t = typeof now === "number" ? now : toMin(now);
   // The live driver: an arrival or departure the driver recorded beats the plan.
   for (let i = run.stops.length - 1; i >= 0; i--) {
     const p = progress[run.stops[i].outlet];

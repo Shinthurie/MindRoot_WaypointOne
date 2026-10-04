@@ -2,17 +2,16 @@ import { useState } from "react";
 import { NavLink, Navigate, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, ArrowLeftRight, Camera, Check, ClipboardList, Clock, LogOut, Droplets, History, Home, Mic, Monitor, PackageX, Snowflake, Split as SplitIcon, Thermometer, Truck, Undo2, UserPlus, Users, Refrigerator } from "lucide-react";
 import { useApp } from "../state";
-import { orders, plan, reeferDown, runsOf, stopUnits, toMin } from "../data/model";
+import { orders, plan, reeferDown, runMin, runsOf, stopUnits, toMin } from "../data/model";
 import { BrandChip, Chip, LangChip, MobileFrame, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Stepper, TopBar, useClock, PhotoButton } from "../components/ui";
 
 /* Field portal: the phone layout on every screen size (phones, big tablets, desktops), with the bottom bar. */
 const useLayout = () => "phone";
 const CAPTION = { kicker: "Loader · Field Mode", title: "Peliyagoda dock", lines: ["Tap a load, say who you are, load in the order shown. Every tick and problem carries a name, and the dispatcher sees it live."] };
 
-/* The run a truck is being loaded for at the clock time: its first run today that hasn't left yet.
-   Trucks come back after run 1 and are loaded again for run 2. */
-export function loadingRun(veh, time) {
-  const now = toMin(time);
+/* The run a truck is being loaded for at the clock time (`now`: minutes, see runMin): its first run that hasn't left
+   yet. Trucks come back after run 1 and are loaded again for run 2. */
+export function loadingRun(veh, now) {
   return runsOf(plan, veh).find((r) => toMin(r.start) > now) || null;
 }
 const tickKey = (veh, run, n) => `${veh}:${run}:${n}`;
@@ -26,9 +25,9 @@ function useLoads() {
   if (!published) return { loads: [], gone: [], clock, depot };
   const byId = Object.fromEntries(fleet.map((v) => [v.id, v]));
   const lanes = plan.lanes.filter((l) => l.runs.length && (byId[l.vehicle.id]?.depot || "Peliyagoda") === depot);
-  const now = toMin(clock.time);
+  const now = runMin(clock);
   const loads = lanes
-    .map((l) => ({ l, run: loadingRun(l.vehicle.id, clock.time) }))
+    .map((l) => ({ l, run: loadingRun(l.vehicle.id, now) }))
     .filter((x) => x.run)
     .map(({ l, run }) => {
       const veh = l.vehicle.id;
@@ -41,7 +40,7 @@ function useLoads() {
         status: finished ? "loaded" : started || done ? "loading" : "toload" };
     })
     .sort((a, b) => a.run.start.localeCompare(b.run.start) || a.veh.localeCompare(b.veh));
-  const gone = lanes.filter((l) => !loadingRun(l.vehicle.id, clock.time)).map((l) => l.vehicle.id);
+  const gone = lanes.filter((l) => !loadingRun(l.vehicle.id, now)).map((l) => l.vehicle.id);
   return { loads, gone, clock, depot };
 }
 
@@ -114,7 +113,7 @@ function Shell({ title, sub, back, children, dock, right }) {
 }
 
 const statusChip = (x, t) => x.status === "loaded" ? <Chip kind="done">{t("loadedDone")}</Chip> : x.status === "loading" ? <Chip kind="way">{t("loadingNow")}</Chip> : <Chip kind="planned">{t("toLoad")}</Chip>;
-const leavesText = (x, t) => (x.minsLeft >= 0 ? `${t("leavesIn")} ${x.minsLeft} ${t("minShort")}` : "");
+const leavesText = (x, t) => (x.minsLeft >= 0 && x.minsLeft <= 120 ? `${t("leavesIn")} ${x.minsLeft} ${t("minShort")}` : "");
 
 /* Home: what's next, today's progress, and the way into loads, log and problems. */
 function HomeScreen() {
@@ -437,7 +436,7 @@ export function LoaderProblem() {
   const nav = useNavigate();
   const clock = useClock();
   const { veh = "VEH006" } = useParams();
-  const run = loadingRun(veh, clock.time) || runsOf(plan, veh)[0];
+  const run = loadingRun(veh, runMin(clock)) || runsOf(plan, veh)[0];
   const stops = run ? run.stops : [];
   const person = (run && loadStarts[`${veh}:${run.run}`]?.by) || lastPerson || "Loader"; // whoever is loading this truck
   const [outlet, setOutlet] = useState(veh === "VEH006" && stops.some((s) => s.outlet === "OUT026") ? "OUT026" : stops[stops.length - 1]?.outlet);

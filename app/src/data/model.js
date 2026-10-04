@@ -16,6 +16,10 @@ export const FRESH_START = "03:30"; // Fresh window 3:30–8:00 (booklet)
 export const DAY_START = "09:00"; // Style and Tech trading day
 
 export const toMin = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+const dayNo = (iso) => { const [y, m, d] = iso.split("-").map(Number); return Date.UTC(y, m - 1, d) / 86400000; };
+/* The clock in minutes from midnight of the run's day: negative the evening before (the plan is made and published
+   then), so "has this truck left yet?" compares the right day, not just the time. */
+export const runMin = (clock) => toMin(clock.time) - 1440 * (dayNo(RUN_DATE) - dayNo(clock.date));
 export const fmt = (min) => `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(Math.round(min % 60)).padStart(2, "0")}`;
 export const round1 = (x) => Math.round(x * 10) / 10;
 export const n = (x) => x.toLocaleString("en-US");
@@ -272,8 +276,8 @@ export let brandCounts = countBrands(orders);
 export function fuelThisWeek(vid, nowTime, delivered = {}, tracked = {}) {
   const before = fuelBeforeToday(vid);
   if (before == null) return null;
-  const now = toMin(nowTime);
-  const done = runsOf(plan, vid).filter((r) => (tracked[vid] ? r.stops.every((s) => delivered[stopKey(vid, s.outlet)]) : toMin(r.end) <= now));
+  const now = typeof nowTime === "number" ? nowTime : toMin(nowTime);
+  const done = runsOf(plan, vid).filter((r) => (!IS_S1 || tracked[vid] ? r.stops.every((s) => delivered[stopKey(vid, s.outlet)]) : toMin(r.end) <= now));
   const today = done.reduce((s, r) => s + r.fuelL, 0);
   return { before, today, total: before + today, runs: done.length, quota: fuelWeek[vid].quotaL, lastWeek: fuelWeek[vid].usedL };
 }
@@ -290,14 +294,16 @@ export function speedIndex(district, hour) {
    Prediction: remaining legs are driven at the typical speed for that district and hour (traffic data),
    so a stop whose predicted arrival passes its window is flagged before it happens. */
 export function liveStatus(scenario, delivered = {}, nowTime = NOW, tracked = { VEH003: true }) {
-  const now = toMin(nowTime);
+  const now = typeof nowTime === "number" ? nowTime : toMin(nowTime);
   return plan.lanes
     .filter((l) => l.runs[0])
     .map((l) => {
       const runs = l.runs;
       const t = runs.find((r) => toMin(r.end) > now) || runs[runs.length - 1];
       const vid = l.vehicle.id;
-      const live = !!tracked[vid]; // a driver has signed in: follow their real records, not the plan's times
+      // Real runs follow only the drivers' real records. The S1 reference day plays the plan's times for trucks
+      // whose driver has not signed in.
+      const live = !IS_S1 || !!tracked[vid];
       const got = (s) => delivered[stopKey(vid, s.outlet)];
       // Finished: past the last run's end; for a tracked truck, only once every stop is recorded.
       const finished = toMin(runs[runs.length - 1].end) <= now && (!live || runs.every((r) => r.stops.every(got)));
