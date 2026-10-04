@@ -27,8 +27,15 @@ export const CLOCK_ACTIONS = new Set(["clock", "badReset", "reset"]);
 
 /* Apply an action at a real moment: the reducer sees the day's current date and time in s.clock,
    and the stored clock setting is kept unless the action changes it. */
-export function reduceAt(reducer, s, a, ms = a.at ?? Date.now()) {
+/* prepare(state, now) can move the state to the run the clock is in (see rollRun in store.js). */
+export function reduceAt(reducer, s, a, ms = a.at ?? Date.now(), prepare = null) {
   const now = clockAt(s.clock, ms);
-  const next = reducer({ ...s, clock: { ...s.clock, date: now.date, time: now.time } }, { ...a, at: ms });
-  return CLOCK_ACTIONS.has(a.type) ? next : { ...next, clock: s.clock };
+  const base = prepare ? prepare(s, now) : s;
+  const act = { ...a, at: ms };
+  const next = reducer({ ...base, clock: { ...base.clock, date: now.date, time: now.time } }, act);
+  if (!CLOCK_ACTIONS.has(a.type)) return { ...next, clock: base.clock };
+  if (!prepare) return next;
+  // The clock moved: the state follows it to its run. A bad-day story is set up again on its own day.
+  const rolled = prepare(next, clockAt(next.clock, ms));
+  return rolled !== next && a.type === "badReset" ? reducer(rolled, act) : rolled;
 }

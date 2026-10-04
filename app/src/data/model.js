@@ -1,8 +1,11 @@
 // Derived views over the S1 peak-day data. Every number shown in the app comes from here.
 import data from "./s1.json";
 
-export const orders = data.orders;
-export const byRef = Object.fromEntries(orders.map((o) => [o.ref, o]));
+// The run's orders: S1's from the dataset, or a real run's orders (stores' orders + carried), set by applyPlanEdits.
+export let orders = data.orders;
+export let byRef = Object.fromEntries(orders.map((o) => [o.ref, o]));
+export let RUN_DATE = data.s1Date; // the run on screen
+export let IS_S1 = true;
 export const vehicles = Object.fromEntries(data.vehicles.map((v) => [v.id, v]));
 export const districts = data.districts;
 export const outlook = data.outlook;
@@ -20,7 +23,7 @@ export const n = (x) => x.toLocaleString("en-US");
 const allowanceFor = (o) => data.allowance[`${o.brand}|${o.dock}`];
 
 /* Store rules edited by admin (window, dock, access, mall window) override the order data. */
-const ORIGINAL = Object.fromEntries(orders.map((o) => [o.ref, { open: o.open, close: o.close, dock: o.dock, parking: o.parking, mall: o.mall }]));
+let ORIGINAL = Object.fromEntries(orders.map((o) => [o.ref, { open: o.open, close: o.close, dock: o.dock, parking: o.parking, mall: o.mall }]));
 export function applyStoreRules(edits = {}) {
   orders.forEach((o) => {
     Object.assign(o, ORIGINAL[o.ref], edits[o.outlet] || {});
@@ -205,8 +208,9 @@ export function buildPlan(key = "fair", edits = [], stopOrders = {}, base = null
   });
   lanes.sort((a, b) => Number(b.vehicle.reefer) - Number(a.vehicle.reefer) || a.vehicle.id.localeCompare(b.vehicle.id));
   deferred.forEach((o) => {
-    o.reason = o.m3 > MAX_TRUCK_M3 ? "Bigger than any truck" : o.chilled ? "No reefer trip left" : "No capacity left";
-    o.kind = o.m3 > MAX_TRUCK_M3 ? "Unavoidable" : "Capacity";
+    const noPlan = !IS_S1 && !Object.keys(alloc).length;
+    o.reason = noPlan ? "Not planned yet" : o.m3 > MAX_TRUCK_M3 ? "Bigger than any truck" : o.chilled ? "No reefer trip left" : "No capacity left";
+    o.kind = noPlan ? "Waiting" : o.m3 > MAX_TRUCK_M3 ? "Unavoidable" : "Capacity";
   });
   deferred.sort((a, b) => b.m3 - a.m3);
   return { key, lanes, deferred, served: orders.length - deferred.length, alloc, edits, stopOrders };
@@ -215,11 +219,24 @@ export function buildPlan(key = "fair", edits = [], stopOrders = {}, base = null
 // Live binding: every screen that imports `plan` sees the dispatcher's latest edits.
 export let plan = buildPlan("fair");
 export let downPlan = buildPlan("veh003Down");
-export function applyPlanEdits(edits, stopOrders = {}, storeEdits = {}, date = fuelDate, base = null) {
+/* Switch the screens to a run: its orders (null = the S1 dataset). */
+function setDay(run, list) {
+  const next = list || data.orders;
+  if (next === orders && RUN_DATE === run) return;
+  orders = next; RUN_DATE = run; IS_S1 = !list;
+  byRef = Object.fromEntries(orders.map((o) => [o.ref, o]));
+  ORIGINAL = Object.fromEntries(orders.map((o) => [o.ref, { open: o.open, close: o.close, dock: o.dock, parking: o.parking, mall: o.mall }]));
+  protectedCount = orders.filter((o) => o.deferredYesterday).length;
+  chilledM3 = orders.filter((o) => o.chilled).reduce((s, o) => s + o.m3, 0);
+  brandCounts = countBrands(orders);
+}
+export function applyPlanEdits(edits, stopOrders = {}, storeEdits = {}, date = fuelDate, base = null, day = null) {
   fuelDate = date;
+  setDay(day?.run || data.s1Date, day?.orders || null);
   applyStoreRules(storeEdits);
-  plan = buildPlan("fair", edits, stopOrders, base);
-  downPlan = buildPlan("veh003Down");
+  // A real run has no plan until the dispatcher makes one (Auto-plan); S1 starts from the team's published plan.
+  plan = buildPlan("fair", edits, stopOrders, IS_S1 ? base : base || {});
+  downPlan = IS_S1 ? buildPlan("veh003Down") : plan;
   return plan;
 }
 
@@ -237,14 +254,17 @@ export function reeferDown() {
   return { affected, moves, newlyDeferred, served: downPlan.served, before: plan.served };
 }
 
-export const protectedCount = orders.filter((o) => o.deferredYesterday).length;
-export const chilledM3 = orders.filter((o) => o.chilled).reduce((s, o) => s + o.m3, 0);
+export let protectedCount = orders.filter((o) => o.deferredYesterday).length;
+export let chilledM3 = orders.filter((o) => o.chilled).reduce((s, o) => s + o.m3, 0);
 export const workshopReefers = data.vehicles.filter((v) => v.reefer && v.status === "in_workshop").map((v) => v.id);
-export const brandCounts = orders.reduce((acc, o) => {
-  const k = o.brand === "Fresh" ? (o.chilled ? "freshChilled" : "freshDry") : o.brand.toLowerCase();
-  acc[k] = (acc[k] || 0) + 1;
-  return acc;
-}, {});
+function countBrands(list) {
+  return list.reduce((acc, o) => {
+    const k = o.brand === "Fresh" ? (o.chilled ? "freshChilled" : "freshDry") : o.brand.toLowerCase();
+    acc[k] = (acc[k] || 0) + 1;
+    return acc;
+  }, {});
+}
+export let brandCounts = countBrands(orders);
 /* Fuel used this week at the clock time: earlier days + every run that has finished today.
    The live truck (VEH003) counts a run only when the driver has recorded all its stops. */
 export function fuelThisWeek(vid, nowTime, delivered = {}, tracked = {}) {

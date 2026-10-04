@@ -3,6 +3,9 @@
    and on the server (the authoritative copy every portal syncs to). */
 import { SEED_ACCOUNTS, storeName } from "../data/accounts";
 import { FAIR_ALLOC, S1_DATE, orders as allOrders, stopKey } from "../data/model";
+import data from "../data/s1.json";
+import { S1_RUN, buildRunOrders, ordersFromStore, runDateAt } from "./day";
+import { reduceAt } from "./clock";
 import { nextOperatingDay, runFor } from "../runs.js";
 import { SCENARIOS, SCENARIO_DAY } from "../scenarios";
 
@@ -55,7 +58,10 @@ export const initial = {
   outbox: [], // stops recorded offline ("VEH003:OUT034")
   person: null, // who is using a shared account right now (dock or store)
   depot: "Peliyagoda", // depot the dispatcher is viewing
-  clock: { date: S1_DATE, time: "05:30" }, // the S1 day, Thu 8 Jan 2026; set by hand for now (later: the real clock)
+  clock: { date: S1_DATE, time: "05:30" },
+  runDate: S1_DATE, // the delivery run the system is working on (follows the clock; see domain/day.js)
+  carry: [], // orders the previous run could not serve: they go first on this run
+  pastRuns: [], // short summary of earlier runs // the S1 day, Thu 8 Jan 2026; set by hand for now (later: the real clock)
   publishedBy: null, // { by, at } who published and when
   published: false, // tonight's plan: loaders, drivers and stores only see it after the dispatcher publishes
   planAlloc: null, // the adopted base plan: null = the team's optimiser plan; set when the dispatcher uses an engine plan
@@ -267,3 +273,43 @@ export const LOCAL_KEYS = ["user", "person", "lang", "phonePreview", "hideDemo",
 export const LOCAL_ACTIONS = new Set(["login", "logout", "person", "lang", "hideDemo", "phonePreview", "hydrate", "guideExit", "scenarioGo", "depot"]);
 /* The shared part of a state (what the server stores). */
 export const sharedOf = (s) => Object.fromEntries(Object.entries(s).filter(([k]) => !LOCAL_KEYS.includes(k)));
+
+
+/* ---------- Runs: the state follows the clock from one delivery run to the next ---------- */
+/* Fields that belong to one run: they start fresh when the next run begins. */
+const DAY_RESET = {
+  published: false, publishedBy: null, planAlloc: null, planSource: null, planEdits: [], stopOrders: {},
+  loaded: {}, delivered: {}, runStarted: {}, stopProgress: {}, driverAck: {}, driverReports: [], outbox: [],
+  loadedTrucks: {}, loadStarts: {}, reeferChecked: {}, loaderReports: [], storeReports: [], adjusted: {},
+  scenario: { dock: "idle", reefer: "idle", dead: "idle" }, simOffline: false, offlineVeh: null,
+};
+
+/* This run's orders: the dataset's for S1; otherwise the stores' orders for it plus the carried ones. */
+export const dayOrdersOf = (s) => ((s.runDate || S1_RUN) === S1_RUN ? null : buildRunOrders(s.storeOrders, s.runDate, s.carry || []));
+export const isS1Run = (s) => (s.runDate || S1_RUN) === S1_RUN;
+
+/* Move the state to the run the clock is in. Going forward, every order the finished run did not serve (and any
+   store order for a run that was skipped over) goes first on the new run. Going back (e.g. to the S1 day) just
+   opens that run. */
+export function rollRun(s, now) {
+  const run = runDateAt(now);
+  const cur = s.runDate || S1_RUN;
+  if (run === cur) return s.runDate ? s : { ...s, runDate: cur };
+  let carry = [];
+  // Unserved orders carry from one real run to the next. S1 is the dataset's reference day: nothing carries from it.
+  if (run > cur && cur !== S1_RUN) {
+    const plan = { ...(s.planAlloc || (cur === S1_RUN ? FAIR_ALLOC : {})) };
+    (s.planEdits || []).forEach((e) => { plan[e.ref] = e.to; });
+    const prev = cur === S1_RUN ? data.orders : dayOrdersOf(s) || [];
+    const skipped = (s.storeOrders || []).filter((so) => so.run > cur && so.run < run && !so.cancelled).flatMap(ordersFromStore);
+    carry = [...prev.filter((o) => !(s.published && plan[o.ref])), ...skipped]
+      .map((o) => ({ ...o, deferredYesterday: true, daysSince: (o.daysSince || 0) + 1, carriedFrom: o.carriedFrom || cur }));
+  }
+  const summary = { run: cur, published: !!s.published, delivered: Object.keys(s.delivered || {}).length };
+  return { ...s, ...DAY_RESET, runDate: run, carry, pastRuns: [...(s.pastRuns || []), summary].slice(-14) };
+}
+
+/* Apply an action at a real moment, with the state on the clock's run. Used by the server and by every device. */
+export const applyAt = (s, a, ms) => reduceAt(reducer, s, a, ms, rollRun);
+/* The state as it is right now (the clock may have moved into a new run since the last action). */
+export const atNow = (s, now) => rollRun(s, now);

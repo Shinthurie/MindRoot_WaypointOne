@@ -14,9 +14,9 @@ export function localDate(lang, iso) {
 }
 import { storeName, fleetAll, outletsAll, SEED_ACCOUNTS } from "./data/accounts";
 import { applyPlanEdits } from "./data/model";
-import { USERS, KANDY_LOADER, USERS_BY_ID, personalUser, initial, reducer } from "./domain/store";
+import { USERS, KANDY_LOADER, USERS_BY_ID, personalUser, initial, reducer, applyAt, atNow, dayOrdersOf, isS1Run } from "./domain/store";
 import { SERVER_MODE } from "./sync";
-import { clockAt, reduceAt } from "./domain/clock";
+import { clockAt } from "./domain/clock";
 import { useServerState } from "./useServerState";
 export { USERS, storeUpdateText } from "./domain/store";
 
@@ -66,10 +66,17 @@ function load() {
   return s;
 }
 
+/* The state on the clock's current run (rolls over at the 4 PM run boundary even when nobody acts). */
+function useRunView(s) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const id = setInterval(() => setNow(Date.now()), 15000); return () => clearInterval(id); }, []);
+  return useMemo(() => atNow(s, clockAt(s.clock, Math.max(now, s.clock?.setAt || 0))), [s, now]);
+}
+
 const Ctx = createContext(null);
 
 /* Local mode: this browser keeps the whole day (the design prototype). Server mode: see useServerState. */
-const localReducer = (s, a) => reduceAt(reducer, s, a);
+const localReducer = (s, a) => (a.type === "hydrate" || a.type === "login" || a.type === "logout" ? reducer(s, a) : applyAt(s, a));
 function useLocalState() {
   const [state, raw] = useReducer(localReducer, undefined, load);
   // Every action carries the moment it happened, so the reducer stays pure.
@@ -80,7 +87,9 @@ function useLocalState() {
 export function StateProvider({ children }) {
   const [toast, setToast] = useState(null);
   // SERVER_MODE is fixed at build time, so the same hook runs on every render.
-  const [state, dispatch, sync] = SERVER_MODE ? useServerState(load, (text) => setToast({ text })) : useLocalState(); // eslint-disable-line react-hooks/rules-of-hooks
+  const [rawState, dispatch, sync] = SERVER_MODE ? useServerState(load, (text) => setToast({ text })) : useLocalState(); // eslint-disable-line react-hooks/rules-of-hooks
+  // The clock may have moved into a new run since the last action: show that run (the next action records it).
+  const state = useRunView(rawState);
   // Link settings (?as=…&time=…) apply once. Then clear them from the address bar, so refreshing this tab
   // doesn't reset the shared clock (or the plan) for every open portal.
   useEffect(() => {
@@ -143,7 +152,10 @@ export function StateProvider({ children }) {
   const [tick, setTick] = useState(() => Date.now());
   useEffect(() => { const id = setInterval(() => setTick(Date.now()), 15000); return () => clearInterval(id); }, []);
   const clock = useMemo(() => clockAt(state.clock, Math.max(tick, state.clock?.setAt || 0)), [state.clock, tick]);
-  useMemo(() => applyPlanEdits(state.planEdits, state.stopOrders, state.storeEdits, clock.date, state.planAlloc), [state.planEdits, state.stopOrders, state.storeEdits, clock.date, state.planAlloc]);
+  // This run's orders: S1's dataset, or the stores' orders for the run plus the ones carried from the last run.
+  const dayOrders = useMemo(() => dayOrdersOf(state), [state.runDate, state.storeOrders, state.carry]); // eslint-disable-line react-hooks/exhaustive-deps
+  useMemo(() => applyPlanEdits(state.planEdits, state.stopOrders, state.storeEdits, clock.date, state.planAlloc, { run: state.runDate, orders: dayOrders }),
+    [state.planEdits, state.stopOrders, state.storeEdits, clock.date, state.planAlloc, state.runDate, dayOrders]);
 
   const accounts = useMemo(
     () => [...SEED_ACCOUNTS, ...state.newAccounts].map((a) => ({
@@ -161,9 +173,11 @@ export function StateProvider({ children }) {
     }))];
     return base.map((v) => {
       const d = drivers[v.id];
-      return { ...v, ...(state.fleetEdits[v.id] || {}), driver: d && d.status !== "Deactivated" ? d : null };
+      // The dataset's workshop list is for S1; on a real run every vehicle is ready unless the dispatcher says otherwise.
+      const own = isS1Run(state) ? {} : { status: "available" };
+      return { ...v, ...own, ...(state.fleetEdits[v.id] || {}), driver: d && d.status !== "Deactivated" ? d : null };
     });
-  }, [accounts, state.fleetEdits]);
+  }, [accounts, state.fleetEdits, state.runDate]); // eslint-disable-line react-hooks/exhaustive-deps
   // Store rules (window, mall window, dock, access) with admin edits.
   const storeRules = (outlet) => ({ ...outletsAll.find((o) => o.id === outlet), ...(state.storeEdits[outlet] || {}) });
   // People on a shared account (store or depot), including admin's edits.

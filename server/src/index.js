@@ -8,6 +8,10 @@ import { config } from "./config.js";
 import { q, waitForDb } from "./db.js";
 import { AuthError, activate, changeSecret, demoLogin, login, profile, requireAuth, requireRole } from "./auth.js";
 import { apply, getState, listenerCount, rebuild, subscribe } from "./daystore.js";
+import { atNow } from "../../app/src/domain/store.js";
+import { clockAt } from "../../app/src/domain/clock.js";
+/* The day on the clock's current run. */
+const current = async (day) => { const { state } = await getState(day); return atNow(state, clockAt(state.clock)); };
 import { checkAlloc, effectiveAlloc, loadDay, runEngine, savePlan } from "./planning.js";
 
 const app = express();
@@ -74,17 +78,17 @@ app.get("/api/commands", requireAuth, requireRole("admin", "dispatcher"), wrap(a
 
 // ---------- Planning ----------
 app.post("/api/plan/auto", requireAuth, requireRole("dispatcher", "demo"), wrap(async (req, res) => {
-  const { state } = await getState(DAY);
+  const state = await current(DAY);
   const r = await runEngine(DAY, state, req.body?.tries ? { tries: Math.min(Number(req.body.tries), 2000) } : {});
-  const planId = await savePlan(DAY, "engine", req.user.id, r);
+  const planId = await savePlan(DAY, "engine", req.user.id, r, state.runDate || null);
   res.json({ planId, ...r });
 }));
 app.get("/api/plan/check", requireAuth, wrap(async (req, res) => {
-  const { state } = await getState(DAY);
+  const state = await current(DAY);
   res.json(await checkAlloc(DAY, state));
 }));
 app.get("/api/plan/current", requireAuth, wrap(async (req, res) => {
-  const { state } = await getState(DAY);
+  const state = await current(DAY);
   res.json({ source: state.planSource?.source || "optimiser", alloc: effectiveAlloc(state), edits: state.planEdits || [] });
 }));
 
@@ -114,7 +118,7 @@ export async function start() {
       console.log(`Waypoint One API on :${config.port} (day ${DAY}, demo mode ${config.demoMode ? "on" : "off"})`);
       resolve(server);
       // Work out tonight's engine plan in the background, so the dispatcher's Auto-plan answers at once.
-      setTimeout(() => getState(DAY).then(({ state }) => runEngine(DAY, state)).then((r) => console.log(`engine plan ready: ${r.summary.served} of ${r.summary.orders} served (${r.ms} ms)`)).catch((e) => console.error("engine warm-up failed", e.message)), 500);
+      setTimeout(() => current(DAY).then((state) => runEngine(DAY, state)).then((r) => console.log(`engine plan ready: ${r.summary.served} of ${r.summary.orders} served (${r.ms} ms)`)).catch((e) => console.error("engine warm-up failed", e.message)), 500);
     });
   });
 }

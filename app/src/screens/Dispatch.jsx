@@ -10,8 +10,9 @@ import { outletsAll } from "../data/accounts";
 import LiveMap from "../components/LiveMap";
 import {
   MAX_TRUCK_M3, REEFER_TRIPS, vehicles, brandCounts, byRef, chilledM3, districts, liveStatus, n, orders, outlook, plan, protectedCount,
-  reeferDown, round1, runsOf, workshopReefers, buildPlan, checkMove, moveOptions, tripOf,
+  reeferDown, round1, runsOf, workshopReefers, buildPlan, checkMove, moveOptions, tripOf, RUN_DATE, IS_S1,
 } from "../data/model";
+import { nextOperatingDay } from "../runs.js";
 import { BrandChip, Chip, DayPill, DeskShell, DepotPill, formatDate, useClock, useRuns } from "../components/ui";
 
 export function useDispatchNav() {
@@ -114,7 +115,9 @@ function Kpis() {
 /* Runs follow the clock: the next run takes store orders until 4 PM, after that new orders join the following run. */
 function RunStatus() {
   const { storeOrders, published, publishedBy } = useApp();
-  const { clock, closed, next, following, leftText } = useRuns();
+  const { clock, closed, leftText, orderRun } = useRuns();
+  // This run is the clock's run (RUN_DATE); "next run" is the one after it.
+  const next = nextOperatingDay(RUN_DATE), following = nextOperatingDay(next);
   const live = storeOrders.filter((s) => !s.cancelled); // a store can cancel before the cutoff
   const forNext = live.filter((s) => s.run === next);
   const forFollowing = live.filter((s) => s.run === following);
@@ -129,8 +132,8 @@ function RunStatus() {
     <div className="kpis" style={{ gridTemplateColumns: "1fr 1fr" }}>
       <div className="kpi">
         <div className="row between" style={{ flexWrap: "wrap", gap: 6 }}>
-          <div className="label" style={{ whiteSpace: "nowrap" }}><Lock size={14} /> Today's run · {formatDate(clock.date)}</div>
-          {closed ? <span className="tag"><Lock size={12} /> Orders closed 4:00 PM</span> : <span className="tag warn"><Timer size={12} /> Store orders for {formatDate(next)} close in {leftText.replace(" left", "")}</span>}
+          <div className="label" style={{ whiteSpace: "nowrap" }}><Lock size={14} /> This run · {formatDate(RUN_DATE)}</div>
+          {closed ? <span className="tag"><Lock size={12} /> Orders closed 4:00 PM</span> : <span className="tag warn"><Timer size={12} /> Store orders for {formatDate(orderRun)} close in {leftText.replace(" left", "")}</span>}
         </div>
         <div className="value" style={{ fontSize: 22 }}>{plan.served} served · {plan.deferred.length} deferred</div>
         <div className="small">{published ? <span style={{ color: "var(--done)", fontWeight: 600 }}><Check size={12} /> Plan published{publishedBy ? `${/demo/i.test(publishedBy.by) ? "" : ` by ${publishedBy.by}`} at ${publishedBy.at}` : ""}</span> : <span style={{ color: "var(--late)", fontWeight: 600 }}>Not published yet</span>}<span className="muted"> · {published ? "loaders, drivers and stores can see it" : "loaders and drivers wait until you publish"}</span></div>
@@ -162,19 +165,20 @@ export function Orders() {
   const { storeOrders } = useApp();
   const runs = useRuns();
   const [queue, setQueue] = useState("today");
-  const nextQueue = storeOrders.filter((s) => !s.cancelled && s.run === runs.next);
+  const nextRun = nextOperatingDay(RUN_DATE);
+  const nextQueue = storeOrders.filter((s) => !s.cancelled && s.run === nextRun);
   const rows = useMemo(() => orders
     .filter((o) => f === "All" || o.brand === f || (f === "Chilled" && o.chilled) || (f === "Skipped yesterday" && o.deferredYesterday) || (f === "Van only" && o.parking === "van_only"))
     .filter((o) => !q || `${o.ref} ${o.outlet} ${o.district}`.toLowerCase().includes(q.toLowerCase()))
-    .sort((a, b) => Number(b.deferredYesterday) - Number(a.deferredYesterday) || b.daysSince - a.daysSince || a.ref.localeCompare(b.ref)), [f, q]);
+    .sort((a, b) => Number(b.deferredYesterday) - Number(a.deferredYesterday) || b.daysSince - a.daysSince || a.ref.localeCompare(b.ref)), [f, q, orders]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <DeskShell peakOnly nav={useDispatchNav()} title="Orders"
       actions={<><DepotPill /><DayPill /><button className="btn primary" onClick={() => nav("/dispatch/plan", { state: { auto: true } })}><Zap size={18} /> Auto-plan</button></>}>
       <Kpis />
       <RunStatus />
       <div className="row" style={{ gap: 8 }} role="tablist" aria-label="Order queue">
-        <button role="tab" aria-selected={queue === "today"} className={`filter ${queue === "today" ? "on" : ""}`} onClick={() => setQueue("today")}>Today's run · {formatDate(runs.clock.date)} · {orders.length}</button>
-        <button role="tab" aria-selected={queue === "next"} className={`filter ${queue === "next" ? "on" : ""}`} onClick={() => setQueue("next")}>Next run · {formatDate(runs.next)} · {nextQueue.length}</button>
+        <button role="tab" aria-selected={queue === "today"} className={`filter ${queue === "today" ? "on" : ""}`} onClick={() => setQueue("today")}>This run · {formatDate(RUN_DATE)} · {orders.length}</button>
+        <button role="tab" aria-selected={queue === "next"} className={`filter ${queue === "next" ? "on" : ""}`} onClick={() => setQueue("next")}>Next run · {formatDate(nextRun)} · {nextQueue.length}</button>
       </div>
       {queue === "next" ? <NextQueue list={nextQueue} closed={runs.closed} /> : (
       <div className="table-card">
@@ -597,7 +601,8 @@ export function Plan() {
     ...plan.lanes.filter((l) => unavailable.has(l.vehicle.id)).map((l) => ({ key: `u-${l.vehicle.id}`, text: `${l.vehicle.id} is not available today (workshop or no driver) but still has ${l.trips.filter(Boolean).reduce((a, x) => a + x.orders.length, 0)} orders. Move them.` })),
     ...plan.lanes.flatMap((l) => l.late.map((s) => ({ key: `l-${s.outlet}`, text: `${s.outlet} on ${l.vehicle.id} arrives ${s.eta}, after its window closes (${s.close}). Change the stop order or move it.` }))),
     ...plan.lanes.filter((l) => l.fuelOver).map((l) => ({ key: `f-${l.vehicle.id}`, text: `${l.vehicle.id} needs about ${Math.round(l.fuelL)} L today but only about ${Math.round(l.fuelLeft)} L of its weekly quota is left.` })),
-    ...(repeat ? [{ key: "r", text: `${repeat} shop${repeat > 1 ? "s" : ""} skipped yesterday ${repeat > 1 ? "are" : "is"} deferred again. Serve them first.` }] : []),
+    ...(!IS_S1 && !Object.keys(plan.alloc).length && orders.length ? [{ key: "np", text: `There is no plan for this run yet. Press Run the planning engine, then Use this plan.` }] : []),
+    ...(repeat && (IS_S1 || Object.keys(plan.alloc).length) ? [{ key: "r", text: `${repeat} shop${repeat > 1 ? "s" : ""} skipped yesterday ${repeat > 1 ? "are" : "is"} deferred again. Serve them first.` }] : []),
   ];
   const [confirming, setConfirming] = useState(false);
   const publish = () => {

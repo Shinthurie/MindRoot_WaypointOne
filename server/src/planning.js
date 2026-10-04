@@ -3,6 +3,7 @@
 import { q, tx } from "./db.js";
 import { createPlanner } from "../../app/src/domain/planner.js";
 import data from "../../app/src/data/s1.json";
+import { dayOrdersOf, isS1Run } from "../../app/src/domain/store.js";
 
 let cache = null; // reference data changes only on reseed
 
@@ -38,20 +39,26 @@ export async function loadDay(dayId) {
 }
 export const clearCache = () => { cache = null; };
 
-/* Vehicles the plan may use today: the day's fleet status, with the dispatcher's workshop changes applied. */
+/* Vehicles the plan may use: on S1 the dataset's fleet status; on a real run every vehicle is ready unless the
+   dispatcher sent it to the workshop. */
 function availableVehicles(d, state) {
   const edits = state?.fleetEdits || {};
-  return d.vehicles.filter((v) => (edits[v.id]?.status || v.status) !== "in_workshop");
+  const s1 = !state || isS1Run(state);
+  return d.vehicles.filter((v) => (edits[v.id]?.status || (s1 ? v.status : "available")) !== "in_workshop");
 }
-/* Store rules edited by admin (windows, dock, access) apply to the orders. */
-function ordersWithRules(d, state) {
+/* The run's orders (S1: the dataset in the database; a real run: the stores' orders + carried), with store rules. */
+export function runOrders(d, state) {
   const edits = state?.storeEdits || {};
-  return d.orders.map((o) => (edits[o.outlet] ? { ...o, ...edits[o.outlet], mall: edits[o.outlet].mall || null } : o));
+  const list = !state || isS1Run(state) ? d.orders : dayOrdersOf(state) || [];
+  return list.map((o) => (edits[o.outlet] ? { ...o, ...edits[o.outlet], mall: edits[o.outlet].mall || null } : o));
 }
+const ordersWithRules = runOrders;
+/* Fuel left this week: from the route history on S1; a real run has no logged legs yet, so the full quota. */
+const fuelFor = (d, state) => (!state || isS1Run(state) ? d.fuelLeft : Object.fromEntries(d.vehicles.map((v) => [v.id, v.quotaL])));
 
 /* The allocation the portals show: the adopted plan (engine or the team's optimiser plan) plus manual edits. */
 export function effectiveAlloc(state) {
-  const alloc = { ...(state.planAlloc || data.plans.fair) };
+  const alloc = { ...(state.planAlloc || (isS1Run(state) ? data.plans.fair : {})) };
   for (const e of state.planEdits || []) alloc[e.ref] = e.to;
   return alloc;
 }
@@ -65,11 +72,12 @@ export async function runEngine(dayId, state, opts = {}) {
   const vehicles = availableVehicles(d, state);
   const orders = ordersWithRules(d, state);
   const tries = opts.tries ?? 150;
-  const key = JSON.stringify([dayId, tries, vehicles.map((v) => v.id), state?.storeEdits || {}]);
+  const fuelLeft = fuelFor(d, state);
+  const key = JSON.stringify([dayId, state?.runDate, tries, vehicles.map((v) => v.id), state?.storeEdits || {}, orders.map((o) => `${o.ref}:${o.units}`)]);
   if (engineCache.has(key)) return { ...engineCache.get(key), cached: true };
   const t0 = Date.now();
-  const result = d.planner.plan({ orders, vehicles, fuelLeft: d.fuelLeft }, { tries });
-  const check = d.planner.check({ orders, vehicles, alloc: result.alloc, fuelLeft: d.fuelLeft });
+  const result = d.planner.plan({ orders, vehicles, fuelLeft }, { tries });
+  const check = d.planner.check({ orders, vehicles, alloc: result.alloc, fuelLeft });
   const out = { ...result, check, ms: Date.now() - t0, vehicles: vehicles.length };
   if (engineCache.size > 20) engineCache.clear();
   engineCache.set(key, out);
@@ -78,13 +86,13 @@ export async function runEngine(dayId, state, opts = {}) {
 
 export async function checkAlloc(dayId, state, alloc = effectiveAlloc(state)) {
   const d = await loadDay(dayId);
-  return d.planner.check({ orders: ordersWithRules(d, state), vehicles: availableVehicles(d, state), alloc, fuelLeft: d.fuelLeft });
+  return d.planner.check({ orders: ordersWithRules(d, state), vehicles: availableVehicles(d, state), alloc, fuelLeft: fuelFor(d, state) });
 }
 
 /* Keep a record of every plan the engine produced (plans + plan_items). */
-export async function savePlan(dayId, source, by, result) {
+export async function savePlan(dayId, source, by, result, runDate = null) {
   return tx(async (c) => {
-    const { rows } = await c.query("INSERT INTO plans (day_id, source, created_by, summary) VALUES ($1, $2, $3, $4) RETURNING id", [dayId, source, by, JSON.stringify(result.summary)]);
+    const { rows } = await c.query("INSERT INTO plans (day_id, source, created_by, summary, run_date) VALUES ($1, $2, $3, $4, $5) RETURNING id", [dayId, source, by, JSON.stringify(result.summary), runDate]);
     const id = rows[0].id;
     const items = Object.entries(result.alloc);
     for (let i = 0; i < items.length; i += 500) {

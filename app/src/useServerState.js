@@ -9,8 +9,7 @@
      signal returns. Every command has an id made here, so a batch sent twice is still applied once.
    - Everyone else's commands arrive on the live stream and are applied to the confirmed state. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { initial, reducer, sharedOf, LOCAL_KEYS, LOCAL_ACTIONS, USERS } from "./domain/store";
-import { reduceAt } from "./domain/clock";
+import { initial, reducer, sharedOf, applyAt, LOCAL_KEYS, LOCAL_ACTIONS, USERS } from "./domain/store";
 import { api, confirmedCache, demoSession, openEvents, outbox, session, uuid } from "./sync";
 
 const pick = (s, keys) => Object.fromEntries(keys.map((k) => [k, s[k]]));
@@ -42,7 +41,7 @@ export function useServerState(load, notify) {
 
   const view = useMemo(() => {
     let s = { ...initial, ...conf.state, ...local };
-    for (const p of pending) s = reduceAt(reducer, s, p.action);
+    for (const p of pending) s = applyAt(s, p.action);
     return { ...s, ...local };
   }, [conf, pending, local]);
 
@@ -92,7 +91,7 @@ export function useServerState(load, notify) {
         if (m.kind === "command") {
           const c = confRef.current;
           if (c.seq + 1 !== m.seq) { refetch(); }
-          else { const next = { seq: m.seq, state: sharedOf(reduceAt(reducer, c.state, m.action)) }; confRef.current = next; setConf(next); }
+          else { const next = { seq: m.seq, state: sharedOf(applyAt(c.state, m.action)) }; confRef.current = next; setConf(next); }
           setPending((p) => p.filter((x) => x.id !== m.id));
         }
       }, setLive);
@@ -145,7 +144,7 @@ export function useServerState(load, notify) {
     }
     const { __demo, ...rest } = a;
     const action = { ...rest, at: Date.now() }; // the server replaces this with its own time when it records it
-    setLocal((l) => pick(reduceAt(reducer, { ...view, ...l }, action), LOCAL_KEYS));
+    setLocal((l) => pick(applyAt({ ...view, ...l }, action), LOCAL_KEYS));
     setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, demo: !!__demo || ["badReset", "offline"].includes(action.type), person: view.person, clientTime: now }]);
   }, [view]);
 

@@ -3,7 +3,8 @@
 import bcrypt from "bcryptjs";
 import { q } from "./db.js";
 import { config } from "./config.js";
-import { checkAlloc, effectiveAlloc, loadDay } from "./planning.js";
+import { checkAlloc, effectiveAlloc, loadDay, runOrders } from "./planning.js";
+import { isS1Run } from "../../app/src/domain/store.js";
 
 export class Invalid extends Error { constructor(message, details) { super(message); this.status = 422; this.details = details; } }
 
@@ -12,7 +13,7 @@ export async function validate(dayId, state, a, user) {
     case "planEdit": {
       const e = a.edit || {};
       const d = await loadDay(dayId);
-      const o = d.orders.find((x) => x.ref === e.ref);
+      const o = runOrders(d, state).find((x) => x.ref === e.ref);
       if (!o) throw new Invalid(`Unknown order ${e.ref}`);
       if (!e.to && o.deferredYesterday && !String(e.reason || "").trim()) throw new Invalid(`${o.outlet} was deferred yesterday: deferring it again needs a written reason`);
       if (e.to) {
@@ -31,6 +32,11 @@ export async function validate(dayId, state, a, user) {
       return;
     }
     case "publish": {
+      // A real run with orders needs a plan first (S1 starts from the team's plan).
+      if (!isS1Run(state) && !state.planAlloc) {
+        const d = await loadDay(dayId);
+        if (runOrders(d, state).length) throw new Invalid("There is no plan for this run yet: run Auto-plan and use a plan before publishing");
+      }
       const r = await checkAlloc(dayId, state);
       if (!r.ok) throw new Invalid(`The plan breaks ${r.errors.length} rule(s); fix them before publishing: ${r.errors[0]}`, r.errors);
       return;

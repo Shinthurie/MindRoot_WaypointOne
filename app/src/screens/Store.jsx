@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Camera, Check, ClipboardCheck, CloudOff, Info, ListOrdered, MessageSquare, PackageX, Pencil, Phone, PlusCircle, RotateCcw, ShieldCheck, Snowflake, Split as SplitIcon, Thermometer, Timer, Truck, UserRound, Bell, CalendarClock, Clock, X } from "lucide-react";
 import { useApp } from "../state";
-import { S1_DATE, downPlan, n, orders, outletOrders, plan, round1, stopKey, toMin, tripOf, unitsOf, vehicleOf } from "../data/model";
+import { RUN_DATE, downPlan, n, orders, outletOrders, plan, round1, stopKey, toMin, tripOf, unitsOf, vehicleOf } from "../data/model";
 import { outletsAll, storeName } from "../data/accounts";
 import { BrandTile, Chip, MobileFrame, Pic, Stepper, TopBar, nextOperatingDay, useClock, useRuns, useWho, PhotoButton } from "../components/ui";
 
@@ -74,7 +74,6 @@ export function deliveryOf(info, outlet, delivered, now, tracked = { VEH003: tru
 }
 
 /* The S1 plan is for Wed 30 Sep: "today" on that day, "tomorrow" the evening before, the date otherwise. */
-const PLAN_DATE = S1_DATE;
 const dayBefore = (iso) => { const [y, m, d] = iso.split("-").map(Number); const dt = new Date(Date.UTC(y, m - 1, d)); dt.setUTCDate(dt.getUTCDate() - 1); return dt.toISOString().slice(0, 10); };
 /* A run takes orders until 4:00 PM the day before it (booklet cutoff). */
 const stillOpen = (run, clock) => { const cut = dayBefore(run); return clock.date < cut || (clock.date === cut && clock.time < "16:00"); };
@@ -108,7 +107,7 @@ function OrderCard({ o }) {
     return (
       <div className="card" style={{ borderColor: "#99d6cf", background: "#f2fbf9" }}>
         <div className="row between">{title}<Chip kind="deferred">{tf("Deferred")}</Chip></div>{size}
-        <div style={{ marginTop: 10, fontWeight: 700 }}>{tf("Moved to the {date} run.", { date: fd(nextOperatingDay(PLAN_DATE)) })}</div>
+        <div style={{ marginTop: 10, fontWeight: 700 }}>{tf("Moved to the {date} run.", { date: fd(nextOperatingDay(RUN_DATE)) })}</div>
         <div className="small" style={{ marginTop: 4 }}><b>{tf("Why:")}</b> {deferralReason(o, planEdits, tf)}</div>
         <div className="row" style={{ gap: 6, marginTop: 10, flexWrap: "wrap" }}>
           <span className="tag shield"><ShieldCheck size={12} /> {tf("Goes first on the next run: it won't be skipped twice")}</span>
@@ -151,7 +150,7 @@ function OrderCard({ o }) {
       {adj && <div className="banner info" style={{ marginTop: 10 }}><Info size={18} /> <span>{adj.reason}. Today brings {adj.units}. The {adj.missing} are re-ordered as <b>{adj.newRef}</b> for the {fd(adj.run)} run, first in line.</span></div>}
       {change && <div className="banner info" style={{ marginTop: 10 }}><Info size={18} /> {tf("Changed {time}: now on truck {v}, about {eta}", { time: change.at, v: vehicle, eta: eta || "—" })}</div>}
       {overdue && !asked && <button className="btn secondary block" style={{ marginTop: 10 }} onClick={notArrived}><MessageSquare size={16} /> {tf("Not arrived yet? Tell the dispatcher")}</button>}
-      {asked && <div className="banner info" style={{ marginTop: 10 }}><MessageSquare size={18} /> {tf("Your report {time}", { time: asked.at })} · {asked.decision ? `${asked.decidedBy}: ${tf(asked.decision === "resend" ? "we'll send them on the {date} run" : "credited to your account", { date: fd(nextOperatingDay(PLAN_DATE)) })}` : tf("the dispatcher is looking at it")}</div>}
+      {asked && <div className="banner info" style={{ marginTop: 10 }}><MessageSquare size={18} /> {tf("Your report {time}", { time: asked.at })} · {asked.decision ? `${asked.decidedBy}: ${tf(asked.decision === "resend" ? "we'll send them on the {date} run" : "credited to your account", { date: fd(nextOperatingDay(RUN_DATE)) })}` : tf("the dispatcher is looking at it")}</div>}
       {who.sheet}
       {moved && <div className="banner info" style={{ marginTop: 10 }}><Info size={18} /> {tf("Your chilled order is on another truck ({v}) because of a refrigeration failure. Still inside your window.", { v: vehicle })}</div>}
       <ul className="tl">
@@ -187,12 +186,12 @@ export function MyDeliveries() {
   const arrived = served.filter((x) => deliveryOf(x, store.outlet, delivered, clock.time, tracked));
   const next = served.filter((x) => !arrived.includes(x)).sort((a, b) => (a.eta || "99").localeCompare(b.eta || "99"))[0];
   const done = arrived.length > 0;
-  const word = clock.date === PLAN_DATE ? "Today's deliveries" : nextOperatingDay(clock.date) === PLAN_DATE ? "Tomorrow's deliveries" : null;
+  const word = clock.date === RUN_DATE ? "Today's deliveries" : nextOperatingDay(clock.date) === RUN_DATE ? "Tomorrow's deliveries" : null;
   const trucks = new Set(served.map((x) => x.vehicle)).size;
-  const mineNext = storeOrders.filter((s) => s.outlet === store.outlet && !s.cancelled && s.run >= runs.next); // upcoming runs only
+  const mineNext = storeOrders.filter((s) => s.outlet === store.outlet && !s.cancelled && s.run > RUN_DATE); // later runs (this run's orders are the cards above)
   const alerts = smsSent.filter((m) => m.to === store.outlet);
   const myReports = storeReports.filter((r) => r.outlet === store.outlet);
-  const nextRunDate = fd(nextOperatingDay(PLAN_DATE));
+  const nextRunDate = fd(nextOperatingDay(RUN_DATE));
   const extras = (
     <>
       {alerts.map((m, i) => <div key={`a${i}`} className="banner info"><Info size={18} /> {m.at} · {m.text}</div>)}
@@ -224,14 +223,14 @@ export function MyDeliveries() {
     : <button className="btn secondary block"><Phone size={18} /> {tf("Call dispatcher")}</button>;
   const nextLabel = published && next ? (next.eta || tf("Second run")) : published ? "✓" : "—";
   return (
-    <StoreFrame title={word ? tf(word) : tf("Deliveries · {date}", { date: fd(PLAN_DATE) })} sub={`${store.name} · ${store.outlet} ${store.district || ""} · ${mine.length === 1 ? tf("1 order") : tf("{n} orders", { n: mine.length })}`}
+    <StoreFrame title={word ? tf(word) : tf("Deliveries · {date}", { date: fd(RUN_DATE) })} sub={`${store.name} · ${store.outlet} ${store.district || ""} · ${mine.length === 1 ? tf("1 order") : tf("{n} orders", { n: mine.length })}`}
       dock={primary}
       actions={done ? <button className="btn primary" onClick={() => nav("/store/receive")}>{tf("Check what arrived")}</button> : <button className="btn secondary"><Phone size={18} /> {tf("Call dispatcher")}</button>}>
       {(wide) => wide ? (
         <>
           <div className="kpis" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
             <div className="kpi"><div className="label"><CalendarClock size={14} /> {tf("Next arrival")}</div><div className="value" style={/^\d/.test(nextLabel) ? {} : { fontSize: 18, marginTop: 12 }}>{nextLabel}</div><div className="muted small">{published && next ? tf(next.o.chilled ? "Chilled · truck {v}" : "Dry · truck {v}", { v: next.vehicle }) : published ? tf("everything has arrived") : tf("after tonight's plan")}</div></div>
-            <div className="kpi"><div className="label"><Truck size={14} /> {tf("Orders · {date}", { date: fd(PLAN_DATE) })}</div><div className="value">{mine.length}</div><div className="muted small">{published ? (trucks === 1 ? tf("on 1 truck") : tf("on {n} trucks", { n: trucks })) : tf("waiting for the plan")}</div></div>
+            <div className="kpi"><div className="label"><Truck size={14} /> {tf("Orders · {date}", { date: fd(RUN_DATE) })}</div><div className="value">{mine.length}</div><div className="muted small">{published ? (trucks === 1 ? tf("on 1 truck") : tf("on {n} trucks", { n: trucks })) : tf("waiting for the plan")}</div></div>
             <div className="kpi"><div className="label"><Timer size={14} /> {tf("Order cutoff")}</div><div className="value">4:00 PM</div><div className="muted small">{tf("for the next run")}</div></div>
             <div className="kpi"><div className="label"><ShieldCheck size={14} /> {tf("Status")}</div><div className="value" style={{ fontSize: 20, marginTop: 12 }}>{!published ? tf("Waiting") : done && !next ? tf("Delivered") : deferred.length ? tf("{n} deferred", { n: deferred.length }) : mine.some((o) => o.deferredYesterday) ? tf("First in line today") : tf("On plan")}</div><div className="muted small">{!published ? tf("plan comes out tonight") : deferred.length ? tf("see the reason below") : mine.some((o) => o.deferredYesterday) ? tf("skipped yesterday, so first in line") : tf("everything is planned")}</div></div>
           </div>
@@ -388,7 +387,8 @@ export function MyOrders() {
   const clock = useClock();
   const store = useStore();
   const who = useWho();
-  const placed = storeOrders.filter((o) => o.outlet === store.outlet).map((o) => {
+  // This run's orders are listed below with their delivery status; here, the orders for later runs (and cancelled ones).
+  const placed = storeOrders.filter((o) => o.outlet === store.outlet && (o.run !== RUN_DATE || o.cancelled)).map((o) => {
     const open = !o.cancelled && stillOpen(o.run, clock);
     return {
       key: o.ref, ref: o.ref, placed: `${fd(o.day)} · ${o.at}`, by: o.by, run: o.run, dry: o.dry, cold: o.cold, raw: o, open,
@@ -401,7 +401,7 @@ export function MyOrders() {
     const info = orderInfo(o, scenario);
     const got = deliveryOf(info, store.outlet, delivered, clock.time, tracked);
     const status = !published ? ["planned", tf("Ordered")] : !info.vehicle ? ["deferred", tf("Deferred")] : got?.outcome === "none" ? ["problem", tf("Not delivered")] : got ? ["done", tf("Delivered")] : ["planned", tf("Planned")];
-    return { key: o.ref, ref: o.ref, placed: tf("Before 4:00 PM {date}", { date: fd(dayBefore(PLAN_DATE)) }), by: "—", run: PLAN_DATE, dry: o.chilled ? 0 : unitsOf(o, adjusted), cold: o.chilled ? unitsOf(o, adjusted) : 0, open: false, status,
+    return { key: o.ref, ref: o.ref, placed: o.placedDay ? `${fd(o.placedDay)} · ${o.placedAt}` : tf("Before 4:00 PM {date}", { date: fd(dayBefore(RUN_DATE)) }), by: o.placedBy || "—", run: RUN_DATE, dry: o.chilled ? 0 : unitsOf(o, adjusted), cold: o.chilled ? unitsOf(o, adjusted) : 0, open: false, status,
       note: [info.vehicle ? tf("Truck {v}", { v: info.vehicle }) : "", adjusted[o.ref] ? `${o.units} → ${adjusted[o.ref].units} · ${adjusted[o.ref].missing} re-ordered as ${adjusted[o.ref].newRef}` : ""].filter(Boolean).join(" · ") };
   });
   const rows = [...placed.sort((a, b) => b.raw.day.localeCompare(a.raw.day) || b.raw.at.localeCompare(a.raw.at)), ...today];

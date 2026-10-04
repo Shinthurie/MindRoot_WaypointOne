@@ -3,8 +3,8 @@
    records them and streams them to every open portal. Commands carry an id made on the device, so a batch replayed
    after a dead zone is recognised and never applied twice. */
 import { q, tx } from "./db.js";
-import { reducer, sharedOf, LOCAL_ACTIONS } from "../../app/src/domain/store.js";
-import { reduceAt } from "../../app/src/domain/clock.js";
+import { sharedOf, applyAt, atNow, LOCAL_ACTIONS } from "../../app/src/domain/store.js";
+import { clockAt } from "../../app/src/domain/clock.js";
 import { authorize } from "./permissions.js";
 import { validate, effects } from "./validate.js";
 
@@ -51,7 +51,8 @@ export function apply(dayId, user, commands) {
         const dup = await q("SELECT seq FROM commands WHERE id = $1", [cmd.id]);
         if (dup.rows[0]) { results.push({ id: cmd.id, status: "duplicate", seq: Number(dup.rows[0].seq) }); continue; }
         authorize(user, a);
-        await validate(dayId, d.state, a, user);
+        // Checks run on the run the clock is in right now (it may have rolled over since the last action).
+        await validate(dayId, atNow(d.state, clockAt(d.state.clock)), a, user);
         // Temporary passwords never go into the log or to other portals: kept aside for the database only.
         const secrets = { temp: a.temp ?? a.account?.temp };
         delete a.temp; if (a.account) delete a.account.temp;
@@ -59,7 +60,7 @@ export function apply(dayId, user, commands) {
         a.at = Date.now();
         // "Reset demo day" goes back to the seeded day (its clock starts running now); everything else runs
         // through the shared reducer.
-        const next = a.type === "reset" ? { ...d.seed, clock: { ...d.seed.clock, setAt: a.at } } : sharedOf(reduceAt(reducer, d.state, a));
+        const next = a.type === "reset" ? { ...d.seed, clock: { ...d.seed.clock, setAt: a.at } } : sharedOf(applyAt(d.state, a));
         const seq = await tx(async (c) => {
           const r = await c.query(`INSERT INTO commands (id, day_id, type, payload, actor_id, actor_role, person, client_time)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING seq`,
@@ -90,7 +91,7 @@ export async function rebuild(dayId) {
   const cmds = (await q("SELECT seq, type, payload FROM commands WHERE day_id = $1 ORDER BY seq", [dayId])).rows;
   let seq = 0;
   for (const c of cmds) {
-    state = c.type === "reset" ? { ...rows[0].seed_state, clock: { ...rows[0].seed_state.clock, setAt: c.payload.at } } : sharedOf(reduceAt(reducer, state, c.payload));
+    state = c.type === "reset" ? { ...rows[0].seed_state, clock: { ...rows[0].seed_state.clock, setAt: c.payload.at } } : sharedOf(applyAt(state, c.payload));
     seq = Number(c.seq);
   }
   await q("UPDATE day_state SET seq = $2, state = $3, updated_at = now() WHERE day_id = $1", [dayId, seq, JSON.stringify(state)]);

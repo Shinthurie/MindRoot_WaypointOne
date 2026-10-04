@@ -153,3 +153,34 @@ test("admin reset sign-in: temporary password works once and never reaches the s
   const first = await call("/api/auth/login", { body: { id: "WP-DRV-005", secret: "AB-CD-EF" } });
   assert.equal(first.body.code, "first");
 });
+
+test("a real run: store orders on the clock's run are planned; unserved orders carry to the next run", async () => {
+  const disp = await signIn("WP-DSP-001", config.seedPassword);
+  const store = await signIn("STORE-OUT034", config.seedPassword);
+  // Sunday 4 Oct 2026, 12:00: the current run is Monday 5 Oct.
+  await send(disp, { type: "reset" });
+  await send(disp, { type: "clock", clock: { date: "2026-10-04", time: "12:00" } });
+  let r = await send(store, { type: "storeOrder", order: { ref: "N-T1", outlet: "OUT034", name: "OUT034", dry: 84, cold: 192, by: "Fathima" } });
+  assert.equal(r.body.results[0].status, "applied");
+  let st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.storeOrders[0].run, "2026-10-05");
+  // Publishing a real run with orders but no plan is refused.
+  r = await send(disp, { type: "publish", by: "Nimal" });
+  assert.match(r.body.results[0].error, /no plan/);
+  // The engine plans exactly this run's real orders.
+  const plan = await call("/api/plan/auto", { token: disp, body: {} });
+  assert.equal(plan.status, 200, JSON.stringify(plan.body));
+  assert.deepEqual(Object.keys(plan.body.alloc).sort(), ["N-T1-C", "N-T1-D"]);
+  assert.equal(plan.body.check.ok, true);
+  // Defer the chilled order on purpose, publish, then move to Tuesday: it carries over and goes first.
+  const alloc = { ...plan.body.alloc, "N-T1-C": null };
+  r = await send(disp, { type: "planSet", alloc, summary: plan.body.summary, by: "Nimal" }, { type: "publish", by: "Nimal" });
+  assert.deepEqual(r.body.results.map((x) => x.status), ["applied", "applied"]);
+  await send(disp, { type: "clock", clock: { date: "2026-10-06", time: "03:00" } });
+  r = await send(disp, { type: "log", who: "Nimal", role: "Dispatcher", what: "Tuesday" });
+  st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.runDate, "2026-10-06");
+  assert.equal(st.published, false, "a new run starts unpublished");
+  assert.deepEqual(st.carry.map((o) => [o.ref, o.deferredYesterday]), [["N-T1-C", true]]);
+  await send(disp, { type: "reset" });
+});
