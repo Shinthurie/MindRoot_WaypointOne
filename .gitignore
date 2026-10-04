@@ -1,0 +1,23 @@
+# Dependencies and builds
+node_modules/
+dist/
+.vercel/
+*.log
+
+# Competition material: the rules forbid sharing the datasets or derivatives publicly
+/data/
+/datathon/
+*.zip
+Challenge Booklet.pdf
+Kick-off Session*.pptx
+check_allocation.py
+
+# Local tools
+.claude/
+__pycache__/
+*.pyc
+
+# Submission files (built locally, uploaded by hand)
+/MindRoot_Designathon/
+/MindRoot_Designathon_Video/
+/MindRoot_Designathon_Canva/

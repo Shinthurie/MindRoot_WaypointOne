@@ -1,0 +1,15 @@
+.git
+**/node_modules
+app/dist
+*.zip
+*.pdf
+*.pptx
+MindRoot_Designathon*
+Waypoint_One_Individual_Pages.zip
+datathon
+docs
+data/Submission Templates
+data/Test Data/route_legs_test.csv
+data/Test Data/task1_test_inputs.csv
+data/Test Data/task2a_test_inputs.csv
+.env

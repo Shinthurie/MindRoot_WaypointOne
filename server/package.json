@@ -1,0 +1,26 @@
+{
+  "name": "waypoint-one-server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Waypoint One API: accounts, planning engine, command log and live sync for all four roles.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "migrate": "tsx db/migrate.js",
+    "seed": "tsx db/seed.js",
+    "setup": "tsx db/migrate.js && tsx db/seed.js --if-empty",
+    "start": "tsx src/index.js",
+    "dev": "tsx watch src/index.js",
+    "test": "tsx --test --test-concurrency=1 test/*.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.6.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,0 +1,5189 @@
+{
+ "s1Date": "2026-01-08",
+ "closedDays": [
+  "2025-12-07",
+  "2025-12-14",
+  "2025-12-21",
+  "2025-12-25",
+  "2025-12-28",
+  "2026-01-04",
+  "2026-01-11",
+  "2026-01-18",
+  "2026-01-25",
+  "2026-02-01",
+  "2026-02-08",
+  "2026-02-15",
+  "2026-02-22",
+  "2026-03-01",
+  "2026-03-08",
+  "2026-03-15",
+  "2026-03-22",
+  "2026-03-29",
+  "2026-04-05",
+  "2026-04-12",
+  "2026-04-13",
+  "2026-04-14",
+  "2026-04-19",
+  "2026-04-26",
+  "2026-05-01",
+  "2026-05-03",
+  "2026-05-10",
+  "2026-05-17",
+  "2026-05-24",
+  "2026-05-31",
+  "2026-06-07",
+  "2026-06-14",
+  "2026-06-21",
+  "2026-06-28"
+ ],
+ "traffic": {
+  "Colombo|0": 94,
+  "Colombo|1": 94,
+  "Colombo|2": 94,
+  "Colombo|3": 92,
+  "Colombo|4": 89,
+  "Colombo|5": 79,
+  "Colombo|6": 68,
+  "Colombo|7": 47,
+  "Colombo|8": 46,
+  "Colombo|9": 55,
+  "Colombo|10": 77,
+  "Colombo|11": 78,
+  "Colombo|12": 79,
+  "Colombo|13": 78,
+  "Colombo|14": 78,
+  "Colombo|15": 70,
+  "Colombo|16": 51,
+  "Colombo|17": 50,
+  "Colombo|18": 60,
+  "Colombo|19": 72,
+  "Colombo|20": 84,
+  "Colombo|21": 90,
+  "Colombo|22": 94,
+  "Colombo|23": 94,
+  "Gampaha|0": 98,
+  "Gampaha|1": 97,
+  "Gampaha|2": 97,
+  "Gampaha|3": 95,
+  "Gampaha|4": 94,
+  "Gampaha|5": 87,
+  "Gampaha|6": 80,
+  "Gampaha|7": 67,
+  "Gampaha|8": 61,
+  "Gampaha|9": 71,
+  "Gampaha|10": 86,
+  "Gampaha|11": 90,
+  "Gampaha|12": 90,
+  "Gampaha|13": 89,
+  "Gampaha|14": 86,
+  "Gampaha|15": 82,
+  "Gampaha|16": 68,
+  "Gampaha|17": 65,
+  "Gampaha|18": 76,
+  "Gampaha|19": 87,
+  "Gampaha|20": 93,
+  "Gampaha|21": 97,
+  "Gampaha|22": 96,
+  "Gampaha|23": 99,
+  "Kalutara|0": 97,
+  "Kalutara|1": 97,
+  "Kalutara|2": 95,
+  "Kalutara|3": 94,
+  "Kalutara|4": 91,
+  "Kalutara|5": 87,
+  "Kalutara|6": 78,
+  "Kalutara|7": 65,
+  "Kalutara|8": 60,
+  "Kalutara|9": 68,
+  "Kalutara|10": 83,
+  "Kalutara|11": 88,
+  "Kalutara|12": 87,
+  "Kalutara|13": 87,
+  "Kalutara|14": 87,
+  "Kalutara|15": 80,
+  "Kalutara|16": 65,
+  "Kalutara|17": 66,
+  "Kalutara|18": 75,
+  "Kalutara|19": 84,
+  "Kalutara|20": 90,
+  "Kalutara|21": 93,
+  "Kalutara|22": 93,
+  "Kalutara|23": 97,
+  "Galle|0": 98,
+  "Galle|1": 98,
+  "Galle|2": 98,
+  "Galle|3": 98,
+  "Galle|4": 96,
+  "Galle|5": 96,
+  "Galle|6": 89,
+  "Galle|7": 82,
+  "Galle|8": 78,
+  "Galle|9": 85,
+  "Galle|10": 92,
+  "Galle|11": 93,
+  "Galle|12": 95,
+  "Galle|13": 95,
+  "Galle|14": 94,
+  "Galle|15": 91,
+  "Galle|16": 80,
+  "Galle|17": 80,
+  "Galle|18": 84,
+  "Galle|19": 91,
+  "Galle|20": 95,
+  "Galle|21": 98,
+  "Galle|22": 98,
+  "Galle|23": 96,
+  "Matara|0": 100,
+  "Matara|1": 100,
+  "Matara|2": 97,
+  "Matara|3": 97,
+  "Matara|4": 99,
+  "Matara|5": 95,
+  "Matara|6": 91,
+  "Matara|7": 83,
+  "Matara|8": 80,
+  "Matara|9": 84,
+  "Matara|10": 95,
+  "Matara|11": 94,
+  "Matara|12": 96,
+  "Matara|13": 94,
+  "Matara|14": 93,
+  "Matara|15": 91,
+  "Matara|16": 84,
+  "Matara|17": 81,
+  "Matara|18": 85,
+  "Matara|19": 92,
+  "Matara|20": 96,
+  "Matara|21": 98,
+  "Matara|22": 99,
+  "Matara|23": 100,
+  "Kurunegala|0": 100,
+  "Kurunegala|1": 100,
+  "Kurunegala|2": 98,
+  "Kurunegala|3": 99,
+  "Kurunegala|4": 96,
+  "Kurunegala|5": 91,
+  "Kurunegala|6": 83,
+  "Kurunegala|7": 70,
+  "Kurunegala|8": 63,
+  "Kurunegala|9": 73,
+  "Kurunegala|10": 86,
+  "Kurunegala|11": 93,
+  "Kurunegala|12": 93,
+  "Kurunegala|13": 91,
+  "Kurunegala|14": 88,
+  "Kurunegala|15": 84,
+  "Kurunegala|16": 69,
+  "Kurunegala|17": 69,
+  "Kurunegala|18": 79,
+  "Kurunegala|19": 88,
+  "Kurunegala|20": 96,
+  "Kurunegala|21": 96,
+  "Kurunegala|22": 100,
+  "Kurunegala|23": 100,
+  "Puttalam|0": 92,
+  "Puttalam|1": 93,
+  "Puttalam|2": 92,
+  "Puttalam|3": 94,
+  "Puttalam|4": 90,
+  "Puttalam|5": 82,
+  "Puttalam|6": 75,
+  "Puttalam|7": 62,
+  "Puttalam|8": 60,
+  "Puttalam|9": 65,
+  "Puttalam|10": 82,
+  "Puttalam|11": 86,
+  "Puttalam|12": 87,
+  "Puttalam|13": 87,
+  "Puttalam|14": 83,
+  "Puttalam|15": 77,
+  "Puttalam|16": 61,
+  "Puttalam|17": 62,
+  "Puttalam|18": 73,
+  "Puttalam|19": 82,
+  "Puttalam|20": 90,
+  "Puttalam|21": 93,
+  "Puttalam|22": 93,
+  "Puttalam|23": 93,
+  "Kandy|0": 89,
+  "Kandy|1": 91,
+  "Kandy|2": 90,
+  "Kandy|3": 88,
+  "Kandy|4": 85,
+  "Kandy|5": 77,
+  "Kandy|6": 64,
+  "Kandy|7": 46,
+  "Kandy|8": 42,
+  "Kandy|9": 52,
+  "Kandy|10": 71,
+  "Kandy|11": 76,
+  "Kandy|12": 75,
+  "Kandy|13": 75,
+  "Kandy|14": 72,
+  "Kandy|15": 67,
+  "Kandy|16": 49,
+  "Kandy|17": 47,
+  "Kandy|18": 57,
+  "Kandy|19": 70,
+  "Kandy|20": 81,
+  "Kandy|21": 88,
+  "Kandy|22": 91,
+  "Kandy|23": 93,
+  "Matale|0": 97,
+  "Matale|1": 95,
+  "Matale|2": 96,
+  "Matale|3": 94,
+  "Matale|4": 93,
+  "Matale|5": 87,
+  "Matale|6": 80,
+  "Matale|7": 66,
+  "Matale|8": 60,
+  "Matale|9": 68,
+  "Matale|10": 85,
+  "Matale|11": 90,
+  "Matale|12": 88,
+  "Matale|13": 90,
+  "Matale|14": 86,
+  "Matale|15": 80,
+  "Matale|16": 66,
+  "Matale|17": 65,
+  "Matale|18": 76,
+  "Matale|19": 85,
+  "Matale|20": 93,
+  "Matale|21": 93,
+  "Matale|22": 94,
+  "Matale|23": 96,
+  "Nuwara Eliya|0": 92,
+  "Nuwara Eliya|1": 90,
+  "Nuwara Eliya|2": 90,
+  "Nuwara Eliya|3": 89,
+  "Nuwara Eliya|4": 82,
+  "Nuwara Eliya|5": 79,
+  "Nuwara Eliya|6": 71,
+  "Nuwara Eliya|7": 59,
+  "Nuwara Eliya|8": 57,
+  "Nuwara Eliya|9": 64,
+  "Nuwara Eliya|10": 76,
+  "Nuwara Eliya|11": 80,
+  "Nuwara Eliya|12": 78,
+  "Nuwara Eliya|13": 78,
+  "Nuwara Eliya|14": 79,
+  "Nuwara Eliya|15": 70,
+  "Nuwara Eliya|16": 61,
+  "Nuwara Eliya|17": 59,
+  "Nuwara Eliya|18": 68,
+  "Nuwara Eliya|19": 77,
+  "Nuwara Eliya|20": 83,
+  "Nuwara Eliya|21": 88,
+  "Nuwara Eliya|22": 89,
+  "Nuwara Eliya|23": 92,
+  "Badulla|0": 86,
+  "Badulla|1": 86,
+  "Badulla|2": 87,
+  "Badulla|3": 82,
+  "Badulla|4": 79,
+  "Badulla|5": 72,
+  "Badulla|6": 64,
+  "Badulla|7": 55,
+  "Badulla|8": 55,
+  "Badulla|9": 62,
+  "Badulla|10": 72,
+  "Badulla|11": 76,
+  "Badulla|12": 74,
+  "Badulla|13": 73,
+  "Badulla|14": 72,
+  "Badulla|15": 65,
+  "Badulla|16": 57,
+  "Badulla|17": 56,
+  "Badulla|18": 62,
+  "Badulla|19": 74,
+  "Badulla|20": 81,
+  "Badulla|21": 84,
+  "Badulla|22": 86,
+  "Badulla|23": 86,
+  "Kegalle|0": 91,
+  "Kegalle|1": 90,
+  "Kegalle|2": 90,
+  "Kegalle|3": 88,
+  "Kegalle|4": 86,
+  "Kegalle|5": 81,
+  "Kegalle|6": 73,
+  "Kegalle|7": 59,
+  "Kegalle|8": 55,
+  "Kegalle|9": 63,
+  "Kegalle|10": 80,
+  "Kegalle|11": 82,
+  "Kegalle|12": 84,
+  "Kegalle|13": 82,
+  "Kegalle|14": 82,
+  "Kegalle|15": 75,
+  "Kegalle|16": 61,
+  "Kegalle|17": 59,
+  "Kegalle|18": 69,
+  "Kegalle|19": 80,
+  "Kegalle|20": 86,
+  "Kegalle|21": 88,
+  "Kegalle|22": 89,
+  "Kegalle|23": 90
+ },
+ "outletsAll": [
+  {
+   "id": "OUT001",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT002",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT003",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT004",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT005",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT006",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT007",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT008",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT009",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT010",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT011",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT012",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT013",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT014",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT015",
+   "brand": "Style",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "09:00",
+   "close": "11:00"
+  },
+  {
+   "id": "OUT016",
+   "brand": "Style",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "09:00",
+   "close": "11:00"
+  },
+  {
+   "id": "OUT017",
+   "brand": "Style",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT018",
+   "brand": "Style",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT019",
+   "brand": "Style",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT020",
+   "brand": "Style",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT021",
+   "brand": "Tech",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT022",
+   "brand": "Tech",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:00",
+   "close": "12:00"
+  },
+  {
+   "id": "OUT023",
+   "brand": "Tech",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT024",
+   "brand": "Tech",
+   "district": "Colombo",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT025",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT026",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT027",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT028",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT029",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT030",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT031",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT032",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT033",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT034",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT035",
+   "brand": "Style",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT036",
+   "brand": "Style",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT037",
+   "brand": "Style",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT038",
+   "brand": "Tech",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT039",
+   "brand": "Tech",
+   "district": "Gampaha",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT040",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT041",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT042",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT043",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT044",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT045",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT046",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT047",
+   "brand": "Style",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT048",
+   "brand": "Style",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT049",
+   "brand": "Tech",
+   "district": "Kalutara",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT050",
+   "brand": "Fresh",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT051",
+   "brand": "Fresh",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT052",
+   "brand": "Fresh",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT053",
+   "brand": "Fresh",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT054",
+   "brand": "Fresh",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT055",
+   "brand": "Fresh",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT056",
+   "brand": "Style",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:00",
+   "close": "12:00"
+  },
+  {
+   "id": "OUT057",
+   "brand": "Style",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT058",
+   "brand": "Tech",
+   "district": "Galle",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT059",
+   "brand": "Fresh",
+   "district": "Matara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT060",
+   "brand": "Fresh",
+   "district": "Matara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT061",
+   "brand": "Fresh",
+   "district": "Matara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT062",
+   "brand": "Fresh",
+   "district": "Matara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT063",
+   "brand": "Style",
+   "district": "Matara",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT064",
+   "brand": "Tech",
+   "district": "Matara",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT065",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT066",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT067",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT068",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT069",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT070",
+   "brand": "Style",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT071",
+   "brand": "Style",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT072",
+   "brand": "Tech",
+   "district": "Kurunegala",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT073",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT074",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT075",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "depot": "Peliyagoda",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT076",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT077",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT078",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT079",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT080",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT081",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT082",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT083",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT084",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT085",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT086",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT087",
+   "brand": "Fresh",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT088",
+   "brand": "Style",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT089",
+   "brand": "Style",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT090",
+   "brand": "Style",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "10:30",
+   "close": "12:30"
+  },
+  {
+   "id": "OUT091",
+   "brand": "Style",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT092",
+   "brand": "Style",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT093",
+   "brand": "Tech",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "van_only",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT094",
+   "brand": "Tech",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "open": "09:00",
+   "close": "11:00"
+  },
+  {
+   "id": "OUT095",
+   "brand": "Tech",
+   "district": "Kandy",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT096",
+   "brand": "Fresh",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT097",
+   "brand": "Fresh",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT098",
+   "brand": "Fresh",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT099",
+   "brand": "Fresh",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT100",
+   "brand": "Fresh",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT101",
+   "brand": "Fresh",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT102",
+   "brand": "Style",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT103",
+   "brand": "Tech",
+   "district": "Matale",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT104",
+   "brand": "Fresh",
+   "district": "Nuwara Eliya",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT105",
+   "brand": "Fresh",
+   "district": "Nuwara Eliya",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT106",
+   "brand": "Fresh",
+   "district": "Nuwara Eliya",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT107",
+   "brand": "Fresh",
+   "district": "Nuwara Eliya",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT108",
+   "brand": "Fresh",
+   "district": "Nuwara Eliya",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT109",
+   "brand": "Style",
+   "district": "Nuwara Eliya",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT110",
+   "brand": "Fresh",
+   "district": "Badulla",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT111",
+   "brand": "Fresh",
+   "district": "Badulla",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT112",
+   "brand": "Fresh",
+   "district": "Badulla",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT113",
+   "brand": "Fresh",
+   "district": "Badulla",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:30",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT114",
+   "brand": "Style",
+   "district": "Badulla",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT115",
+   "brand": "Tech",
+   "district": "Badulla",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  },
+  {
+   "id": "OUT116",
+   "brand": "Fresh",
+   "district": "Kegalle",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "05:00",
+   "close": "07:30"
+  },
+  {
+   "id": "OUT117",
+   "brand": "Fresh",
+   "district": "Kegalle",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT118",
+   "brand": "Fresh",
+   "district": "Kegalle",
+   "depot": "Kandy",
+   "dock": "street",
+   "parking": "normal",
+   "open": "04:00",
+   "close": "07:45"
+  },
+  {
+   "id": "OUT119",
+   "brand": "Fresh",
+   "district": "Kegalle",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "03:00",
+   "close": "08:00"
+  },
+  {
+   "id": "OUT120",
+   "brand": "Style",
+   "district": "Kegalle",
+   "depot": "Kandy",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "open": "09:00",
+   "close": "17:00"
+  }
+ ],
+ "fleetAll": [
+  {
+   "id": "VEH001",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 26.4,
+   "kg": 5510,
+   "kmPerL": 4.7,
+   "quotaL": 340,
+   "fuel": "diesel",
+   "usedL": 297.5,
+   "weekSoFarL": 178.8,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH002",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 21.1,
+   "kg": 3990,
+   "kmPerL": 6.1,
+   "quotaL": 610,
+   "fuel": "diesel",
+   "usedL": 312.4,
+   "weekSoFarL": 95.8,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH003",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 26.4,
+   "kg": 5510,
+   "kmPerL": 4.7,
+   "quotaL": 480,
+   "fuel": "diesel",
+   "usedL": 267.6,
+   "weekSoFarL": 115.4,
+   "status": "available"
+  },
+  {
+   "id": "VEH004",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 33.4,
+   "kg": 6840,
+   "kmPerL": 4.4,
+   "quotaL": 430,
+   "fuel": "diesel",
+   "usedL": 240.4,
+   "weekSoFarL": 141.5,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH005",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 33.4,
+   "kg": 6840,
+   "kmPerL": 4.4,
+   "quotaL": 490,
+   "fuel": "diesel",
+   "usedL": 137.9,
+   "weekSoFarL": 72.8,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH006",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 33.4,
+   "kg": 6840,
+   "kmPerL": 4.4,
+   "quotaL": 380,
+   "fuel": "diesel",
+   "usedL": 78.8,
+   "weekSoFarL": 55.8,
+   "status": "available"
+  },
+  {
+   "id": "VEH007",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 19.4,
+   "kg": 3610,
+   "kmPerL": 6.4,
+   "quotaL": 590,
+   "fuel": "diesel",
+   "usedL": 269.4,
+   "weekSoFarL": 134.2,
+   "status": "available"
+  },
+  {
+   "id": "VEH008",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 460,
+   "fuel": "diesel",
+   "usedL": 385.6,
+   "weekSoFarL": 160.1,
+   "status": "available"
+  },
+  {
+   "id": "VEH009",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 30.0,
+   "kg": 5800,
+   "kmPerL": 5.2,
+   "quotaL": 440,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH010",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 34.0,
+   "kg": 6500,
+   "kmPerL": 5.6,
+   "quotaL": 540,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH011",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 600,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH012",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 540,
+   "fuel": "diesel",
+   "usedL": 91.6,
+   "weekSoFarL": 0.0,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH013",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 30.0,
+   "kg": 5800,
+   "kmPerL": 5.2,
+   "quotaL": 430,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH014",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 530,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH015",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 560,
+   "fuel": "diesel",
+   "usedL": 351.2,
+   "weekSoFarL": 156.6,
+   "status": "available"
+  },
+  {
+   "id": "VEH016",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 550,
+   "fuel": "diesel",
+   "usedL": 245.4,
+   "weekSoFarL": 104.7,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH017",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 470,
+   "fuel": "diesel",
+   "usedL": 220.4,
+   "weekSoFarL": 108.8,
+   "status": "available"
+  },
+  {
+   "id": "VEH018",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 450,
+   "fuel": "diesel",
+   "usedL": 269.9,
+   "weekSoFarL": 127.3,
+   "status": "available"
+  },
+  {
+   "id": "VEH019",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 610,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH020",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 34.0,
+   "kg": 6500,
+   "kmPerL": 5.6,
+   "quotaL": 460,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH021",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 440,
+   "fuel": "diesel",
+   "usedL": 20.1,
+   "weekSoFarL": 0.0,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH022",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 580,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH023",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 530,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH024",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 34.0,
+   "kg": 6500,
+   "kmPerL": 5.6,
+   "quotaL": 600,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH025",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 580,
+   "fuel": "diesel",
+   "usedL": 147.7,
+   "weekSoFarL": 63.5,
+   "status": "available"
+  },
+  {
+   "id": "VEH026",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 340,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH027",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 440,
+   "fuel": "diesel",
+   "usedL": 84.3,
+   "weekSoFarL": 51.1,
+   "status": "available"
+  },
+  {
+   "id": "VEH028",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 380,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH029",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 30.0,
+   "kg": 5800,
+   "kmPerL": 5.2,
+   "quotaL": 600,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH030",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 34.0,
+   "kg": 6500,
+   "kmPerL": 5.6,
+   "quotaL": 360,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH031",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 350,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH032",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 610,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH033",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 470,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH034",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 440,
+   "fuel": "diesel",
+   "usedL": 78.4,
+   "weekSoFarL": 23.4,
+   "status": "available"
+  },
+  {
+   "id": "VEH035",
+   "type": "van",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 7.0,
+   "kg": 1040,
+   "kmPerL": 10.3,
+   "quotaL": 480,
+   "fuel": "diesel",
+   "usedL": 14.3,
+   "weekSoFarL": 8.5,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH036",
+   "type": "van",
+   "reefer": true,
+   "depot": "Peliyagoda",
+   "m3": 7.0,
+   "kg": 1040,
+   "kmPerL": 10.3,
+   "quotaL": 480,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH037",
+   "type": "van",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 8.0,
+   "kg": 1100,
+   "kmPerL": 11.5,
+   "quotaL": 340,
+   "fuel": "diesel",
+   "usedL": 13.9,
+   "weekSoFarL": 8.6,
+   "status": "available"
+  },
+  {
+   "id": "VEH038",
+   "type": "van",
+   "reefer": false,
+   "depot": "Peliyagoda",
+   "m3": 9.0,
+   "kg": 1200,
+   "kmPerL": 10.8,
+   "quotaL": 620,
+   "fuel": "diesel",
+   "usedL": 2.8,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH039",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 29.9,
+   "kg": 6180,
+   "kmPerL": 5.0,
+   "quotaL": 370,
+   "fuel": "diesel",
+   "usedL": 125.2,
+   "weekSoFarL": 102.9,
+   "status": "available"
+  },
+  {
+   "id": "VEH040",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 26.4,
+   "kg": 5510,
+   "kmPerL": 4.7,
+   "quotaL": 380,
+   "fuel": "diesel",
+   "usedL": 309.3,
+   "weekSoFarL": 155.7,
+   "status": "available"
+  },
+  {
+   "id": "VEH041",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 19.4,
+   "kg": 3610,
+   "kmPerL": 6.4,
+   "quotaL": 600,
+   "fuel": "diesel",
+   "usedL": 253.5,
+   "weekSoFarL": 130.7,
+   "status": "available"
+  },
+  {
+   "id": "VEH042",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 29.9,
+   "kg": 6180,
+   "kmPerL": 5.0,
+   "quotaL": 480,
+   "fuel": "diesel",
+   "usedL": 4.5,
+   "weekSoFarL": 8.9,
+   "status": "available"
+  },
+  {
+   "id": "VEH043",
+   "type": "truck",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 26.4,
+   "kg": 5510,
+   "kmPerL": 4.7,
+   "quotaL": 450,
+   "fuel": "diesel",
+   "usedL": 211.7,
+   "weekSoFarL": 85.8,
+   "status": "available"
+  },
+  {
+   "id": "VEH044",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 340,
+   "fuel": "diesel",
+   "usedL": 201.1,
+   "weekSoFarL": 100.7,
+   "status": "available"
+  },
+  {
+   "id": "VEH045",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 530,
+   "fuel": "diesel",
+   "usedL": 133.7,
+   "weekSoFarL": 59.6,
+   "status": "available"
+  },
+  {
+   "id": "VEH046",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 350,
+   "fuel": "diesel",
+   "usedL": 369.5,
+   "weekSoFarL": 186.1,
+   "status": "available"
+  },
+  {
+   "id": "VEH047",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 30.0,
+   "kg": 5800,
+   "kmPerL": 5.2,
+   "quotaL": 510,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH048",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 570,
+   "fuel": "diesel",
+   "usedL": 91.3,
+   "weekSoFarL": 40.1,
+   "status": "available"
+  },
+  {
+   "id": "VEH049",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 390,
+   "fuel": "diesel",
+   "usedL": 13.5,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH050",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 34.0,
+   "kg": 6500,
+   "kmPerL": 5.6,
+   "quotaL": 560,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH051",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 400,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH052",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 570,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH053",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 34.0,
+   "kg": 6500,
+   "kmPerL": 5.6,
+   "quotaL": 370,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH054",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 38.0,
+   "kg": 7200,
+   "kmPerL": 4.9,
+   "quotaL": 520,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH055",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 24.0,
+   "kg": 4200,
+   "kmPerL": 6.8,
+   "quotaL": 530,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH056",
+   "type": "truck",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 22.0,
+   "kg": 3800,
+   "kmPerL": 7.1,
+   "quotaL": 610,
+   "fuel": "diesel",
+   "usedL": 218.8,
+   "weekSoFarL": 139.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH057",
+   "type": "van",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 7.0,
+   "kg": 1040,
+   "kmPerL": 10.3,
+   "quotaL": 450,
+   "fuel": "diesel",
+   "usedL": 17.5,
+   "weekSoFarL": 7.7,
+   "status": "available"
+  },
+  {
+   "id": "VEH058",
+   "type": "van",
+   "reefer": true,
+   "depot": "Kandy",
+   "m3": 7.0,
+   "kg": 1040,
+   "kmPerL": 10.3,
+   "quotaL": 550,
+   "fuel": "diesel",
+   "usedL": 0.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  },
+  {
+   "id": "VEH059",
+   "type": "van",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 9.0,
+   "kg": 1200,
+   "kmPerL": 10.8,
+   "quotaL": 610,
+   "fuel": "diesel",
+   "usedL": 25.1,
+   "weekSoFarL": 11.8,
+   "status": "available"
+  },
+  {
+   "id": "VEH060",
+   "type": "van",
+   "reefer": false,
+   "depot": "Kandy",
+   "m3": 9.0,
+   "kg": 1200,
+   "kmPerL": 10.8,
+   "quotaL": 520,
+   "fuel": "diesel",
+   "usedL": 3.0,
+   "weekSoFarL": 0.0,
+   "status": "available"
+  }
+ ],
+ "fuelWeek": {
+  "label": "ISO week 1, 2026 (2025-12-29 to 2026-01-03)",
+  "soFarFrom": "2026-01-05"
+ },
+ "orders": [
+  {
+   "ref": "S1-000",
+   "outlet": "OUT001",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "van_only",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 12,
+   "kg": 97.8,
+   "m3": 0.5,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-001",
+   "outlet": "OUT001",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "van_only",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 80,
+   "kg": 448.6,
+   "m3": 2.445,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-002",
+   "outlet": "OUT002",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "van_only",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 18,
+   "kg": 130.9,
+   "m3": 0.666,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-003",
+   "outlet": "OUT002",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "van_only",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 38,
+   "kg": 329.0,
+   "m3": 1.843,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-004",
+   "outlet": "OUT003",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "van_only",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 28,
+   "kg": 160.6,
+   "m3": 0.87,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-005",
+   "outlet": "OUT003",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "van_only",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 42,
+   "kg": 318.1,
+   "m3": 1.725,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-006",
+   "outlet": "OUT004",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 40,
+   "kg": 305.6,
+   "m3": 1.686,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-007",
+   "outlet": "OUT004",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 74,
+   "kg": 567.7,
+   "m3": 2.925,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-008",
+   "outlet": "OUT005",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": false,
+   "units": 102,
+   "kg": 751.8,
+   "m3": 3.631,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-009",
+   "outlet": "OUT005",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": true,
+   "units": 250,
+   "kg": 1696.6,
+   "m3": 10.09,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-010",
+   "outlet": "OUT006",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 105,
+   "kg": 798.7,
+   "m3": 4.373,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-011",
+   "outlet": "OUT007",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 169,
+   "kg": 1045.8,
+   "m3": 5.697,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-012",
+   "outlet": "OUT007",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 262,
+   "kg": 1991.0,
+   "m3": 11.722,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-013",
+   "outlet": "OUT008",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 53,
+   "kg": 401.2,
+   "m3": 2.18,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-014",
+   "outlet": "OUT008",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 102,
+   "kg": 713.9,
+   "m3": 4.003,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-015",
+   "outlet": "OUT009",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": false,
+   "units": 42,
+   "kg": 333.7,
+   "m3": 1.995,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-016",
+   "outlet": "OUT009",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": true,
+   "units": 230,
+   "kg": 1241.3,
+   "m3": 6.944,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-017",
+   "outlet": "OUT010",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 57,
+   "kg": 414.6,
+   "m3": 2.59,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-018",
+   "outlet": "OUT011",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 83,
+   "kg": 564.5,
+   "m3": 2.638,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-019",
+   "outlet": "OUT012",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 71,
+   "kg": 464.1,
+   "m3": 2.479,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-020",
+   "outlet": "OUT013",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 180,
+   "kg": 1265.2,
+   "m3": 6.274,
+   "deferredYesterday": true,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-021",
+   "outlet": "OUT013",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 234,
+   "kg": 2007.0,
+   "m3": 9.898,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-022",
+   "outlet": "OUT014",
+   "brand": "Fresh",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 56,
+   "kg": 357.2,
+   "m3": 1.899,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-023",
+   "outlet": "OUT022",
+   "brand": "Tech",
+   "district": "Colombo",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "mall": "10:00-12:00",
+   "open": "10:00",
+   "close": "12:00",
+   "chilled": false,
+   "units": 8,
+   "kg": 1695.8,
+   "m3": 5.39,
+   "deferredYesterday": true,
+   "daysSince": 5
+  },
+  {
+   "ref": "S1-024",
+   "outlet": "OUT023",
+   "brand": "Tech",
+   "district": "Colombo",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 4,
+   "kg": 896.0,
+   "m3": 2.741,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-025",
+   "outlet": "OUT024",
+   "brand": "Tech",
+   "district": "Colombo",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 7,
+   "kg": 1566.3,
+   "m3": 4.653,
+   "deferredYesterday": true,
+   "daysSince": 5
+  },
+  {
+   "ref": "S1-026",
+   "outlet": "OUT025",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 49,
+   "kg": 265.4,
+   "m3": 1.473,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-027",
+   "outlet": "OUT026",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 52,
+   "kg": 420.8,
+   "m3": 2.304,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-028",
+   "outlet": "OUT026",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": true,
+   "units": 170,
+   "kg": 1190.1,
+   "m3": 6.368,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-029",
+   "outlet": "OUT027",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 62,
+   "kg": 376.0,
+   "m3": 1.994,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-030",
+   "outlet": "OUT028",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 77,
+   "kg": 554.1,
+   "m3": 2.831,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-031",
+   "outlet": "OUT028",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": true,
+   "units": 182,
+   "kg": 1209.9,
+   "m3": 6.883,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-032",
+   "outlet": "OUT029",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 86,
+   "kg": 588.5,
+   "m3": 3.015,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-033",
+   "outlet": "OUT029",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 131,
+   "kg": 1036.8,
+   "m3": 6.227,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-034",
+   "outlet": "OUT030",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 73,
+   "kg": 545.4,
+   "m3": 2.759,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-035",
+   "outlet": "OUT030",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": true,
+   "units": 230,
+   "kg": 1202.9,
+   "m3": 7.427,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-036",
+   "outlet": "OUT031",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 175,
+   "kg": 1160.0,
+   "m3": 6.652,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-037",
+   "outlet": "OUT032",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": false,
+   "units": 131,
+   "kg": 820.7,
+   "m3": 4.652,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-038",
+   "outlet": "OUT032",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": true,
+   "units": 400,
+   "kg": 2836.8,
+   "m3": 14.41,
+   "deferredYesterday": true,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-039",
+   "outlet": "OUT033",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 84,
+   "kg": 610.7,
+   "m3": 3.502,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-040",
+   "outlet": "OUT034",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 84,
+   "kg": 664.3,
+   "m3": 3.378,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-041",
+   "outlet": "OUT034",
+   "brand": "Fresh",
+   "district": "Gampaha",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 192,
+   "kg": 1257.9,
+   "m3": 6.742,
+   "deferredYesterday": true,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-042",
+   "outlet": "OUT040",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 90,
+   "kg": 618.1,
+   "m3": 3.427,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-043",
+   "outlet": "OUT041",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 61,
+   "kg": 416.4,
+   "m3": 2.13,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-044",
+   "outlet": "OUT042",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 127,
+   "kg": 1020.6,
+   "m3": 5.225,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-045",
+   "outlet": "OUT043",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 41,
+   "kg": 225.5,
+   "m3": 1.332,
+   "deferredYesterday": true,
+   "daysSince": 3
+  },
+  {
+   "ref": "S1-046",
+   "outlet": "OUT043",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 115,
+   "kg": 951.0,
+   "m3": 5.075,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-047",
+   "outlet": "OUT044",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 59,
+   "kg": 419.5,
+   "m3": 2.218,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-048",
+   "outlet": "OUT044",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": true,
+   "units": 112,
+   "kg": 907.2,
+   "m3": 5.024,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-049",
+   "outlet": "OUT045",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 52,
+   "kg": 333.1,
+   "m3": 1.914,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-050",
+   "outlet": "OUT046",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 42,
+   "kg": 286.6,
+   "m3": 1.631,
+   "deferredYesterday": true,
+   "daysSince": 3
+  },
+  {
+   "ref": "S1-051",
+   "outlet": "OUT046",
+   "brand": "Fresh",
+   "district": "Kalutara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 176,
+   "kg": 1072.0,
+   "m3": 5.933,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-052",
+   "outlet": "OUT050",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 54,
+   "kg": 524.9,
+   "m3": 2.592,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-053",
+   "outlet": "OUT051",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 35,
+   "kg": 294.5,
+   "m3": 1.375,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-054",
+   "outlet": "OUT052",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 101,
+   "kg": 578.7,
+   "m3": 3.791,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-055",
+   "outlet": "OUT053",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 25,
+   "kg": 186.0,
+   "m3": 0.996,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-056",
+   "outlet": "OUT053",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": true,
+   "units": 80,
+   "kg": 670.7,
+   "m3": 3.754,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-057",
+   "outlet": "OUT054",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 104,
+   "kg": 747.3,
+   "m3": 4.307,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-058",
+   "outlet": "OUT054",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 547,
+   "kg": 2741.8,
+   "m3": 16.515,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-059",
+   "outlet": "OUT055",
+   "brand": "Fresh",
+   "district": "Galle",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 74,
+   "kg": 401.4,
+   "m3": 2.236,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-060",
+   "outlet": "OUT056",
+   "brand": "Style",
+   "district": "Galle",
+   "dock": "mall_bay",
+   "parking": "mall_dock",
+   "mall": "10:00-12:00",
+   "open": "10:00",
+   "close": "12:00",
+   "chilled": false,
+   "units": 31,
+   "kg": 516.7,
+   "m3": 7.858,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-061",
+   "outlet": "OUT057",
+   "brand": "Style",
+   "district": "Galle",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 59,
+   "kg": 799.0,
+   "m3": 11.822,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-062",
+   "outlet": "OUT059",
+   "brand": "Fresh",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": false,
+   "units": 93,
+   "kg": 561.5,
+   "m3": 3.388,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-063",
+   "outlet": "OUT060",
+   "brand": "Fresh",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 60,
+   "kg": 464.4,
+   "m3": 2.3,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-064",
+   "outlet": "OUT060",
+   "brand": "Fresh",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": true,
+   "units": 186,
+   "kg": 1277.8,
+   "m3": 6.784,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-065",
+   "outlet": "OUT061",
+   "brand": "Fresh",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 66,
+   "kg": 461.0,
+   "m3": 2.23,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-066",
+   "outlet": "OUT062",
+   "brand": "Fresh",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 89,
+   "kg": 678.1,
+   "m3": 3.425,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-067",
+   "outlet": "OUT062",
+   "brand": "Fresh",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 128,
+   "kg": 930.2,
+   "m3": 5.194,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-068",
+   "outlet": "OUT063",
+   "brand": "Style",
+   "district": "Matara",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 29,
+   "kg": 469.2,
+   "m3": 7.494,
+   "deferredYesterday": true,
+   "daysSince": 5
+  },
+  {
+   "ref": "S1-069",
+   "outlet": "OUT064",
+   "brand": "Tech",
+   "district": "Matara",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 3,
+   "kg": 477.9,
+   "m3": 1.55,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-070",
+   "outlet": "OUT065",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 76,
+   "kg": 505.3,
+   "m3": 2.598,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-071",
+   "outlet": "OUT065",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 298,
+   "kg": 2218.9,
+   "m3": 12.035,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-072",
+   "outlet": "OUT066",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": false,
+   "units": 58,
+   "kg": 382.5,
+   "m3": 2.095,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-073",
+   "outlet": "OUT066",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "04:00",
+   "close": "07:45",
+   "chilled": true,
+   "units": 163,
+   "kg": 1049.3,
+   "m3": 5.766,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-074",
+   "outlet": "OUT067",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": false,
+   "units": 64,
+   "kg": 433.8,
+   "m3": 2.349,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-075",
+   "outlet": "OUT067",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:00",
+   "close": "07:30",
+   "chilled": true,
+   "units": 221,
+   "kg": 1325.1,
+   "m3": 7.238,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-076",
+   "outlet": "OUT068",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 53,
+   "kg": 426.1,
+   "m3": 2.032,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-077",
+   "outlet": "OUT069",
+   "brand": "Fresh",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 67,
+   "kg": 504.2,
+   "m3": 2.482,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-078",
+   "outlet": "OUT070",
+   "brand": "Style",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 42,
+   "kg": 2561.6,
+   "m3": 40.66,
+   "deferredYesterday": false,
+   "daysSince": 2
+  },
+  {
+   "ref": "S1-079",
+   "outlet": "OUT071",
+   "brand": "Style",
+   "district": "Kurunegala",
+   "dock": "street",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 34,
+   "kg": 531.8,
+   "m3": 9.379,
+   "deferredYesterday": true,
+   "daysSince": 5
+  },
+  {
+   "ref": "S1-080",
+   "outlet": "OUT072",
+   "brand": "Tech",
+   "district": "Kurunegala",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "09:00",
+   "close": "17:00",
+   "chilled": false,
+   "units": 6,
+   "kg": 1006.3,
+   "m3": 3.72,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-081",
+   "outlet": "OUT073",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 63,
+   "kg": 402.3,
+   "m3": 2.38,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-082",
+   "outlet": "OUT074",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": false,
+   "units": 69,
+   "kg": 532.1,
+   "m3": 2.618,
+   "deferredYesterday": false,
+   "daysSince": 1
+  },
+  {
+   "ref": "S1-083",
+   "outlet": "OUT074",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "05:30",
+   "close": "08:00",
+   "chilled": true,
+   "units": 205,
+   "kg": 1588.8,
+   "m3": 8.659,
+   "deferredYesterday": true,
+   "daysSince": 5
+  },
+  {
+   "ref": "S1-084",
+   "outlet": "OUT075",
+   "brand": "Fresh",
+   "district": "Puttalam",
+   "dock": "rear_dock",
+   "parking": "normal",
+   "mall": null,
+   "open": "03:00",
+   "close": "08:00",
+   "chilled": false,
+   "units": 40,
+   "kg": 336.9,
+   "m3": 1.859,
+   "deferredYesterday": false,
+   "daysSince": 1
+  }
+ ],
+ "vehicles": [
+  {
+   "id": "VEH001",
+   "type": "truck",
+   "reefer": true,
+   "kg": 5510,
+   "m3": 26.4,
+   "kmPerL": 4.7,
+   "quotaL": 340,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH002",
+   "type": "truck",
+   "reefer": true,
+   "kg": 3990,
+   "m3": 21.1,
+   "kmPerL": 6.1,
+   "quotaL": 610,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH003",
+   "type": "truck",
+   "reefer": true,
+   "kg": 5510,
+   "m3": 26.4,
+   "kmPerL": 4.7,
+   "quotaL": 480,
+   "status": "available"
+  },
+  {
+   "id": "VEH004",
+   "type": "truck",
+   "reefer": true,
+   "kg": 6840,
+   "m3": 33.4,
+   "kmPerL": 4.4,
+   "quotaL": 430,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH005",
+   "type": "truck",
+   "reefer": true,
+   "kg": 6840,
+   "m3": 33.4,
+   "kmPerL": 4.4,
+   "quotaL": 490,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH006",
+   "type": "truck",
+   "reefer": true,
+   "kg": 6840,
+   "m3": 33.4,
+   "kmPerL": 4.4,
+   "quotaL": 380,
+   "status": "available"
+  },
+  {
+   "id": "VEH007",
+   "type": "truck",
+   "reefer": true,
+   "kg": 3610,
+   "m3": 19.4,
+   "kmPerL": 6.4,
+   "quotaL": 590,
+   "status": "available"
+  },
+  {
+   "id": "VEH008",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 460,
+   "status": "available"
+  },
+  {
+   "id": "VEH009",
+   "type": "truck",
+   "reefer": false,
+   "kg": 5800,
+   "m3": 30.0,
+   "kmPerL": 5.2,
+   "quotaL": 440,
+   "status": "available"
+  },
+  {
+   "id": "VEH010",
+   "type": "truck",
+   "reefer": false,
+   "kg": 6500,
+   "m3": 34.0,
+   "kmPerL": 5.6,
+   "quotaL": 540,
+   "status": "available"
+  },
+  {
+   "id": "VEH011",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 600,
+   "status": "available"
+  },
+  {
+   "id": "VEH012",
+   "type": "truck",
+   "reefer": false,
+   "kg": 4200,
+   "m3": 24.0,
+   "kmPerL": 6.8,
+   "quotaL": 540,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH013",
+   "type": "truck",
+   "reefer": false,
+   "kg": 5800,
+   "m3": 30.0,
+   "kmPerL": 5.2,
+   "quotaL": 430,
+   "status": "available"
+  },
+  {
+   "id": "VEH014",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 530,
+   "status": "available"
+  },
+  {
+   "id": "VEH015",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 560,
+   "status": "available"
+  },
+  {
+   "id": "VEH016",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 550,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH017",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 470,
+   "status": "available"
+  },
+  {
+   "id": "VEH018",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 450,
+   "status": "available"
+  },
+  {
+   "id": "VEH019",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 610,
+   "status": "available"
+  },
+  {
+   "id": "VEH020",
+   "type": "truck",
+   "reefer": false,
+   "kg": 6500,
+   "m3": 34.0,
+   "kmPerL": 5.6,
+   "quotaL": 460,
+   "status": "available"
+  },
+  {
+   "id": "VEH021",
+   "type": "truck",
+   "reefer": false,
+   "kg": 4200,
+   "m3": 24.0,
+   "kmPerL": 6.8,
+   "quotaL": 440,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH022",
+   "type": "truck",
+   "reefer": false,
+   "kg": 4200,
+   "m3": 24.0,
+   "kmPerL": 6.8,
+   "quotaL": 580,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH023",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 530,
+   "status": "available"
+  },
+  {
+   "id": "VEH024",
+   "type": "truck",
+   "reefer": false,
+   "kg": 6500,
+   "m3": 34.0,
+   "kmPerL": 5.6,
+   "quotaL": 600,
+   "status": "available"
+  },
+  {
+   "id": "VEH025",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 580,
+   "status": "available"
+  },
+  {
+   "id": "VEH026",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 340,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH027",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 440,
+   "status": "available"
+  },
+  {
+   "id": "VEH028",
+   "type": "truck",
+   "reefer": false,
+   "kg": 4200,
+   "m3": 24.0,
+   "kmPerL": 6.8,
+   "quotaL": 380,
+   "status": "available"
+  },
+  {
+   "id": "VEH029",
+   "type": "truck",
+   "reefer": false,
+   "kg": 5800,
+   "m3": 30.0,
+   "kmPerL": 5.2,
+   "quotaL": 600,
+   "status": "available"
+  },
+  {
+   "id": "VEH030",
+   "type": "truck",
+   "reefer": false,
+   "kg": 6500,
+   "m3": 34.0,
+   "kmPerL": 5.6,
+   "quotaL": 360,
+   "status": "available"
+  },
+  {
+   "id": "VEH031",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 350,
+   "status": "available"
+  },
+  {
+   "id": "VEH032",
+   "type": "truck",
+   "reefer": false,
+   "kg": 4200,
+   "m3": 24.0,
+   "kmPerL": 6.8,
+   "quotaL": 610,
+   "status": "available"
+  },
+  {
+   "id": "VEH033",
+   "type": "truck",
+   "reefer": false,
+   "kg": 7200,
+   "m3": 38.0,
+   "kmPerL": 4.9,
+   "quotaL": 470,
+   "status": "available"
+  },
+  {
+   "id": "VEH034",
+   "type": "truck",
+   "reefer": false,
+   "kg": 3800,
+   "m3": 22.0,
+   "kmPerL": 7.1,
+   "quotaL": 440,
+   "status": "available"
+  },
+  {
+   "id": "VEH035",
+   "type": "van",
+   "reefer": true,
+   "kg": 1040,
+   "m3": 7.0,
+   "kmPerL": 10.3,
+   "quotaL": 480,
+   "status": "in_workshop"
+  },
+  {
+   "id": "VEH036",
+   "type": "van",
+   "reefer": true,
+   "kg": 1040,
+   "m3": 7.0,
+   "kmPerL": 10.3,
+   "quotaL": 480,
+   "status": "available"
+  },
+  {
+   "id": "VEH037",
+   "type": "van",
+   "reefer": false,
+   "kg": 1100,
+   "m3": 8.0,
+   "kmPerL": 11.5,
+   "quotaL": 340,
+   "status": "available"
+  },
+  {
+   "id": "VEH038",
+   "type": "van",
+   "reefer": false,
+   "kg": 1200,
+   "m3": 9.0,
+   "kmPerL": 10.8,
+   "quotaL": 620,
+   "status": "available"
+  }
+ ],
+ "districts": {
+  "Colombo": {
+   "outMin": 24,
+   "stopMin": 8,
+   "outKm": 12.0,
+   "stopKm": 4.0
+  },
+  "Gampaha": {
+   "outMin": 37,
+   "stopMin": 9,
+   "outKm": 28.0,
+   "stopKm": 7.0
+  },
+  "Kalutara": {
+   "outMin": 64,
+   "stopMin": 12,
+   "outKm": 48.0,
+   "stopKm": 9.0
+  },
+  "Galle": {
+   "outMin": 103,
+   "stopMin": 9,
+   "outKm": 120.0,
+   "stopKm": 10.0
+  },
+  "Matara": {
+   "outMin": 137,
+   "stopMin": 10,
+   "outKm": 160.0,
+   "stopKm": 12.0
+  },
+  "Kurunegala": {
+   "outMin": 127,
+   "stopMin": 19,
+   "outKm": 95.0,
+   "stopKm": 14.0
+  },
+  "Puttalam": {
+   "outMin": 173,
+   "stopMin": 24,
+   "outKm": 130.0,
+   "stopKm": 18.0
+  },
+  "Kandy": {
+   "outMin": 16,
+   "stopMin": 6,
+   "outKm": 8.0,
+   "stopKm": 3.0
+  },
+  "Matale": {
+   "outMin": 35,
+   "stopMin": 11,
+   "outKm": 26.0,
+   "stopKm": 8.0
+  },
+  "Nuwara Eliya": {
+   "outMin": 111,
+   "stopMin": 20,
+   "outKm": 78.0,
+   "stopKm": 14.0
+  },
+  "Badulla": {
+   "outMin": 186,
+   "stopMin": 23,
+   "outKm": 130.0,
+   "stopKm": 16.0
+  },
+  "Kegalle": {
+   "outMin": 53,
+   "stopMin": 13,
+   "outKm": 40.0,
+   "stopKm": 10.0
+  }
+ },
+ "allowance": {
+  "Fresh|rear_dock": 15,
+  "Fresh|street": 16,
+  "Fresh|mall_bay": 18,
+  "Style|rear_dock": 38,
+  "Style|street": 46,
+  "Style|mall_bay": 59,
+  "Tech|rear_dock": 43,
+  "Tech|street": 55,
+  "Tech|mall_bay": 55
+ },
+ "plans": {
+  "fair": {
+   "S1-000": {
+    "vehicle": "VEH036",
+    "trip": 2
+   },
+   "S1-001": {
+    "vehicle": "VEH036",
+    "trip": 2
+   },
+   "S1-002": {
+    "vehicle": "VEH038",
+    "trip": 2
+   },
+   "S1-003": null,
+   "S1-004": {
+    "vehicle": "VEH038",
+    "trip": 2
+   },
+   "S1-005": {
+    "vehicle": "VEH036",
+    "trip": 2
+   },
+   "S1-006": {
+    "vehicle": "VEH011",
+    "trip": 1
+   },
+   "S1-007": {
+    "vehicle": "VEH007",
+    "trip": 2
+   },
+   "S1-008": {
+    "vehicle": "VEH011",
+    "trip": 1
+   },
+   "S1-009": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-010": {
+    "vehicle": "VEH009",
+    "trip": 1
+   },
+   "S1-011": {
+    "vehicle": "VEH025",
+    "trip": 1
+   },
+   "S1-012": {
+    "vehicle": "VEH007",
+    "trip": 2
+   },
+   "S1-013": {
+    "vehicle": "VEH009",
+    "trip": 1
+   },
+   "S1-014": {
+    "vehicle": "VEH007",
+    "trip": 2
+   },
+   "S1-015": {
+    "vehicle": "VEH030",
+    "trip": 2
+   },
+   "S1-016": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-017": {
+    "vehicle": "VEH009",
+    "trip": 1
+   },
+   "S1-018": {
+    "vehicle": "VEH009",
+    "trip": 1
+   },
+   "S1-019": {
+    "vehicle": "VEH009",
+    "trip": 1
+   },
+   "S1-020": {
+    "vehicle": "VEH011",
+    "trip": 1
+   },
+   "S1-021": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-022": {
+    "vehicle": "VEH030",
+    "trip": 2
+   },
+   "S1-023": {
+    "vehicle": "VEH032",
+    "trip": 1
+   },
+   "S1-024": {
+    "vehicle": "VEH031",
+    "trip": 2
+   },
+   "S1-025": {
+    "vehicle": "VEH032",
+    "trip": 1
+   },
+   "S1-026": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-027": {
+    "vehicle": "VEH018",
+    "trip": 2
+   },
+   "S1-028": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-029": {
+    "vehicle": "VEH018",
+    "trip": 2
+   },
+   "S1-030": {
+    "vehicle": "VEH033",
+    "trip": 1
+   },
+   "S1-031": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-032": {
+    "vehicle": "VEH011",
+    "trip": 2
+   },
+   "S1-033": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-034": {
+    "vehicle": "VEH015",
+    "trip": 2
+   },
+   "S1-035": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-036": {
+    "vehicle": "VEH018",
+    "trip": 2
+   },
+   "S1-037": {
+    "vehicle": "VEH011",
+    "trip": 2
+   },
+   "S1-038": {
+    "vehicle": "VEH003",
+    "trip": 1
+   },
+   "S1-039": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-040": {
+    "vehicle": "VEH033",
+    "trip": 1
+   },
+   "S1-041": {
+    "vehicle": "VEH003",
+    "trip": 1
+   },
+   "S1-042": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-043": {
+    "vehicle": "VEH019",
+    "trip": 1
+   },
+   "S1-044": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-045": {
+    "vehicle": "VEH019",
+    "trip": 1
+   },
+   "S1-046": {
+    "vehicle": "VEH007",
+    "trip": 1
+   },
+   "S1-047": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-048": {
+    "vehicle": "VEH007",
+    "trip": 1
+   },
+   "S1-049": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-050": {
+    "vehicle": "VEH019",
+    "trip": 1
+   },
+   "S1-051": {
+    "vehicle": "VEH007",
+    "trip": 1
+   },
+   "S1-052": {
+    "vehicle": "VEH029",
+    "trip": 2
+   },
+   "S1-053": {
+    "vehicle": "VEH029",
+    "trip": 2
+   },
+   "S1-054": {
+    "vehicle": "VEH029",
+    "trip": 2
+   },
+   "S1-055": {
+    "vehicle": "VEH036",
+    "trip": 1
+   },
+   "S1-056": {
+    "vehicle": "VEH036",
+    "trip": 1
+   },
+   "S1-057": {
+    "vehicle": "VEH029",
+    "trip": 2
+   },
+   "S1-058": null,
+   "S1-059": {
+    "vehicle": "VEH029",
+    "trip": 2
+   },
+   "S1-060": {
+    "vehicle": "VEH013",
+    "trip": 2
+   },
+   "S1-061": {
+    "vehicle": "VEH013",
+    "trip": 2
+   },
+   "S1-062": {
+    "vehicle": "VEH013",
+    "trip": 1
+   },
+   "S1-063": {
+    "vehicle": "VEH013",
+    "trip": 1
+   },
+   "S1-064": null,
+   "S1-065": {
+    "vehicle": "VEH032",
+    "trip": 2
+   },
+   "S1-066": {
+    "vehicle": "VEH020",
+    "trip": 2
+   },
+   "S1-067": null,
+   "S1-068": {
+    "vehicle": "VEH024",
+    "trip": 2
+   },
+   "S1-069": {
+    "vehicle": "VEH010",
+    "trip": 2
+   },
+   "S1-070": {
+    "vehicle": "VEH015",
+    "trip": 1
+   },
+   "S1-071": null,
+   "S1-072": {
+    "vehicle": "VEH018",
+    "trip": 1
+   },
+   "S1-073": null,
+   "S1-074": {
+    "vehicle": "VEH015",
+    "trip": 1
+   },
+   "S1-075": null,
+   "S1-076": {
+    "vehicle": "VEH015",
+    "trip": 1
+   },
+   "S1-077": {
+    "vehicle": "VEH008",
+    "trip": 2
+   },
+   "S1-078": null,
+   "S1-079": {
+    "vehicle": "VEH028",
+    "trip": 1
+   },
+   "S1-080": {
+    "vehicle": "VEH033",
+    "trip": 2
+   },
+   "S1-081": {
+    "vehicle": "VEH017",
+    "trip": 2
+   },
+   "S1-082": {
+    "vehicle": "VEH010",
+    "trip": 1
+   },
+   "S1-083": {
+    "vehicle": "VEH003",
+    "trip": 2
+   },
+   "S1-084": {
+    "vehicle": "VEH010",
+    "trip": 1
+   }
+  },
+  "veh003Down": {
+   "S1-000": {
+    "vehicle": "VEH036",
+    "trip": 2
+   },
+   "S1-001": {
+    "vehicle": "VEH036",
+    "trip": 2
+   },
+   "S1-002": {
+    "vehicle": "VEH037",
+    "trip": 1
+   },
+   "S1-003": null,
+   "S1-004": {
+    "vehicle": "VEH037",
+    "trip": 1
+   },
+   "S1-005": {
+    "vehicle": "VEH036",
+    "trip": 2
+   },
+   "S1-006": {
+    "vehicle": "VEH028",
+    "trip": 1
+   },
+   "S1-007": null,
+   "S1-008": {
+    "vehicle": "VEH013",
+    "trip": 1
+   },
+   "S1-009": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-010": {
+    "vehicle": "VEH010",
+    "trip": 1
+   },
+   "S1-011": {
+    "vehicle": "VEH025",
+    "trip": 2
+   },
+   "S1-012": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-013": {
+    "vehicle": "VEH010",
+    "trip": 1
+   },
+   "S1-014": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-015": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-016": {
+    "vehicle": "VEH006",
+    "trip": 2
+   },
+   "S1-017": {
+    "vehicle": "VEH032",
+    "trip": 2
+   },
+   "S1-018": {
+    "vehicle": "VEH032",
+    "trip": 2
+   },
+   "S1-019": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-020": {
+    "vehicle": "VEH015",
+    "trip": 2
+   },
+   "S1-021": null,
+   "S1-022": {
+    "vehicle": "VEH024",
+    "trip": 1
+   },
+   "S1-023": {
+    "vehicle": "VEH011",
+    "trip": 1
+   },
+   "S1-024": {
+    "vehicle": "VEH011",
+    "trip": 1
+   },
+   "S1-025": {
+    "vehicle": "VEH011",
+    "trip": 1
+   },
+   "S1-026": {
+    "vehicle": "VEH020",
+    "trip": 1
+   },
+   "S1-027": {
+    "vehicle": "VEH014",
+    "trip": 2
+   },
+   "S1-028": {
+    "vehicle": "VEH007",
+    "trip": 1
+   },
+   "S1-029": {
+    "vehicle": "VEH027",
+    "trip": 1
+   },
+   "S1-030": {
+    "vehicle": "VEH014",
+    "trip": 2
+   },
+   "S1-031": {
+    "vehicle": "VEH007",
+    "trip": 1
+   },
+   "S1-032": {
+    "vehicle": "VEH034",
+    "trip": 2
+   },
+   "S1-033": null,
+   "S1-034": {
+    "vehicle": "VEH014",
+    "trip": 2
+   },
+   "S1-035": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-036": {
+    "vehicle": "VEH014",
+    "trip": 2
+   },
+   "S1-037": {
+    "vehicle": "VEH017",
+    "trip": 2
+   },
+   "S1-038": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-039": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-040": {
+    "vehicle": "VEH033",
+    "trip": 2
+   },
+   "S1-041": {
+    "vehicle": "VEH006",
+    "trip": 1
+   },
+   "S1-042": {
+    "vehicle": "VEH011",
+    "trip": 2
+   },
+   "S1-043": {
+    "vehicle": "VEH015",
+    "trip": 1
+   },
+   "S1-044": {
+    "vehicle": "VEH028",
+    "trip": 2
+   },
+   "S1-045": {
+    "vehicle": "VEH011",
+    "trip": 2
+   },
+   "S1-046": {
+    "vehicle": "VEH036",
+    "trip": 1
+   },
+   "S1-047": {
+    "vehicle": "VEH011",
+    "trip": 2
+   },
+   "S1-048": null,
+   "S1-049": {
+    "vehicle": "VEH019",
+    "trip": 2
+   },
+   "S1-050": {
+    "vehicle": "VEH015",
+    "trip": 1
+   },
+   "S1-051": null,
+   "S1-052": {
+    "vehicle": "VEH032",
+    "trip": 1
+   },
+   "S1-053": {
+    "vehicle": "VEH025",
+    "trip": 1
+   },
+   "S1-054": {
+    "vehicle": "VEH025",
+    "trip": 1
+   },
+   "S1-055": {
+    "vehicle": "VEH032",
+    "trip": 1
+   },
+   "S1-056": null,
+   "S1-057": {
+    "vehicle": "VEH025",
+    "trip": 1
+   },
+   "S1-058": null,
+   "S1-059": {
+    "vehicle": "VEH032",
+    "trip": 1
+   },
+   "S1-060": {
+    "vehicle": "VEH029",
+    "trip": 1
+   },
+   "S1-061": {
+    "vehicle": "VEH029",
+    "trip": 1
+   },
+   "S1-062": {
+    "vehicle": "VEH019",
+    "trip": 1
+   },
+   "S1-063": {
+    "vehicle": "VEH034",
+    "trip": 1
+   },
+   "S1-064": null,
+   "S1-065": {
+    "vehicle": "VEH024",
+    "trip": 2
+   },
+   "S1-066": {
+    "vehicle": "VEH024",
+    "trip": 2
+   },
+   "S1-067": null,
+   "S1-068": {
+    "vehicle": "VEH030",
+    "trip": 2
+   },
+   "S1-069": {
+    "vehicle": "VEH017",
+    "trip": 1
+   },
+   "S1-070": {
+    "vehicle": "VEH020",
+    "trip": 2
+   },
+   "S1-071": null,
+   "S1-072": {
+    "vehicle": "VEH038",
+    "trip": 1
+   },
+   "S1-073": null,
+   "S1-074": {
+    "vehicle": "VEH030",
+    "trip": 1
+   },
+   "S1-075": null,
+   "S1-076": {
+    "vehicle": "VEH038",
+    "trip": 1
+   },
+   "S1-077": {
+    "vehicle": "VEH030",
+    "trip": 1
+   },
+   "S1-078": null,
+   "S1-079": {
+    "vehicle": "VEH010",
+    "trip": 2
+   },
+   "S1-080": {
+    "vehicle": "VEH038",
+    "trip": 2
+   },
+   "S1-081": {
+    "vehicle": "VEH027",
+    "trip": 2
+   },
+   "S1-082": {
+    "vehicle": "VEH033",
+    "trip": 1
+   },
+   "S1-083": {
+    "vehicle": "VEH007",
+    "trip": 2
+   },
+   "S1-084": {
+    "vehicle": "VEH018",
+    "trip": 1
+   }
+  }
+ },
+ "outlook": {
+  "weeks": [
+   {
+    "week": 14,
+    "total": 1015.8,
+    "chilled": 386.0,
+    "other": 172.9,
+    "flags": [
+     "Payday"
+    ],
+    "from": "2026-03-30"
+   },
+   {
+    "week": 15,
+    "total": 1351.0,
+    "chilled": 501.0,
+    "other": 254.4,
+    "flags": [],
+    "from": "2026-04-06"
+   },
+   {
+    "week": 16,
+    "total": 623.5,
+    "chilled": 231.2,
+    "other": 122.8,
+    "flags": [
+     "Sinhala & Tamil New Year"
+    ],
+    "from": "2026-04-13"
+   },
+   {
+    "week": 17,
+    "total": 960.8,
+    "chilled": 365.7,
+    "other": 185.2,
+    "flags": [
+     "Payday"
+    ],
+    "from": "2026-04-20"
+   },
+   {
+    "week": 18,
+    "total": 810.9,
+    "chilled": 308.6,
+    "other": 138.4,
+    "flags": [
+     "Payday",
+     "Vesak"
+    ],
+    "from": "2026-04-27"
+   },
+   {
+    "week": 19,
+    "total": 1054.3,
+    "chilled": 399.9,
+    "other": 169.0,
+    "flags": [],
+    "from": "2026-05-04"
+   },
+   {
+    "week": 20,
+    "total": 1004.6,
+    "chilled": 381.2,
+    "other": 148.9,
+    "flags": [],
+    "from": "2026-05-11"
+   },
+   {
+    "week": 21,
+    "total": 962.8,
+    "chilled": 361.2,
+    "other": 143.1,
+    "flags": [],
+    "from": "2026-05-18"
+   },
+   {
+    "week": 22,
+    "total": 983.7,
+    "chilled": 374.6,
+    "other": 159.3,
+    "flags": [
+     "Payday",
+     "Poson"
+    ],
+    "from": "2026-05-25"
+   },
+   {
+    "week": 23,
+    "total": 1023.6,
+    "chilled": 392.1,
+    "other": 173.4,
+    "flags": [],
+    "from": "2026-06-01"
+   }
+  ],
+  "byDepot": {
+   "Peliyagoda": [
+    {
+     "week": 14,
+     "total": 1015.8,
+     "chilled": 386.0,
+     "other": 172.9,
+     "flags": [
+      "Payday"
+     ],
+     "from": "2026-03-30"
+    },
+    {
+     "week": 15,
+     "total": 1351.0,
+     "chilled": 501.0,
+     "other": 254.4,
+     "flags": [],
+     "from": "2026-04-06"
+    },
+    {
+     "week": 16,
+     "total": 623.5,
+     "chilled": 231.2,
+     "other": 122.8,
+     "flags": [
+      "Sinhala & Tamil New Year"
+     ],
+     "from": "2026-04-13"
+    },
+    {
+     "week": 17,
+     "total": 960.8,
+     "chilled": 365.7,
+     "other": 185.2,
+     "flags": [
+      "Payday"
+     ],
+     "from": "2026-04-20"
+    },
+    {
+     "week": 18,
+     "total": 810.9,
+     "chilled": 308.6,
+     "other": 138.4,
+     "flags": [
+      "Payday",
+      "Vesak"
+     ],
+     "from": "2026-04-27"
+    },
+    {
+     "week": 19,
+     "total": 1054.3,
+     "chilled": 399.9,
+     "other": 169.0,
+     "flags": [],
+     "from": "2026-05-04"
+    },
+    {
+     "week": 20,
+     "total": 1004.6,
+     "chilled": 381.2,
+     "other": 148.9,
+     "flags": [],
+     "from": "2026-05-11"
+    },
+    {
+     "week": 21,
+     "total": 962.8,
+     "chilled": 361.2,
+     "other": 143.1,
+     "flags": [],
+     "from": "2026-05-18"
+    },
+    {
+     "week": 22,
+     "total": 983.7,
+     "chilled": 374.6,
+     "other": 159.3,
+     "flags": [
+      "Payday",
+      "Poson"
+     ],
+     "from": "2026-05-25"
+    },
+    {
+     "week": 23,
+     "total": 1023.6,
+     "chilled": 392.1,
+     "other": 173.4,
+     "flags": [],
+     "from": "2026-06-01"
+    }
+   ],
+   "Kandy": [
+    {
+     "week": 14,
+     "total": 523.7,
+     "chilled": 190.3,
+     "other": 104.7,
+     "flags": [
+      "Payday"
+     ]
+    },
+    {
+     "week": 15,
+     "total": 696.8,
+     "chilled": 260.2,
+     "other": 163.4,
+     "flags": []
+    },
+    {
+     "week": 16,
+     "total": 334.3,
+     "chilled": 126.5,
+     "other": 70.3,
+     "flags": [
+      "Sinhala & Tamil New Year"
+     ]
+    },
+    {
+     "week": 17,
+     "total": 516.2,
+     "chilled": 193.8,
+     "other": 90.7,
+     "flags": [
+      "Payday"
+     ]
+    },
+    {
+     "week": 18,
+     "total": 414.9,
+     "chilled": 154.9,
+     "other": 54.3,
+     "flags": [
+      "Payday",
+      "Vesak"
+     ]
+    },
+    {
+     "week": 19,
+     "total": 580.0,
+     "chilled": 215.3,
+     "other": 103.9,
+     "flags": []
+    },
+    {
+     "week": 20,
+     "total": 495.0,
+     "chilled": 185.1,
+     "other": 81.3,
+     "flags": []
+    },
+    {
+     "week": 21,
+     "total": 479.0,
+     "chilled": 179.8,
+     "other": 95.4,
+     "flags": []
+    },
+    {
+     "week": 22,
+     "total": 522.2,
+     "chilled": 195.4,
+     "other": 117.1,
+     "flags": [
+      "Payday",
+      "Poson"
+     ]
+    },
+    {
+     "week": 23,
+     "total": 537.3,
+     "chilled": 201.9,
+     "other": 93.2,
+     "flags": []
+    }
+   ]
+  },
+  "reeferWeekM3": 2490.0,
+  "basis": "Same weeks in 2025 (baseline until our demand model is ready)"
+ }
+}
