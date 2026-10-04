@@ -712,9 +712,23 @@ export function Deferrals() {
   const { planEdits, published } = useApp();
   const nav = useNavigate();
   const manual = (ref) => [...planEdits].reverse().find((e) => e.ref === ref && !e.to);
-  const [sel, setSel] = useState(plan.deferred[0]?.ref);
-  const o = byRef[sel];
-  const reeferTrip = districts[o.district].outMin;
+  const [picked, setSel] = useState(null);
+  // The chosen order, or the first one (the list changes when the plan does).
+  const sel = plan.deferred.some((d) => d.ref === picked) ? picked : plan.deferred[0]?.ref;
+  const o = plan.deferred.find((d) => d.ref === sel);
+  const reeferTrip = o && districts[o.district]?.outMin;
+  if (!o) {
+    return (
+      <DeskShell peakOnly nav={useDispatchNav()} title="Deferrals" subtitle="Every deferral has a reason, a type, and a notice to the store">
+        <div className="panel" style={{ maxWidth: 720 }}>
+          <div className="card-title"><Check size={18} color="var(--done)" /> No deferred orders</div>
+          <p className="muted" style={{ margin: "8px 0 0", lineHeight: 1.6 }}>
+            {orders.length ? `Every order of this run (${formatDate(RUN_DATE)}) is on a truck.` : `No orders for this run (${formatDate(RUN_DATE)}) yet. Orders appear as stores place them.`}
+          </p>
+        </div>
+      </DeskShell>
+    );
+  }
   return (
     <DeskShell peakOnly nav={useDispatchNav()} title="Deferrals" subtitle="Every deferral has a reason, a type, and a notice to the store"
       actions={<><button className="btn secondary" onClick={() => nav("/dispatch/plan", { state: { select: sel } })}>Serve this order instead…</button><button className="btn primary" onClick={() => nav("/dispatch/plan")}>{published ? <><Check size={16} /> Sent with the plan</> : "Review and publish"}</button></>}>
@@ -727,7 +741,7 @@ export function Deferrals() {
                 {plan.deferred.map((d) => (
                   <tr key={d.ref} className={`click ${sel === d.ref ? "sel" : ""}`} onClick={() => setSel(d.ref)}>
                     <td><b>{d.outlet}</b><div className="muted xs">{d.ref} · {d.brand}</div></td><td>{d.district}</td><td>{d.chilled ? "❄" : "dry"}</td><td>{round1(d.m3)}</td>
-                    <td>{manual(d.ref)?.reason || d.reason}</td><td>{manual(d.ref) ? <span className="tag brinjal">Chosen by {manual(d.ref).by}</span> : d.kind === "Unavoidable" ? <Chip kind="planned">Unavoidable</Chip> : <Chip kind="deferred">Capacity</Chip>}</td>
+                    <td>{manual(d.ref)?.reason || d.reason}</td><td>{manual(d.ref) ? <span className="tag brinjal">Chosen by {manual(d.ref).by}</span> : d.reason === "Not planned yet" ? <span className="tag">Run Auto-plan</span> : d.kind === "Unavoidable" ? <Chip kind="planned">Unavoidable</Chip> : <Chip kind="deferred">Capacity</Chip>}</td>
                     <td>{published ? <span className="tag ok"><Check size={12} /> Told · SMS</span> : <span className="tag">Told when published</span>}</td>
                   </tr>
                 ))}
@@ -744,10 +758,11 @@ export function Deferrals() {
               <li><AlertTriangle size={18} color="var(--problem)" /> {round1(o.m3)} m³ is bigger than our largest truck ({MAX_TRUCK_M3} m³). Orders can't be split across trucks, so the store is asked to send it as 2 orders.</li>
             ) : (
               <>
-                <li><Snowflake size={18} color="var(--way)" /> Chilled: needs a reefer, and all {REEFER_TRIPS.possible} reefer trips are used</li>
+                <li><Info size={18} color="var(--muted)" /> {manual(o.ref)?.reason || o.reason || "No truck has room"}</li>
+                {o.chilled && <li><Snowflake size={18} color="var(--way)" /> Chilled: it can only go on a reefer{IS_S1 ? `, and all ${REEFER_TRIPS.possible} reefer trips are used` : ""}</li>}
                 <li><ShieldCheck size={18} color="var(--muted)" /> Skipped yesterday: <b>{o.deferredYesterday ? "Yes" : "No"}</b></li>
                 <li><CalendarRange size={18} color="var(--muted)" /> Days since last delivery: <b>{o.daysSince}</b></li>
-                <li><Timer size={18} color="var(--muted)" /> {o.district} is {reeferTrip} min from the depot, so a trip there uses much of a reefer's 270-minute morning</li>
+                {o.chilled && reeferTrip && <li><Timer size={18} color="var(--muted)" /> {o.district} is {reeferTrip} min from the depot, so a trip there uses much of a reefer's 270-minute morning</li>}
               </>
             )}
           </ul>
@@ -756,7 +771,7 @@ export function Deferrals() {
             <div className="section-label" style={{ margin: 0 }}>What happens</div>
             <p className="small" style={{ margin: "6px 0 0", lineHeight: 1.6 }}>{consequence(o)}</p>
           </div>
-          <p className="muted small" style={{ marginTop: 12 }}>Our best plans all leave 7 chilled orders waiting today. We chose which 7 so that no shop waits twice. Deferrals are sent to stores together with the plan when you publish.</p>
+          {IS_S1 && <p className="muted small" style={{ marginTop: 12 }}>Our best plans all leave 7 chilled orders waiting today. We chose which 7 so that no shop waits twice. Deferrals are sent to stores together with the plan when you publish.</p>}
         </div>
       </div>
     </DeskShell>
