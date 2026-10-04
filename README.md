@@ -54,7 +54,7 @@ All settings are environment variables; see [.env.example](.env.example).
 |---|---|---|
 | `DATABASE_URL` | set by compose | PostgreSQL connection |
 | `JWT_SECRET` | `change-me-in-production` | signs session tokens: set a long random value |
-| `DEMO_MODE` | `true` | the shared demo clock, the bad days portal and "Reset demo day". `false` = a real deployment (no one can move the clock) |
+| `DEMO_MODE` | `true` | the bad days portal and "Reset demo day" (Admin). `false` = a real deployment without them |
 | `SEED_PASSWORD` / `SEED_PIN` | `waypoint@mr2026` | password for all seeded accounts (change and restart to update them) |
 | `PORT` | `8080` | port of the app |
 | `CORS_ORIGIN` | `*` | allowed origins when the app is hosted separately |
@@ -106,7 +106,7 @@ password the same way. Everyone can change their own password or PIN on their pr
 
 Every portal follows one clock. It **keeps running** like a real clock. Only the **dispatcher** can change it, in the
 **date and time** menu at the top right of Orders or the Live board: *Use real time* (Sri Lanka time), set any date
-and time (it runs on from there), or jump to a step of the S1 day. The seeded orders belong to the S1 day (Thu 8 Jan
+and time (it runs on from there). The seeded orders belong to the S1 day (Thu 8 Jan
 2026), so the walkthrough uses those steps.
 
 ---
@@ -132,9 +132,8 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Loader, at the dock (Thu 8 Jan 03:00)**
 
-5. Move the day forward: in the dispatcher's window, click the **date and time** at the top right → *03:00 · Loading at
-   the dock*. Every portal follows the
-   shared clock.
+5. Move the day forward: in the dispatcher's window, click the **date and time** at the top right, set **8 Jan 2026,
+   03:00** → **Set this time** (loading at the dock). Every portal follows the shared clock.
 6. In a phone-sized window, sign in as `DEPOT-PELIYAGODA` / `waypoint@mr2026`. **Home** shows the next load. Open
    **Today's loads** → **VEH003** → tap **Suresh** ("Who is loading VEH003?"). The dispatcher's bell shows
    *Loading started*.
@@ -143,7 +142,7 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Driver, on the road (05:30)**
 
-8. **Dispatcher's date and time → 05:30 · Trucks on the road.** Sign in as `WP-DRV-003` / `waypoint@mr2026` in a phone-sized window (the
+8. **Dispatcher's date and time → 8 Jan 2026, 05:30 → Set this time** (trucks on the road). Sign in as `WP-DRV-003` / `waypoint@mr2026` in a phone-sized window (the
    screens are in Sinhala for Ruwan; tap **EN** at the top for English). The trip shows *Loaded by Suresh*.
 9. **Start run · Trip 1** → the route map opens inside the app → **I've arrived · OUT074** → **All given** → **Take
    photo** → **Sign here** → **Slide to finish**. The dispatcher's **Live board** shows the stop done.
@@ -152,7 +151,7 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Store manager, receiving (08:00)**
 
-11. **Dispatcher's date and time → 08:00 · Stores receive.** Sign in as `STORE-OUT074` / `waypoint@mr2026`. **Deliveries** shows the
+11. **Dispatcher's date and time → 8 Jan 2026, 08:00 → Set this time** (stores receive). Sign in as `STORE-OUT074` / `waypoint@mr2026`. **Deliveries** shows the
     chilled order delivered with the driver's proof (time, receiver, photo, signature).
 12. **Check delivery** → **Everything is OK ✓** (or report missing, damaged or warm cases with a photo; it goes to
     the dispatcher). That completes the order's journey.
@@ -167,7 +166,7 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
       truck for chilled goods, and every store sees its new truck and time.
     - **Dead Zone**: the VEH010 driver loses signal, records the delivery offline, the store says "not delivered",
       the dispatcher sees the truck as offline (not lost), and the proof syncs when the signal returns.
-14. **Reset demo day** (in the dispatcher's date and time menu, or on the Admin page) puts the seeded day back to the
+14. **Reset demo day** (on the Admin page, signed in as `WP-ADM-001`) puts the seeded day back to the
     start for the next judge.
 
 ---

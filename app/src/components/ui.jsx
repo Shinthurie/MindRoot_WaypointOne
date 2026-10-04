@@ -519,14 +519,6 @@ function ClockBadge() {
 }
 
 /* The S1 day, step by step (judge walkthrough): orders close, plan, load, on the road, receipt. */
-export const TIMELINE = [
-  ["Store orders close", "2026-01-07", "15:30"],
-  ["Plan and publish", "2026-01-07", "19:00"],
-  ["Loading at the dock", "2026-01-08", "03:00"],
-  ["Trucks on the road", "2026-01-08", "05:30"],
-  ["Stores receive", "2026-01-08", "08:00"],
-];
-
 /* The dispatcher's clock menu: the time every portal follows. A set time keeps running from that moment;
    "Use real time" follows Sri Lanka time. Only the dispatcher sees this (and the server allows only them). */
 export function DayPill() {
@@ -557,16 +549,7 @@ export function DayPill() {
               <input type="time" className="input" style={{ height: 40, maxWidth: 120 }} value={time} onChange={(e) => setTime(e.target.value)} aria-label="Time" />
             </div>
             <button className="btn secondary" style={{ minHeight: 38 }} disabled={!date || !time} onClick={() => set({ date, time })}>Set this time</button>
-            <div className="field-label" style={{ marginTop: 2 }}>Jump to a step of the S1 day</div>
-            <div className="col" style={{ gap: 6 }}>
-              {TIMELINE.map(([label, d, tm]) => (
-                <button key={label} className="option" style={{ padding: "8px 10px" }} onClick={() => set({ date: d, time: tm })}>
-                  <b className="small">{formatDate(d)} · {tm}</b> <span className="muted small">{label}</span>
-                </button>
-              ))}
-            </div>
             <div className="muted xs">Every portal follows this clock, and it keeps running from the time you set.</div>
-            <button className="btn secondary" style={{ minHeight: 38 }} onClick={() => { if (window.confirm("Reset the demo day? Everything done today (plan, loading, deliveries, reports) goes back to the start for everyone.")) { dispatch({ type: "reset" }); setOpen(false); } }}>Reset demo day</button>
           </div>
         </>
       )}
