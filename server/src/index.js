@@ -79,7 +79,8 @@ app.get("/api/commands", requireAuth, requireRole("admin", "dispatcher"), wrap(a
 // ---------- Planning ----------
 app.post("/api/plan/auto", requireAuth, requireRole("dispatcher", "demo"), wrap(async (req, res) => {
   const state = await current(DAY);
-  const r = await runEngine(DAY, state, req.body?.tries ? { tries: Math.min(Number(req.body.tries), 2000) } : {});
+  const without = typeof req.body?.without === "string" ? req.body.without : null;
+  const r = await runEngine(DAY, state, { ...(req.body?.tries ? { tries: Math.min(Number(req.body.tries), 2000) } : {}), without });
   const planId = await savePlan(DAY, "engine", req.user.id, r, state.runDate || null);
   res.json({ planId, ...r });
 }));

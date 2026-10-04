@@ -68,6 +68,7 @@ export function effectiveAlloc(state) {
    150 tries reach the best plan on S1 (measured); more add time, not quality. */
 const engineCache = new Map();
 export async function runEngine(dayId, state, opts = {}) {
+  if (opts.without) return replanWithout(dayId, state, opts.without);
   const d = await loadDay(dayId);
   const vehicles = availableVehicles(d, state);
   const orders = ordersWithRules(d, state);
@@ -84,9 +85,32 @@ export async function runEngine(dayId, state, opts = {}) {
   return out;
 }
 
+/* An order whose stop is already delivered is done: it is not planned or checked again. */
+const isDone = (state, alloc, o) => !!(alloc[o.ref] && state?.delivered?.[`${alloc[o.ref].vehicle}:${o.outlet}`]);
+
+/* A truck broke down (cooling, engine, tyre): plan again without it. Every other truck keeps its orders; the engine
+   finds room for the broken truck's orders that are not delivered yet, or defers them with a reason. */
+async function replanWithout(dayId, state, vid) {
+  const d = await loadDay(dayId);
+  const vehicles = availableVehicles(d, state).filter((v) => v.id !== vid);
+  const current = effectiveAlloc(state);
+  const orders = ordersWithRules(d, state);
+  const all = orders.filter((o) => !isDone(state, current, o));
+  // The broken truck's stops already delivered stay in the plan as they were.
+  const done = Object.fromEntries(orders.filter((o) => isDone(state, current, o)).map((o) => [o.ref, current[o.ref]]));
+  const locked = Object.fromEntries(all.filter((o) => current[o.ref] && current[o.ref].vehicle !== vid).map((o) => [o.ref, current[o.ref]]));
+  const fuelLeft = fuelFor(d, state);
+  const t0 = Date.now();
+  const result = d.planner.plan({ orders: all, vehicles, fuelLeft, locked }, { tries: 150 });
+  const check = d.planner.check({ orders: all, vehicles, alloc: result.alloc, fuelLeft });
+  const moved = all.filter((o) => current[o.ref]?.vehicle === vid).map((o) => ({ ref: o.ref, outlet: o.outlet, chilled: o.chilled, m3: o.m3, to: result.alloc[o.ref] || null, reason: result.reasons?.[o.ref]?.reason || null }));
+  return { ...result, alloc: { ...result.alloc, ...done }, check, moved, without: vid, ms: Date.now() - t0, vehicles: vehicles.length };
+}
+
 export async function checkAlloc(dayId, state, alloc = effectiveAlloc(state)) {
   const d = await loadDay(dayId);
-  return d.planner.check({ orders: ordersWithRules(d, state), vehicles: availableVehicles(d, state), alloc, fuelLeft: fuelFor(d, state) });
+  const orders = ordersWithRules(d, state).filter((o) => !isDone(state, alloc, o));
+  return d.planner.check({ orders, vehicles: availableVehicles(d, state), alloc, fuelLeft: fuelFor(d, state) });
 }
 
 /* Keep a record of every plan the engine produced (plans + plan_items). */

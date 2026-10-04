@@ -814,7 +814,12 @@ export function Live() {
   });
   if (scenario.reefer === "reported") problems.push({ key: "reefer", title: "Reefer Down", text: "VEH003 cooling failed at the gate · 3 orders from shops skipped yesterday on board", to: "/dispatch/incident/reefer" });
   if (scenario.reefer === "approved") problems.push({ key: "reefer-ok", title: "Reefer Down", text: `Re-plan approved${by("Reefer Down") ? ` by ${by("Reefer Down")}` : ""} · crates moved · stores notified`, ok: true });
-  driverReports.filter((r) => r.synced).forEach((r) => problems.push({
+  driverReports.filter((r) => r.synced).forEach((r) => problems.push(!r.outlet || r.kind === "vehicle" ? {
+    // The truck itself broke down: plan again without it.
+    key: r.id, ok: !!r.seenBy, title: `Truck problem · ${r.vehicle}`,
+    text: `${r.label}${r.outlet ? ` before ${r.outlet}` : ""} · ${r.at} by ${r.by}${r.seenBy ? ` · ${r.seenBy} re-planned without ${r.vehicle} at ${r.seenAt}` : " · its orders need another truck"}`,
+    to: r.seenBy ? null : `/dispatch/replan/${r.vehicle}`,
+  } : {
     key: r.id, ok: !!r.seenBy, title: `Driver report · ${r.vehicle}`,
     text: `${r.label} before ${r.outlet}${r.delayMin ? ` · about ${r.delayMin} min late, new time about ${r.newEta}` : ""} · ${r.at} by ${r.by}${r.storeText ? " · store told" : " · store not told"}${r.seenBy ? ` · seen by ${r.seenBy} ${r.seenAt}` : ""}`,
     driver: r.seenBy ? null : r,
@@ -1146,6 +1151,80 @@ export function TeamLog() {
               {!rows.length && <tr><td colSpan={4} className="muted" style={{ textAlign: "center", padding: 30 }}>No decisions yet.</td></tr>}
             </tbody>
           </table>
+        </div>
+      </div>
+    </DeskShell>
+  );
+}
+
+/* A truck broke down (the driver reported cooling, engine or tyre). The engine plans again without it: every other
+   truck keeps its orders, stops already delivered stay done, and the truck's other orders go to trucks with room or
+   are deferred with a reason. The dispatcher approves; the truck goes to the workshop and everyone sees the new plan. */
+export function Replan() {
+  const { veh } = useParams();
+  const { dispatch, user, setToast, fleetEdits, storeEdits, planAlloc, planEdits, delivered, driverReports } = useApp();
+  const nav = useNavigate();
+  const [r, setR] = useState(null);
+  const [err, setErr] = useState(null);
+  const report = driverReports.find((x) => x.vehicle === veh && (!x.outlet || x.kind === "vehicle") && !x.seenBy);
+  useEffect(() => {
+    let live = true;
+    autoPlan({ fleetEdits, storeEdits, without: veh, planAlloc, planEdits, delivered })
+      .then((x) => live && setR(x)).catch((e) => live && setErr(e.message || "The planning engine did not answer"));
+    return () => { live = false; };
+  }, [veh]); // eslint-disable-line react-hooks/exhaustive-deps
+  const moved = r?.moved || [];
+  const kept = moved.filter((m) => m.to), dropped = moved.filter((m) => !m.to);
+  const approve = () => {
+    const what = `Truck problem: re-planned without ${veh} · ${kept.length} of ${moved.length} orders moved to other trucks${dropped.length ? `, ${dropped.length} deferred` : ""}`;
+    dispatch({ type: "planSet", alloc: r.alloc, summary: r.summary, source: "engine", by: user.name, what });
+    dispatch({ type: "fleetStatus", vehicle: veh, change: { status: "in_workshop", back: null, by: user.name } });
+    for (const x of driverReports.filter((d) => d.vehicle === veh && (!d.outlet || d.kind === "vehicle") && !d.seenBy)) dispatch({ type: "driverReportSeen", id: x.id, by: user.name });
+    setToast({ text: `Re-plan approved · ${veh} to the workshop · loaders, drivers and stores see the new plan` });
+    nav("/dispatch/live");
+  };
+  return (
+    <DeskShell nav={useDispatchNav()} title={`Truck problem · ${veh}`} subtitle={report ? `${report.label} · ${report.at} · reported by ${report.by}` : "Re-plan without this truck"}>
+      <div className="two">
+        <div className="panel incident">
+          <div className="row" style={{ gap: 10, flexWrap: "wrap" }}><Chip kind="problem">Truck problem</Chip><span className="muted small">{veh} cannot carry on</span></div>
+          {!r && !err && <div className="card flat muted" style={{ marginTop: 14 }}><RotateCw size={16} /> The planning engine is re-planning without {veh}…</div>}
+          {err && <div className="banner problem" style={{ marginTop: 14 }}><AlertTriangle size={18} /> {err}</div>}
+          {r && (
+            <>
+              <h3 style={{ margin: "12px 0 4px", fontSize: 22 }}>{moved.length} order{moved.length === 1 ? "" : "s"} still to deliver on {veh}</h3>
+              <div className="card" style={{ marginTop: 14, background: "#fffaf0", borderColor: "#ffe08a" }}>
+                <div className="card-title"><Zap size={18} /> Re-plan without {veh}</div>
+                <div className="col" style={{ marginTop: 8 }}>
+                  <span><Check size={16} color="var(--done)" /> <b>{kept.length} of {moved.length}</b> moved to other trucks</span>
+                  <span><Lock size={16} /> Every other truck keeps its orders; delivered stops stay done</span>
+                  <span>{r.check?.ok ? <><ShieldCheck size={16} color="var(--done)" /> Every rule is met (capacity, chilled on reefers, windows, fuel)</> : <><AlertTriangle size={16} color="var(--problem)" /> {r.check?.errors?.[0]}</>}</span>
+                  {dropped.length > 0 && <span><RotateCw size={16} color="var(--deferred)" /> {dropped.length} deferred: no truck has room</span>}
+                </div>
+              </div>
+              <div className="section-label" style={{ marginTop: 16 }}>Moves</div>
+              {kept.map((m) => (
+                <div key={m.ref} className="row" style={{ padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
+                  <b>{m.outlet}</b><span className="muted">{m.ref}{m.chilled ? " ❄" : ""} · {round1(m.m3)} m³</span><ArrowRight size={16} /><b>{m.to.vehicle}</b>
+                </div>
+              ))}
+              {!moved.length && <div className="card flat muted">Nothing left on {veh}: send it to the workshop.</div>}
+              <div className="option locked" style={{ marginTop: 14 }}><b><Ban size={14} /> Put chilled goods on a dry truck</b><div className="muted small">Never offered: chilled goods need a reefer</div></div>
+              <div className="row" style={{ marginTop: 16, justifyContent: "flex-end" }}>
+                <button className="btn primary" disabled={!r.check?.ok} onClick={approve}>Approve re-plan &amp; notify everyone</button>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="panel">
+          <div className="card-title"><RotateCw size={18} /> Deferred ({dropped.length})</div>
+          {dropped.map((m) => (
+            <div key={m.ref} className="row between" style={{ padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
+              <span><b>{m.outlet}</b> <span className="muted small">{m.reason || "No truck has room"}</span></span><span className="small">{m.chilled ? "❄ " : ""}{round1(m.m3)} m³</span>
+            </div>
+          ))}
+          {!dropped.length && <div className="muted small">None: every order still goes out.</div>}
+          <div className="card flat small" style={{ marginTop: 12 }}><MessageSquare size={14} style={{ verticalAlign: "-2px" }} /> Stores see their new truck in the app. Deferred orders go first on the next run.</div>
         </div>
       </div>
     </DeskShell>

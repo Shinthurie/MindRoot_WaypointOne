@@ -179,7 +179,7 @@ export function reducer(s, a) {
     }
     // The dispatcher adopts a plan from the planning engine: it replaces the base plan and clears manual edits.
     case "planSet": return { ...s, planAlloc: a.alloc, planSource: { source: a.source || "engine", by: a.by, at: s.clock.time, summary: a.summary || null }, planEdits: [], stopOrders: {},
-      log: [{ at: s.clock.time, day: s.clock.date, who: a.by, role: "Dispatcher · Peliyagoda", what: `Used the engine plan: ${a.summary?.served ?? "?"} of ${a.summary?.orders ?? "?"} orders served, ${a.summary?.deferred ?? "?"} deferred` }, ...s.log] };
+      log: [{ at: s.clock.time, day: s.clock.date, who: a.by, role: "Dispatcher · Peliyagoda", what: a.what || `Used the engine plan: ${a.summary?.served ?? "?"} of ${a.summary?.orders ?? "?"} orders served, ${a.summary?.deferred ?? "?"} deferred` }, ...s.log] };
     case "loaderReport": {
       const id = `LR-${s.loaderReports.length + 1}`;
       const r = { ...a.report, id, at: s.clock.time };

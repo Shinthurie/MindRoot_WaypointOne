@@ -38,6 +38,8 @@ test("judge walkthrough across all four roles", async () => {
   const driver = await signIn("WP-DRV-003", config.seedPin);
   const store = await signIn("STORE-OUT074", config.seedPassword);
 
+  // The S1 reference day: the evening before (orders closed, plan not yet published).
+  await send(disp, { type: "clock", clock: { date: "2026-01-07", time: "19:00" } });
   // 1. Dispatcher runs the planning engine: every rule holds and every shop skipped yesterday is served.
   const plan = await call("/api/plan/auto", { token: disp, body: { tries: 60 } });
   assert.equal(plan.status, 200);
@@ -115,11 +117,14 @@ test("only a dispatcher sets the clock, and it keeps running", async () => {
   assert.equal((await call("/api/state", { token: disp })).body.state.clock.real, true);
 });
 
-test("no back doors: a demo session cannot be a real account", async () => {
+test("no back doors: no demo sessions, no reset in a real deployment", async () => {
   const r = await call("/api/auth/demo", { body: { role: "dispatcher", account: "WP-DSP-001" } });
   assert.equal(r.status, 403);
-  const portal = (await call("/api/auth/demo", { body: { role: "demo" } })).body;
-  assert.equal(portal.user.role, "demo");
+  const portal = await call("/api/auth/demo", { body: { role: "demo" } });
+  assert.equal(portal.status, 403, "DEMO_MODE is off by default");
+  const disp = await signIn("WP-DSP-001", config.seedPassword);
+  const reset = await send(disp, { type: "reset" });
+  assert.equal(reset.body.results[0].status, "rejected");
 });
 
 test("first sign-in with a temporary password, then a password change", async () => {
@@ -158,7 +163,6 @@ test("a real run: store orders on the clock's run are planned; unserved orders c
   const disp = await signIn("WP-DSP-001", config.seedPassword);
   const store = await signIn("STORE-OUT034", config.seedPassword);
   // Sunday 4 Oct 2026, 12:00: the current run is Monday 5 Oct.
-  await send(disp, { type: "reset" });
   await send(disp, { type: "clock", clock: { date: "2026-10-04", time: "12:00" } });
   let r = await send(store, { type: "storeOrder", order: { ref: "N-T1", outlet: "OUT034", name: "OUT034", dry: 84, cold: 192, by: "Fathima" } });
   assert.equal(r.body.results[0].status, "applied");
@@ -182,5 +186,32 @@ test("a real run: store orders on the clock's run are planned; unserved orders c
   assert.equal(st.runDate, "2026-10-06");
   assert.equal(st.published, false, "a new run starts unpublished");
   assert.deepEqual(st.carry.map((o) => [o.ref, o.deferredYesterday]), [["N-T1-C", true]]);
-  await send(disp, { type: "reset" });
+});
+
+test("a truck breaks down: re-plan without it keeps every other truck's orders", async () => {
+  const disp = await signIn("WP-DSP-001", config.seedPassword);
+  // Tuesday 17:00: orders for Wednesday's run.
+  await send(disp, { type: "clock", clock: { date: "2026-10-06", time: "17:00" } });
+  for (const [ref, outlet] of [["N-R1", "OUT034"], ["N-R2", "OUT026"], ["N-R3", "OUT074"]]) {
+    const store = await signIn(`STORE-${outlet}`, config.seedPassword);
+    const r = await send(store, { type: "storeOrder", order: { ref, outlet, name: outlet, dry: 60, cold: 40, by: "Store" } });
+    assert.equal(r.body.results[0].status, "applied");
+  }
+  const plan = (await call("/api/plan/auto", { token: disp, body: {} })).body;
+  let r = await send(disp, { type: "planSet", alloc: plan.alloc, summary: plan.summary, by: "Nimal" }, { type: "publish", by: "Nimal" });
+  assert.deepEqual(r.body.results.map((x) => x.status), ["applied", "applied"]);
+  const down = Object.values(plan.alloc).find(Boolean).vehicle;
+  const re = await call("/api/plan/auto", { token: disp, body: { without: down } });
+  assert.equal(re.status, 200, JSON.stringify(re.body));
+  assert.equal(re.body.check.ok, true);
+  assert.ok(Object.values(re.body.alloc).every((a) => !a || a.vehicle !== down), "nothing left on the broken truck");
+  for (const [ref, a] of Object.entries(plan.alloc)) if (a && a.vehicle !== down) assert.deepEqual(re.body.alloc[ref], a, `${ref} keeps its truck`);
+  assert.deepEqual(re.body.moved.map((m) => m.ref).sort(), Object.keys(plan.alloc).filter((k) => plan.alloc[k]?.vehicle === down).sort());
+  r = await send(disp, { type: "planSet", alloc: re.body.alloc, summary: re.body.summary, by: "Nimal", what: "re-plan" },
+    { type: "fleetStatus", vehicle: down, change: { status: "in_workshop", back: null, by: "Nimal" } });
+  assert.deepEqual(r.body.results.map((x) => x.status), ["applied", "applied"]);
+  const st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.published, true, "the plan stays published");
+  assert.equal(st.fleetEdits[down].status, "in_workshop");
+  assert.equal((await call("/api/plan/check", { token: disp })).body.ok, true);
 });

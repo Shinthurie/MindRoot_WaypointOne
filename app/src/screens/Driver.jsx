@@ -50,7 +50,7 @@ function TripTop({ back }) {
 
 /* Left panel on tablets, the whole screen on phones. */
 function TripList({ active }) {
-  const { t, scenario, loadedTrucks, planEdits, dispatch, stopProgress, online, user } = useApp();
+  const { t, fleetEdits, driverReports, loadedTrucks, planEdits, dispatch, stopProgress, online, user } = useApp();
   const nav = useNavigate();
   const clock = useClock();
   const [view, setView] = useState("list");
@@ -58,9 +58,11 @@ function TripList({ active }) {
   // Arrivals the driver recorded on this truck, by shop (the map puts the truck there).
   const arrivedMap = Object.fromEntries(Object.entries(stopProgress).filter(([k]) => k.startsWith(`${veh}:`)).map(([k, v]) => [k.split(":")[1], v]));
   const { changes, unseen } = useRouteChanges();
-  if (!t1) return <div className="body field"><div className="card flat muted">{t("nothingToLoad")}</div></div>;
+  // The dispatcher re-planned without this truck: its stops went to other trucks.
+  const cancelled = fleetEdits?.[veh]?.status === "in_workshop";
+  const workshop = cancelled && <div className="banner problem"><Wrench size={18} /> Trip moved to other trucks. Return {veh} to the workshop bay.</div>;
+  if (!t1) return <div className="body field">{workshop}<div className="card flat muted">{t("nothingToLoad")}</div></div>;
   const next = t1.stops.find((s) => !done(s));
-  const cancelled = scenario.reefer === "approved" && veh === "VEH003";
   const current = active ?? next?.n;
   const loaded = loadedTrucks[`${veh}:${t1.run}`];
   const last = changes[changes.length - 1];
@@ -73,8 +75,8 @@ function TripList({ active }) {
           <button className="btn secondary" style={{ minHeight: 34 }} onClick={() => dispatch({ type: "driverAck", vehicle: veh, count: changes.length })}>{t("gotIt")}</button>
         </div>
       )}
-      {cancelled && <div className="banner problem"><Wrench size={18} /> Trip moved to other trucks. Return {veh} to the workshop bay.</div>}
-      {scenario.reefer === "reported" && veh === "VEH003" && <div className="banner problem"><Thermometer size={18} /> Cooling problem reported · waiting for dispatcher</div>}
+      {workshop}
+      {!cancelled && driverReports.some((r) => r.vehicle === veh && !r.outlet && !r.seenBy) && <div className="banner problem"><Thermometer size={18} /> Truck problem reported · waiting for dispatcher</div>}
       <div className={`banner ${loaded ? "done" : "info"}`}><Package size={18} /> {loaded ? `${t("loadedBy")} ${loaded.by} · ${loaded.at}` : t("notLoaded")}</div>
       <div className="seg" role="tablist" aria-label={t("navTrip")}>
         <button role="tab" aria-selected={view === "list"} className={view === "list" ? "on" : ""} onClick={() => setView("list")}><ListIcon size={16} /> {t("listView")}</button>
@@ -279,12 +281,12 @@ function AllDonePanel() {
 }
 
 function DriverTripScreen() {
-  const { t, scenario } = useApp();
+  const { t, fleetEdits } = useApp();
   const nav = useNavigate();
   const layout = useLayout();
   const { t1, done, veh } = useTrip();
   const next = t1?.stops.find((s) => !done(s));
-  const cancelled = scenario.reefer === "approved" && veh === "VEH003";
+  const cancelled = fleetEdits?.[veh]?.status === "in_workshop";
   const action = useNextAction(next);
   if (layout !== "phone") {
     return (
@@ -388,18 +390,18 @@ export function DriverSync() {
 }
 
 export function VehicleProblem() {
-  const { t, dispatch, scenario, setToast } = useApp();
+  const { t, dispatch, setToast, online, driverReports, user } = useApp();
   const nav = useNavigate();
   const { veh } = useVeh();
   const [kind, setKind] = useState("cool");
+  const already = driverReports.some((r) => r.vehicle === veh && !r.outlet && !r.seenBy);
   const send = () => {
-    if (kind === "cool" && veh === "VEH003") dispatch({ type: "scenario", patch: { reefer: "reported" } });
-    else dispatch({ type: "driverReport", online: true, report: { vehicle: veh, outlet: null, kind, label: kind === "cool" ? t("coolingFailed") : kind === "engine" ? t("engine") : t("tyre"), by: veh } });
+    dispatch({ type: "driverReport", online, report: { vehicle: veh, outlet: null, kind, label: kind === "cool" ? t("coolingFailed") : kind === "engine" ? t("engine") : t("tyre"), by: user?.name || veh } });
     setToast({ text: "Dispatcher alerted · keep the doors closed" });
     nav("/driver");
   };
   return (
-    <MobileFrame caption={{ kicker: "Bad day 2", title: "Reefer Down · 03:25", lines: ["VEH003's cooling fails at the gate. It carries the three shops we promised to protect."] }}>
+    <MobileFrame>
       <div className="screen">
         <TopBar title={t("vehicleProblem")} sub={veh} back />
         <div className="body field">
@@ -410,7 +412,7 @@ export function VehicleProblem() {
           </div>
           <div className="card" style={{ fontSize: 17, fontWeight: 650, lineHeight: 1.5 }}>{t("keepClosed")}</div>
           <button className="stop"><Mic size={24} color="var(--brinjal)" /> <b style={{ fontSize: 17 }}>{t("voiceNote")}</b></button>
-          {scenario.reefer !== "idle" && veh === "VEH003" && <div className="banner problem">Already reported</div>}
+          {already && <div className="banner problem">Already reported · waiting for the dispatcher</div>}
         </div>
         <div className="dock"><SlideConfirm red label={t("slideReport")} onDone={send} /></div>
       <DriverNav /></div>
@@ -449,7 +451,6 @@ function IssueScreen() {
     const refs = s.orders.map((o) => o.ref).join(", ");
     const storeText = tellStore ? `Waypoint: your delivery (${refs}) is running about ${delay} min late (${label.toLowerCase()}). New time about ${newEta}.` : null;
     dispatch({ type: "driverReport", online, report: { vehicle: veh, outlet: s.outlet, kind, label, delayMin: delay, newEta, storeText, by: driver } });
-    if (kind === "vehicle" && veh === "VEH003") dispatch({ type: "scenario", patch: { reefer: "reported" } });
     dispatch({ type: "log", who: driver, role: `Driver · ${veh}`, what: `Reported ${label.toLowerCase()} before ${s.outlet} · about ${delay} min late` });
     setToast({ text: online ? `Sent to dispatcher${tellStore ? ` and ${s.outlet}` : ""}` : "Saved on phone · sends when signal returns" });
     nav(-1);

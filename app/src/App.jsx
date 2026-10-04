@@ -1,12 +1,10 @@
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { StateProvider, useApp } from "./state";
-import { GuideBar, ScenarioJump } from "./components/Guide";
-import { BadDayPanel, BadDaysHome } from "./screens/BadDays";
 import { FirstSignIn, Forgot, Profile, SignIn, Unlock } from "./screens/Auth";
 import { Deliver, DriverAccount, DriverIssue, DriverMapScreen, DriverSync, DriverTrip, DriverTrips, StopDetails, VehicleProblem } from "./screens/Driver";
 import { LoadList, LoaderLoads, LoaderLog, LoaderProblem, LoaderProblems, LoaderTrucks, LoaderWall, MoveList, Replace, WhoIsLoading } from "./screens/Loader";
 import { Dispute, MyDeliveries, MyOrders, PlaceOrder, Receive } from "./screens/Store";
-import { Deferrals, Incident, Live, Orders, Outlook, Plan, TeamLog } from "./screens/Dispatch";
+import { Deferrals, Incident, Live, Orders, Outlook, Plan, Replan, TeamLog } from "./screens/Dispatch";
 import { AdminLog, AdminUsers } from "./screens/Admin";
 import { AdminFleet, DispatchFleet } from "./screens/Fleet";
 
@@ -28,9 +26,6 @@ export default function App() {
         <Routes>
           <Route path="/" element={<SignIn landing />} />
           <Route path="/signin" element={<SignIn />} />
-          <Route path="/scenario/:id/:step" element={<ScenarioJump />} />
-          <Route path="/bad-days" element={<BadDaysHome />} />
-          <Route path="/bad-days/:id" element={<BadDayPanel />} />
           <Route path="/first" element={<FirstSignIn />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/unlock" element={<Unlock />} />
@@ -71,6 +66,7 @@ export default function App() {
           <Route path="/dispatch/outlook" element={<Guard role="dispatcher"><Outlook /></Guard>} />
           <Route path="/dispatch/incident/:type" element={<Guard role="dispatcher"><Incident /></Guard>} />
           <Route path="/dispatch/incident/:type/:id" element={<Guard role="dispatcher"><Incident /></Guard>} />
+          <Route path="/dispatch/replan/:veh" element={<Guard role="dispatcher"><Replan /></Guard>} />
           <Route path="/dispatch/log" element={<Guard role="dispatcher"><TeamLog /></Guard>} />
           <Route path="/dispatch/fleet" element={<Guard role="dispatcher"><DispatchFleet /></Guard>} />
 
@@ -79,7 +75,6 @@ export default function App() {
           <Route path="/admin/fleet" element={<Guard role="admin"><AdminFleet /></Guard>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <GuideBar />
       </HashRouter>
     </StateProvider>
   );

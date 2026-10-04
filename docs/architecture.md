@@ -17,7 +17,7 @@ flowchart LR
   end
 
   subgraph App["Web app (React 19 + Vite, installable PWA)"]
-    UI["Role screens<br/>(Dispatch, Loader, Driver, Store, Admin, Bad days)"]
+    UI["Role screens<br/>(Dispatch, Loader, Driver, Store, Admin)"]
     SYNC["Sync layer<br/>useServerState + sync.js<br/>optimistic view, outbox, live stream"]
     DOM1["Domain code (shared)<br/>domain/store.js · reducer<br/>domain/planner.js · engine"]
     SW["Service worker<br/>app shell offline"]

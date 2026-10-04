@@ -7,8 +7,8 @@ export const config = {
   databaseUrl: env.DATABASE_URL || "postgres://waypoint:waypoint@localhost:5432/waypoint",
   jwtSecret: env.JWT_SECRET || "dev-only-secret-change-me",
   jwtHours: Number(env.JWT_HOURS || 12),
-  // Demo controls (the shared clock, the bad days portal, "Reset demo") are allowed only when this is on.
-  demoMode: (env.DEMO_MODE ?? "true") !== "false",
+  // Demo tools (story sessions, resetting the seeded day) exist only when DEMO_MODE=true.
+  demoMode: env.DEMO_MODE === "true", // off unless switched on (no demo tools in a real deployment)
   corsOrigin: env.CORS_ORIGIN || "*",
   dataDir: env.DATA_DIR || here("../../data"),
   staticDir: env.STATIC_DIR || here("../../app/dist"),

@@ -303,7 +303,6 @@ export function AdminUsers() {
   return (
     <DeskShell nav={NAV} title="Accounts" subtitle="Personal accounts for drivers and dispatchers · shared accounts for stores and depots"
       actions={<>
-        <button className="btn secondary" onClick={() => { if (window.confirm("Reset the demo day? Everything done today (plan, loading, deliveries, reports) goes back to the start for everyone.")) { dispatch({ type: "reset" }); setToast({ text: "Demo day reset to the start" }); } }}>Reset demo day</button>
         <button className="btn primary" onClick={() => { setAdding(true); setCreated(null); setEditing(null); }}><UserPlus size={18} /> New account</button>
       </>}>
       {adding && <AddAccount accounts={accounts} onCreate={onCreate} onCancel={() => setAdding(false)} />}

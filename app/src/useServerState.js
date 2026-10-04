@@ -10,7 +10,7 @@
    - Everyone else's commands arrive on the live stream and are applied to the confirmed state. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { initial, reducer, sharedOf, applyAt, LOCAL_KEYS, LOCAL_ACTIONS, USERS } from "./domain/store";
-import { api, confirmedCache, demoSession, openEvents, outbox, session, uuid } from "./sync";
+import { api, confirmedCache, openEvents, outbox, session, uuid } from "./sync";
 
 const pick = (s, keys) => Object.fromEntries(keys.map((k) => [k, s[k]]));
 const LOCAL_KEY = "waypoint-one-state-v9"; // the same key the app's load() reads
@@ -32,7 +32,6 @@ export function useServerState(load, notify) {
   const [retry, setRetry] = useState(0);
   const confRef = useRef(conf); confRef.current = conf;
   const sending = useRef(false);
-  const demoTok = useRef(demoSession.get());
 
   useEffect(() => { outbox.save(pending); }, [pending]);
   // This device's own fields (who is signed in, language, view) survive a reload; the day itself comes from the server.
@@ -54,35 +53,22 @@ export function useServerState(load, notify) {
   }, []);
   const online = net && !(view.simOffline && view.user?.role === "driver" && (!view.offlineVeh || view.user.vehicle === view.offlineVeh));
 
-  const getDemoToken = useCallback(async () => {
-    if (demoTok.current) return demoTok.current;
-    const r = await api.demo("demo");
-    demoTok.current = r.token; demoSession.set(r.token);
-    return r.token;
-  }, []);
-  // The token to read with: the signed-in person's. The bad days portal (a demo tool) reads with its demo session.
+  // The token to read and send with: the signed-in person's.
   const readToken = auth?.token && auth.userId === local.user?.id ? auth.token : null;
-  const [onPortal, setOnPortal] = useState(() => window.location.hash.startsWith("#/bad-days"));
-  useEffect(() => {
-    const on = () => setOnPortal(window.location.hash.startsWith("#/bad-days"));
-    window.addEventListener("hashchange", on);
-    return () => window.removeEventListener("hashchange", on);
-  }, []);
 
   const refetch = useCallback(async () => {
     try {
-      const tok = readToken || (onPortal ? await getDemoToken() : null);
-      if (!tok) return;
-      const r = await api.state(tok);
+      if (!readToken) return;
+      const r = await api.state(readToken);
       setConf({ seq: r.seq, state: r.state });
     } catch { /* offline: keep what we have */ }
-  }, [readToken, onPortal, getDemoToken]);
+  }, [readToken]);
 
   // Live stream of everyone's changes.
   useEffect(() => {
     let close = () => {}, stop = false;
     (async () => {
-      const tok = readToken || (onPortal ? await getDemoToken().catch(() => null) : null);
+      const tok = readToken;
       if (!tok || stop) return;
       await refetch();
       close = openEvents(tok, (m) => {
@@ -97,27 +83,24 @@ export function useServerState(load, notify) {
       }, setLive);
     })();
     return () => { stop = true; close(); };
-  }, [readToken, onPortal]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [readToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Send the outbox, oldest first, whenever there is signal.
   useEffect(() => {
     if (!pending.length || sending.current || !online) return;
-    const useDemo = !!pending[0].demo;
-    if (!useDemo && !readToken) return; // wait for this person's session
-    const batch = [];
-    for (const p of pending) { if (!!p.demo !== useDemo || batch.length >= 50) break; batch.push(p); }
+    if (!readToken) return; // wait for this person's session
+    const batch = pending.slice(0, 50);
     sending.current = true;
     (async () => {
       try {
-        const tok = useDemo ? await getDemoToken() : readToken;
-        const r = await api.commands(tok, batch.map(({ id, action, person, clientTime }) => ({ id, action, person, clientTime })));
+        const r = await api.commands(readToken, batch.map(({ id, action, person, clientTime }) => ({ id, action, person, clientTime })));
         const done = new Set(r.results.map((x) => x.id));
         const rejected = r.results.filter((x) => x.status === "rejected");
         if (rejected.length) notify?.(`Not saved: ${rejected[0].error}`);
         setPending((p) => p.filter((x) => !done.has(x.id)));
         if (r.results.some((x) => x.status === "duplicate") || r.seq !== confRef.current.seq) setTimeout(() => refetch(), 400);
       } catch (e) {
-        if (e.status === 401) { if (useDemo) { demoTok.current = null; demoSession.set(null); } else { session.clear(); setAuth(null); } }
+        if (e.status === 401) { session.clear(); setAuth(null); }
         setTimeout(() => setRetry((n) => n + 1), e.status === 0 ? 4000 : 1500);
       } finally {
         sending.current = false;
@@ -138,14 +121,13 @@ export function useServerState(load, notify) {
       if (a.type === "login") {
         const role = a.user?.role || a.role;
         const vehicle = a.user?.vehicle || (role === "driver" ? USERS.driver.vehicle : null);
-        if (role === "driver" && vehicle && a.token) setPending((p) => [...p, { id: uuid(), action: { type: "driverSignedIn", vehicle, at: Date.now() }, demo: false, clientTime: now }]);
+        if (role === "driver" && vehicle && a.token) setPending((p) => [...p, { id: uuid(), action: { type: "driverSignedIn", vehicle, at: Date.now() }, clientTime: now }]);
       }
       return;
     }
-    const { __demo, ...rest } = a;
-    const action = { ...rest, at: Date.now() }; // the server replaces this with its own time when it records it
+    const action = { ...a, at: Date.now() }; // the server replaces this with its own time when it records it
     setLocal((l) => pick(applyAt({ ...view, ...l }, action), LOCAL_KEYS));
-    setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, demo: !!__demo || ["badReset", "offline"].includes(action.type), person: view.person, clientTime: now }]);
+    setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, person: view.person, clientTime: now }]);
   }, [view]);
 
   const syncInfo = { live, waiting: pending.length, seq: conf.seq, online };

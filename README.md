@@ -18,7 +18,7 @@ Team MindRoot · Tech-Triathlon 2026 (Rootcode) · Hackathon
 ### With Docker (recommended)
 
 ```bash
-cp .env.example .env        # optional: change ports, secrets, demo mode
+cp .env.example .env        # optional: change ports and secrets
 docker compose up --build
 ```
 
@@ -54,7 +54,7 @@ All settings are environment variables; see [.env.example](.env.example).
 |---|---|---|
 | `DATABASE_URL` | set by compose | PostgreSQL connection |
 | `JWT_SECRET` | `change-me-in-production` | signs session tokens: set a long random value |
-| `DEMO_MODE` | `true` | the bad days portal and "Reset demo day" (Admin). `false` = a real deployment without them |
+| `DEMO_MODE` | `false` | leave off. `true` allows a test-only command that puts the seeded day back to its start |
 | `SEED_PASSWORD` / `SEED_PIN` | `waypoint@mr2026` | password for all seeded accounts (change and restart to update them) |
 | `PORT` | `8080` | port of the app |
 | `CORS_ORIGIN` | `*` | allowed origins when the app is hosted separately |
@@ -115,8 +115,9 @@ fresh, and every order the last run could not serve is carried over and goes fir
 
 - **Real runs (any real date):** the orders are the ones stores place in the app. The dispatcher plans them with
   Auto-plan, publishes, and loaders, drivers and stores carry on from there. This is how the system runs every day.
-- **S1 (Thu 8 Jan 2026)** is the dataset's peak day, kept as the reference day: its 85 orders and fleet status come
-  from the shared datasets. The seeded day starts there (Wed 7 Jan 19:00), and the three bad days are written for it.
+- **S1 (Thu 8 Jan 2026)** is the dataset's peak day, kept as a reference day: its 85 orders and fleet status come
+  from the shared datasets. The app starts on real time; the dispatcher opens S1 by setting the clock to
+  **7 Jan 2026, 19:00** (the evening before).
 
 ### A real day, step by step (today's date)
 
@@ -130,6 +131,11 @@ fresh, and every order the last run could not serve is carried over and goes fir
 5. Dispatcher sets e.g. 06:00 → the truck's driver (`WP-DRV-0xx`, the vehicle number on Today's loads) starts the run,
    arrives, and hands over with a real photo and signature.
 6. The store sees *Delivered · photo + signature* and confirms in **Check delivery**.
+7. **A truck breaks down** (any truck, any day): its driver opens **Vehicle problem** → *Cooling failed*, *Engine* or
+   *Tyre* → slides to report. The dispatcher's **Live board** shows *Truck problem* → the planning engine re-plans
+   without that truck: every other truck keeps its orders, delivered stops stay done, its other orders go to trucks
+   with room (chilled only on reefers) or are deferred with a reason → **Approve re-plan & notify everyone**. The truck
+   goes to the workshop, its driver sees *Return to the workshop bay*, and loaders, drivers and stores see the new plan.
 
 ## Judge walkthrough on the S1 reference day (planning → loading → delivery → receipt)
 
@@ -138,13 +144,14 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 **Dispatcher, evening before (Wed 7 Jan 19:00)**
 
-1. Sign in as `WP-DSP-001` / `waypoint@mr2026`. **Orders** shows the 85 orders: 26 chilled, 10 shops skipped yesterday
+1. Sign in as `WP-DSP-001` / `waypoint@mr2026`. Click the **date and time** at the top right, set **7 Jan 2026,
+   19:00** → **Set this time** (every portal follows). Press **Use real time** in the same menu to go back to today. **Orders** shows the 85 orders: 26 chilled, 10 shops skipped yesterday
    (they must not be skipped again), one Style order of 40.7 m³ that is bigger than any truck, and today's real limit:
    every reefer trip is already used.
 2. Press **Auto-plan**. The planning engine runs on the server: it shows its plan (served, deferred, shops skipped
    yesterday served, chilled volume waiting) next to the team's plan, and confirms every rule is met. Choose
-   **Keep current plan** to follow this walkthrough (the three bad days are written around it), or **Use this
-   plan** to adopt the engine's plan.
+   **Keep current plan** (the team's published plan, which this walkthrough follows) or **Use this plan** to adopt the
+   engine's plan.
 3. On the **Plan board**, click any shop (e.g. OUT034 on VEH003). The panel offers only moves that follow the rules
    and explains why other trucks don't fit ("Chilled goods need a refrigerated vehicle", "Space 38.6 / 33.4 m³").
    Close it. **Deferrals** shows each deferred order with its reason and the store notice.
@@ -176,18 +183,17 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 12. **Check delivery** → **Everything is OK ✓** (or report missing, damaged or warm cases with a photo; it goes to
     the dispatcher). That completes the order's journey.
 
-**Bad days (degradation and recovery)**
+**Bad days (degradation and recovery), in the normal portals**
 
-13. Open the **bad days portal**: `/#/bad-days` (e.g. https://mindroot-waypointone-app.onrender.com/#/bad-days). Each story runs step by step and changes the real
-    portals (open them with the links on the right):
-    - **Short at the Dock**: the loader reports 2 broken chilled cases; the dispatcher replaces them or sends the
-      truck short with a replacement order; the store is told before it opens.
-    - **Reefer Down**: VEH003's cooling fails at the gate; the re-plan keeps all 10 protected shops, never uses a dry
-      truck for chilled goods, and every store sees its new truck and time.
-    - **Dead Zone**: the VEH010 driver loses signal, records the delivery offline, the store says "not delivered",
-      the dispatcher sees the truck as offline (not lost), and the proof syncs when the signal returns.
-14. **Reset demo day** (on the Admin page, signed in as `WP-ADM-001`) puts the seeded day back to the
-    start for the next judge.
+13. **Short at the Dock:** the loader opens **Problems → Report a problem** on a truck (e.g. 2 broken chilled cases,
+    with a photo). The dispatcher's Live board shows it; they replace the cases from stock or send the truck short with
+    a replacement order first on the next run, and the store is told before it opens.
+14. **Truck down:** the driver reports **Vehicle problem** (cooling, engine or tyre). The dispatcher re-plans without
+    that truck (step 7 of the real day above): no chilled goods on a dry truck, shops skipped yesterday stay
+    protected, and every store sees its new truck.
+15. **Dead Zone:** the driver's phone loses signal (airplane mode, or the browser's device toolbar → Offline). The
+    driver keeps recording deliveries; they wait on the phone, the dispatcher sees the truck as offline (not lost),
+    and the proof syncs once, with no duplicates, when the signal returns.
 
 ---
 
@@ -195,10 +201,11 @@ Driver and loader screens are designed for a phone: use a phone or your browser'
 
 ```
 app/                 React web app (PWA) for all roles
-  src/domain/        shared domain code: store.js (reducer), planner.js (planning engine), autoPlan.js
+  src/domain/        shared domain code: store.js (reducer), planner.js (planning engine), autoPlan.js,
+                     clock.js (the shared clock), day.js (runs and their orders)
   src/sync.js        API client, outbox, live stream
   src/useServerState.js  server mode for the app's state (optimistic view, outbox, live updates)
-  src/screens/       Dispatch, Loader, Driver, Store, Admin, Auth, BadDays
+  src/screens/       Dispatch, Loader, Driver, Store, Admin, Auth, Fleet
 server/              API server (Node + Express + PostgreSQL)
   src/               index.js (routes), auth.js, permissions.js, validate.js, daystore.js, planning.js
   db/                migrations/, migrate.js, seed.js
@@ -220,24 +227,23 @@ Not connected yet (shown honestly in the app where it matters): sending SMS (sto
 at first sign-in and *Forgot password*: any 6 digits are accepted at first sign-in), voice notes, phone calls from the
 app, and live GPS (positions follow the plan and the drivers' recorded steps). The seeded data has one delivery day
 (S1); real runs take their orders from the stores in the app. Real runs are planned for the Peliyagoda depot (like S1):
-Kandy stores' orders are recorded but not yet planned. The bad days portal (`/#/bad-days`)
-is a demo tool that plays every role of a story; switch it off with `DEMO_MODE=false`.
+Kandy stores' orders are recorded but not yet planned.
 
 ## Departures from the Designathon submission
 
 - **Real planning engine.** In the Designathon, Auto-plan showed our optimiser's precomputed S1 plan. Now Auto-plan
   runs a planning engine on the server (every booklet rule, delivery windows, fuel, fairness first) and the
   dispatcher chooses whether to use it. On S1 it serves 76 of 85 with all 10 protected shops and leaves 49.6 m³ of
-  chilled goods waiting, less than the published plan's 55.4 m³. The seeded day keeps the team's published plan
-  (77 of 85) because the bad-day stories are written around its trucks.
+  chilled goods waiting, less than the published plan's 55.4 m³. On S1 the team's published plan (77 of 85)
+  stays until the dispatcher chooses the engine's plan.
 - **Shared server state.** The prototype kept each browser's own copy; now every role on every device shares one
   day through the server, with live updates.
 - **Real offline.** The Designathon showed offline with a demo switch. Now a real lost connection works the same way
-  (outbox, replay, no duplicates), and "No signal" shows whenever the device is really offline. The demo switch
-  stays for the Dead Zone story.
+  (outbox, replay, no duplicates), and "No signal" shows whenever the device is really offline.
 - **Short at the Dock timing.** The design said VEH006 waits up to 12 minutes; the timing engine computes up to
   15 minutes within every window, and all screens now say 15.
 - **Loader flow.** After the Designathon review we added *Home*, *Today's loads*, *Loader log* and a "who is loading?"
   question per truck (the design had one sign-in per shift), plus a reefer temperature check before chilled loading.
-- **Demo controls.** A shared demo clock and the bad days portal let a judge move through the night in minutes. They
-  are server-side demo commands and can be switched off with `DEMO_MODE=false`.
+- **No demo layer.** The Designathon prototype had a demo clock, guided bad-day stories and a reset button. The app
+  now runs as a real system: real Sri Lanka time by default, only the dispatcher can set the clock, bad days are
+  handled in the normal portals (a truck breakdown is re-planned by the engine on any day), and nothing is reset.

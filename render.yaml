@@ -21,7 +21,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: DEMO_MODE
-        value: "true"
+        value: "false"
       - key: SEED_PASSWORD
         value: waypoint@mr2026
       - key: SEED_PIN

@@ -17,7 +17,8 @@ import { SEED_ACCOUNTS, storeName } from "../../app/src/data/accounts.js";
 import { initial, sharedOf } from "../../app/src/domain/store.js";
 
 const DAY = { id: config.dayId, date: "2026-01-08", depot: "Peliyagoda", label: "S1 peak day · Thu 8 Jan 2026" };
-const START_CLOCK = { date: "2026-01-07", time: "19:00" };
+// The system starts on real time (Sri Lanka). The S1 peak day stays in the data as the reference day.
+const START_CLOCK = { real: true };
 
 function csv(rel) {
   const path = join(config.dataDir, rel);
@@ -136,7 +137,7 @@ export async function seed({ ifEmpty = false } = {}) {
     await insertMany(c, "accounts", ["id", "role", "name", "depot", "outlet_id", "vehicle_id", "category", "shared", "people", "lang", "status", "secret_hash"], accounts);
 
     // The day's starting state: the evening before, orders closed, plan not yet published.
-    const start = { ...sharedOf(initial), clock: { ...START_CLOCK, setAt: Date.now() }, published: false, publishedBy: null };
+    const start = { ...sharedOf(initial), clock: { ...START_CLOCK, setAt: Date.now() }, published: false, publishedBy: null, log: [], notifications: [] };
     await c.query("INSERT INTO day_state (day_id, seq, state, seed_state) VALUES ($1, 0, $2, $2)", [DAY.id, JSON.stringify(start)]);
   });
   await q(`INSERT INTO app_meta (key, value) VALUES ('seed_secrets', $1) ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = now()`, [fingerprint()]);
