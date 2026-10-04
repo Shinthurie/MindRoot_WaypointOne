@@ -4,6 +4,7 @@
    after a dead zone is recognised and never applied twice. */
 import { q, tx } from "./db.js";
 import { reducer, sharedOf, LOCAL_ACTIONS } from "../../app/src/domain/store.js";
+import { reduceAt } from "../../app/src/domain/clock.js";
 import { authorize } from "./permissions.js";
 import { validate, effects } from "./validate.js";
 
@@ -51,8 +52,14 @@ export function apply(dayId, user, commands) {
         if (dup.rows[0]) { results.push({ id: cmd.id, status: "duplicate", seq: Number(dup.rows[0].seq) }); continue; }
         authorize(user, a);
         await validate(dayId, d.state, a, user);
-        // "Reset demo" goes back to the seeded day; everything else runs through the shared reducer.
-        const next = a.type === "reset" ? d.seed : sharedOf(reducer(d.state, a));
+        // Temporary passwords never go into the log or to other portals: kept aside for the database only.
+        const secrets = { temp: a.temp ?? a.account?.temp };
+        delete a.temp; if (a.account) delete a.account.temp;
+        // The server's clock decides when it happened: every portal replays the action at this same moment.
+        a.at = Date.now();
+        // "Reset demo day" goes back to the seeded day (its clock starts running now); everything else runs
+        // through the shared reducer.
+        const next = a.type === "reset" ? { ...d.seed, clock: { ...d.seed.clock, setAt: a.at } } : sharedOf(reduceAt(reducer, d.state, a));
         const seq = await tx(async (c) => {
           const r = await c.query(`INSERT INTO commands (id, day_id, type, payload, actor_id, actor_role, person, client_time)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING seq`,
@@ -62,7 +69,7 @@ export function apply(dayId, user, commands) {
           return s;
         });
         d.seq = seq; d.state = next;
-        await effects(a).catch((e) => console.error("effect failed", a.type, e.message));
+        await effects(a, secrets).catch((e) => console.error("effect failed", a.type, e.message));
         broadcast(dayId, a.type === "reset" ? { kind: "reset", seq } : { kind: "command", seq, id: cmd.id, action: a, by: user.id });
         results.push({ id: cmd.id, status: "applied", seq });
       } catch (e) {
@@ -82,7 +89,10 @@ export async function rebuild(dayId) {
   let state = rows[0].seed_state;
   const cmds = (await q("SELECT seq, type, payload FROM commands WHERE day_id = $1 ORDER BY seq", [dayId])).rows;
   let seq = 0;
-  for (const c of cmds) { state = c.type === "reset" ? rows[0].seed_state : sharedOf(reducer(state, c.payload)); seq = Number(c.seq); }
+  for (const c of cmds) {
+    state = c.type === "reset" ? { ...rows[0].seed_state, clock: { ...rows[0].seed_state.clock, setAt: c.payload.at } } : sharedOf(reduceAt(reducer, state, c.payload));
+    seq = Number(c.seq);
+  }
   await q("UPDATE day_state SET seq = $2, state = $3, updated_at = now() WHERE day_id = $1", [dayId, seq, JSON.stringify(state)]);
   days.delete(dayId);
   return { seq, commands: cmds.length };

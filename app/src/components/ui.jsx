@@ -257,6 +257,89 @@ export function Codes({ value, total = 6 }) {
   );
 }
 
+/* ---------- Proof: a real photo and a real signature ---------- */
+/* Shrinks a camera photo to a small JPEG (longest side 800 px), so it syncs fast on a weak signal. */
+export function compressImage(file, max = 800, quality = 0.6) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+
+/* Opens the phone's camera (a file picker on a computer); shows the photo once taken. */
+export function PhotoButton({ value, onChange, label, doneLabel, highlight, icon: Icon }) {
+  const input = useRef(null);
+  const pick = async (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (f) onChange(await compressImage(f));
+  };
+  return (
+    <button type="button" className={`stop grow ${value ? "" : highlight ? "hl" : ""}`} onClick={() => input.current?.click()}>
+      {value ? <img src={value} alt="" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 8 }} /> : Icon ? <Icon size={24} color="var(--brinjal)" /> : null}
+      <b className="grow" style={{ fontSize: 17 }}>{value ? doneLabel : label}</b>
+      {value && <span className="muted xs">↻</span>}
+      <input ref={input} type="file" accept="image/*" capture="environment" hidden onChange={pick} />
+    </button>
+  );
+}
+
+/* A signature pad: the receiver signs with a finger; saved as a small PNG. */
+export function SignatureButton({ value, onChange, label, doneLabel, highlight, icon: Icon, who }) {
+  const [open, setOpen] = useState(false);
+  const canvas = useRef(null);
+  const drawing = useRef(false);
+  const [empty, setEmpty] = useState(true);
+  useEffect(() => {
+    if (!open) return;
+    const c = canvas.current;
+    const r = c.getBoundingClientRect();
+    c.width = r.width * 2; c.height = r.height * 2;
+    const g = c.getContext("2d");
+    g.scale(2, 2); g.lineWidth = 2.6; g.lineCap = "round"; g.lineJoin = "round"; g.strokeStyle = "#2a1331";
+    g.fillStyle = "#fff"; g.fillRect(0, 0, r.width, r.height);
+    setEmpty(true);
+  }, [open]);
+  const pos = (e) => { const r = canvas.current.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const down = (e) => { e.preventDefault(); canvas.current.setPointerCapture(e.pointerId); drawing.current = true; const g = canvas.current.getContext("2d"); g.beginPath(); g.moveTo(...pos(e)); };
+  const move = (e) => { if (!drawing.current) return; const g = canvas.current.getContext("2d"); g.lineTo(...pos(e)); g.stroke(); setEmpty(false); };
+  const up = () => { drawing.current = false; };
+  const save = () => { onChange(canvas.current.toDataURL("image/png")); setOpen(false); };
+  return (
+    <>
+      <button type="button" className={`stop grow ${value ? "" : highlight ? "hl" : ""}`} onClick={() => setOpen(true)}>
+        {value ? <img src={value} alt="" style={{ width: 64, height: 40, objectFit: "contain", background: "#fff", borderRadius: 6 }} /> : Icon ? <Icon size={24} color="var(--brinjal)" /> : null}
+        <b className="grow" style={{ fontSize: 17 }}>{value ? doneLabel : label}</b>
+      </button>
+      {open && (
+        <div className="sheet-backdrop" onClick={() => setOpen(false)}>
+          <div className="sheet" role="dialog" aria-label={label} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: "0 0 4px" }}>{label}</h3>
+            {who && <div className="muted small" style={{ marginBottom: 8 }}>{who}</div>}
+            <canvas ref={canvas} style={{ width: "100%", height: 200, border: "1.5px dashed var(--line-2)", borderRadius: 12, touchAction: "none", background: "#fff" }}
+              onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} />
+            <div className="row" style={{ gap: 10, marginTop: 12 }}>
+              <button type="button" className="btn secondary grow" onClick={() => setOpen(false)}>Cancel</button>
+              <button type="button" className="btn secondary grow" onClick={() => { setOpen(false); setTimeout(() => setOpen(true), 0); }}>Clear</button>
+              <button type="button" className="btn primary grow" disabled={empty} onClick={save}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function Stepper({ value, onChange, min = 0 }) {
   return (
     <div className="stepper">
@@ -402,13 +485,9 @@ export function PeakDayOnly({ children }) {
     </div>
   );
 }
-/* Planning date and time. Set by hand for now; later this reads the real clock (see AUTO_CLOCK). */
-const AUTO_CLOCK = false;
+/* The day's current date and time (running; set by the dispatcher or real Sri Lanka time). */
 export function useClock() {
-  const { clock } = useApp();
-  if (!AUTO_CLOCK) return clock;
-  const d = new Date();
-  return { date: d.toISOString().slice(0, 10), time: d.toTimeString().slice(0, 5) };
+  return useApp().clock;
 }
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -448,34 +527,45 @@ export const TIMELINE = [
   ["Stores receive", "2026-01-08", "08:00"],
 ];
 
+/* The dispatcher's clock menu: the time every portal follows. A set time keeps running from that moment;
+   "Use real time" follows Sri Lanka time. Only the dispatcher sees this (and the server allows only them). */
 export function DayPill() {
-  const { dispatch } = useApp();
+  const { dispatch, clockSetting, user } = useApp();
   const clock = useClock();
   const [open, setOpen] = useState(false);
+  const [date, setDate] = useState(clock.date);
+  const [time, setTime] = useState(clock.time);
+  if (user?.role !== "dispatcher") return null;
+  const real = !!clockSetting?.real;
+  const set = (c) => { dispatch({ type: "clock", clock: c }); setOpen(false); };
   return (
     <span style={{ position: "relative" }}>
-      <button className="pillsel" style={{ cursor: "pointer" }} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <Clock size={14} /> {formatDate(clock.date)} · {clock.time} <ChevronDown size={15} />
+      <button className="pillsel" style={{ cursor: "pointer" }} aria-haspopup="dialog" aria-expanded={open}
+        onClick={() => { setDate(clock.date); setTime(clock.time); setOpen(!open); }}>
+        <Clock size={14} /> {formatDate(clock.date)} · {clock.time}{real ? " · live" : ""} <ChevronDown size={15} />
       </button>
       {open && (
         <>
           <div style={{ position: "fixed", inset: 0, zIndex: 20 }} onClick={() => setOpen(false)} />
-          <div className="menu" role="dialog" aria-label="Date and time" style={{ top: 46, padding: 12, minWidth: 240, gap: 10 }}>
-            <label><span className="field-label">Date</span>
-              <input type="date" className="input" style={{ height: 40 }} value={clock.date} onChange={(e) => e.target.value && dispatch({ type: "clock", clock: { date: e.target.value } })} />
-            </label>
-            <label><span className="field-label">Time</span>
-              <input type="time" className="input" style={{ height: 40 }} value={clock.time} onChange={(e) => e.target.value && dispatch({ type: "clock", clock: { time: e.target.value } })} />
-            </label>
+          <div className="menu" role="dialog" aria-label="Date and time" style={{ top: 46, padding: 12, minWidth: 260, gap: 10 }}>
+            <div className="small" style={{ fontWeight: 700 }}>{real ? "Following real time (Sri Lanka)" : "Running from a time you set"}</div>
+            <button className={`btn ${real ? "secondary" : "primary"}`} style={{ minHeight: 38 }} disabled={real}
+              onClick={() => { dispatch({ type: "clock", real: true }); setOpen(false); }}>Use real time</button>
+            <div className="field-label" style={{ marginTop: 4 }}>Or set the day's time</div>
+            <div className="row" style={{ gap: 8 }}>
+              <input type="date" className="input" style={{ height: 40 }} value={date} onChange={(e) => setDate(e.target.value)} aria-label="Date" />
+              <input type="time" className="input" style={{ height: 40, maxWidth: 120 }} value={time} onChange={(e) => setTime(e.target.value)} aria-label="Time" />
+            </div>
+            <button className="btn secondary" style={{ minHeight: 38 }} disabled={!date || !time} onClick={() => set({ date, time })}>Set this time</button>
             <div className="field-label" style={{ marginTop: 2 }}>Jump to a step of the S1 day</div>
             <div className="col" style={{ gap: 6 }}>
-              {TIMELINE.map(([label, date, time]) => (
-                <button key={label} className="option" style={{ padding: "8px 10px" }} onClick={() => { dispatch({ type: "clock", clock: { date, time } }); setOpen(false); }}>
-                  <b className="small">{formatDate(date)} · {time}</b> <span className="muted small">{label}</span>
+              {TIMELINE.map(([label, d, tm]) => (
+                <button key={label} className="option" style={{ padding: "8px 10px" }} onClick={() => set({ date: d, time: tm })}>
+                  <b className="small">{formatDate(d)} · {tm}</b> <span className="muted small">{label}</span>
                 </button>
               ))}
             </div>
-            <div className="muted xs">Set by hand for now. Every portal follows this time.</div>
+            <div className="muted xs">Every portal follows this clock, and it keeps running from the time you set.</div>
             <button className="btn secondary" style={{ minHeight: 38 }} onClick={() => { if (window.confirm("Reset the demo day? Everything done today (plan, loading, deliveries, reports) goes back to the start for everyone.")) { dispatch({ type: "reset" }); setOpen(false); } }}>Reset demo day</button>
           </div>
         </>

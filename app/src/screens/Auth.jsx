@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { api } from "../sync";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { api, session } from "../sync";
 import { ArrowRight, X, Eye, EyeOff, KeyRound, Languages, Lock, LogOut, MapPin, MessageSquareText, Phone, Shirt, ShieldCheck, ShoppingBasket, Store, Tv, UserRound, Check } from "lucide-react";
 import { useApp, USERS } from "../state";
 import { LANGS } from "../i18n";
@@ -43,14 +43,18 @@ export function SignIn({ landing = false }) {
   const submit = (e) => {
     e.preventDefault();
     const clean = id.trim().toUpperCase();
-    if (clean === "WP-DRV-027") { nav("/first"); return; }
+    if (!serverMode && clean === "WP-DRV-027") { nav("/first"); return; }
     if (serverMode) {
       // The server checks the password or PIN (bcrypt) and locks the account after 5 wrong tries.
       setBusy(true); setErr(null);
       api.login(clean, pw).then((r) => {
         dispatch({ type: "login", user: r.user, token: r.token, keepLang: picked });
         nav(USERS[r.user.role]?.home || r.user.home);
-      }).catch((ex) => setErr({ text: ex.status === 0 ? "No connection to the server. Try again when you have signal." : ex.message })).finally(() => setBusy(false));
+      }).catch((ex) => {
+        // A new account: the temporary password was right, now the person sets their own.
+        if (ex.body?.code === "first") { nav("/first", { state: { id: clean, temp: pw } }); return; }
+        setErr({ text: ex.status === 0 ? "No connection to the server. Try again when you have signal." : ex.message });
+      }).finally(() => setBusy(false));
       return;
     }
     const role = Object.entries(ROLE_BY_PREFIX).find(([p]) => clean.startsWith(p))?.[1];
@@ -165,18 +169,34 @@ const CAPTION = { kicker: "Supporting flow", title: "First sign-in", lines: ["Ad
 const stepFromLink = (max) => { const n = Number(new URLSearchParams(window.location.search).get("step")); return n >= 1 && n <= max ? n : 1; };
 
 export function FirstSignIn() {
-  const { dispatch, lang, accounts } = useApp();
+  const { dispatch, lang, accounts, serverMode } = useApp();
   const nav = useNavigate();
+  const { state: from } = useLocation();
+  // With the server: the account that just signed in with its temporary password. Stand-alone: the sample account.
+  const accountId = from?.id || "WP-DRV-027";
+  const field = /^(WP-DRV|DEPOT-)/.test(accountId);
   const [step, setStep] = useState(() => stepFromLink(4));
-  const me = accounts.find((a) => a.id === "WP-DRV-027") || {};
-  const [code, setCode] = useState("482");
-  const [pin, setPin] = useState(() => (stepFromLink(4) >= 3 ? "1234" : ""));
+  const me = accounts.find((a) => a.id === accountId) || {};
+  const [code, setCode] = useState(serverMode ? "" : "482");
+  const [pin, setPin] = useState(() => (!serverMode && stepFromLink(4) >= 3 ? "1234" : ""));
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
+  if (serverMode && !from?.temp) return <Navigate to="/signin" replace />;
+  const okSecret = field ? pin.length === 6 : pin.length >= 8;
+  const finish = () => {
+    if (!serverMode) { dispatch({ type: "login", role: "driver" }); nav("/driver"); return; }
+    setBusy(true); setErr(null);
+    api.activate(accountId, from.temp, pin).then((r) => {
+      dispatch({ type: "login", user: r.user, token: r.token });
+      nav(USERS[r.user.role]?.home || r.user.home);
+    }).catch((e) => { setErr(e.message); setStep(3); setPin(""); }).finally(() => setBusy(false));
+  };
   const key = (setter, max) => (k) => setter((v) => (k === "⌫" ? v.slice(0, -1) : v.length < max ? v + k : v));
 
   return (
     <MobileFrame caption={CAPTION}>
       <div className="screen">
-        <TopBar title="First sign-in" sub={`Step ${step} of 4 · WP-DRV-027`} back={step > 1 ? undefined : "/"} time="08:10" />
+        <TopBar title="First sign-in" sub={`Step ${step} of 4 · ${accountId}`} back={step > 1 ? undefined : "/"} />
         <div className="body field">
           <div className="row" style={{ gap: 6 }}>
             {[1, 2, 3, 4].map((s) => <span key={s} style={{ flex: 1, height: 6, borderRadius: 9, background: s <= step ? "var(--brinjal)" : "var(--line-2)" }} />)}
@@ -196,18 +216,26 @@ export function FirstSignIn() {
             <>
               <h2 style={{ margin: "6px 0 0" }}>Add your phone number</h2>
               <div className="stop"><Phone size={20} /> <span className="muted">🇱🇰 +94</span> <b style={{ fontSize: 22 }} className="num">77 123 4521</b></div>
-              <div className="card flat small"><MessageSquareText size={16} style={{ verticalAlign: "-3px" }} /> We'll send a 6-digit code to check this number. We use it only if you forget your PIN.</div>
+              <div className="card flat small"><MessageSquareText size={16} style={{ verticalAlign: "-3px" }} /> We'll send a 6-digit code to check this number. We use it only if you forget your PIN.{serverMode && " (SMS sending is not connected in this version: enter any 6 digits.)"}</div>
               <Codes value={code} />
               <div className="muted small" style={{ textAlign: "center" }}>Code expires in 4:32 · Resend in 0:41</div>
               <Keypad onKey={key(setCode, 6)} />
             </>
           )}
-          {step === 3 && (
+          {step === 3 && field && (
             <>
               <h2 style={{ margin: "6px 0 0" }}>Make your own 6-digit PIN</h2>
+              {err && <div className="banner problem small">{err}</div>}
               <Dots count={pin.length} />
               <div className="muted small" style={{ textAlign: "center" }}>Don't use 123456 or your birthday.</div>
               <Keypad onKey={key(setPin, 6)} />
+            </>
+          )}
+          {step === 3 && !field && (
+            <>
+              <h2 style={{ margin: "6px 0 0" }}>Make your own password</h2>
+              {err && <div className="banner problem small">{err}</div>}
+              <input className="input" type="password" value={pin} onChange={(e) => setPin(e.target.value)} placeholder="At least 8 characters" autoComplete="new-password" />
             </>
           )}
           {step === 4 && (
@@ -217,7 +245,7 @@ export function FirstSignIn() {
                 <span className="tag ok"><Check size={13} /> Language</span><span className="tag ok"><Check size={13} /> Phone verified</span><span className="tag ok"><Check size={13} /> PIN set</span>
               </div>
               <div className="card">
-                {[["Name", me.name || "—"], ["Employee ID", "WP-DRV-027"], ["Role", "Driver"], ["Vehicle", me.vehicle || "VEH027"], ["Depot", me.depot || "Peliyagoda"]].map(([k, v]) => (
+                {[["Name", me.name || "—"], ["Account ID", accountId], ["Role", me.type || (field ? "Driver" : "—")], ...(me.vehicle ? [["Vehicle", me.vehicle]] : []), ["Depot", me.depot || "Peliyagoda"]].map(([k, v]) => (
                   <div key={k} className="row between" style={{ padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
                     <span className="muted"><Lock size={14} style={{ verticalAlign: "-2px" }} /> {k}</span><b>{v}</b>
                   </div>
@@ -230,8 +258,8 @@ export function FirstSignIn() {
         <div className="dock">
           <button
             className="btn primary field block"
-            disabled={(step === 2 && code.length < 6) || (step === 3 && pin.length < 6)}
-            onClick={() => (step < 4 ? setStep(step + 1) : (dispatch({ type: "login", role: "driver" }), nav("/driver")))}
+            disabled={busy || (step === 2 && code.length < 6) || (step === 3 && !okSecret)}
+            onClick={() => (step < 4 ? setStep(step + 1) : finish())}
           >
             {step === 2 ? "Verify" : step === 4 ? "Yes, start" : "Next"}
           </button>
@@ -317,6 +345,41 @@ export function Unlock() {
   );
 }
 
+/* Change your own password or PIN: checked and saved by the server. */
+export function ChangeSecret({ field, tf }) {
+  const { serverMode, setToast } = useApp();
+  const [open, setOpen] = useState(false);
+  const [cur, setCur] = useState(""); const [next, setNext] = useState(""); const [again, setAgain] = useState("");
+  const [err, setErr] = useState(null); const [busy, setBusy] = useState(false);
+  const label = tf(field ? "PIN" : "Password");
+  const save = () => {
+    if (next !== again) { setErr(tf("The two new entries are not the same")); return; }
+    if (!serverMode) { setErr(tf("Changing it needs the server (this is the stand-alone prototype)")); return; }
+    setBusy(true); setErr(null);
+    api.changePassword(session.get()?.token, cur, next)
+      .then(() => { setOpen(false); setCur(""); setNext(""); setAgain(""); setToast({ text: tf("{x} changed", { x: label }) }); })
+      .catch((e) => setErr(e.message)).finally(() => setBusy(false));
+  };
+  return (
+    <div className="stop" style={{ flexWrap: "wrap" }}>
+      <KeyRound size={20} color="var(--brinjal)" /> <span className="grow">{label}</span>
+      {!open && <button className="btn secondary" style={{ minHeight: 38 }} onClick={() => setOpen(true)}>{tf("Change")}</button>}
+      {open && (
+        <div className="col" style={{ gap: 8, width: "100%", marginTop: 8 }}>
+          <input className="input" type="password" inputMode={field ? "numeric" : undefined} placeholder={tf("Current {x}", { x: label })} value={cur} onChange={(e) => setCur(e.target.value)} autoComplete="current-password" />
+          <input className="input" type="password" inputMode={field ? "numeric" : undefined} placeholder={field ? tf("New PIN (6 digits)") : tf("New password (8+ characters)")} value={next} onChange={(e) => setNext(e.target.value)} autoComplete="new-password" />
+          <input className="input" type="password" inputMode={field ? "numeric" : undefined} placeholder={tf("New one again")} value={again} onChange={(e) => setAgain(e.target.value)} autoComplete="new-password" />
+          {err && <div className="banner problem small">{err}</div>}
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn secondary grow" onClick={() => { setOpen(false); setErr(null); }}>{tf("Cancel")}</button>
+            <button className="btn primary grow" disabled={busy || !cur || !next || !again} onClick={save}>{tf("Save")}</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Profile() {
   const { user, dispatch, tf, lang, peopleOf } = useApp();
   const nav = useNavigate();
@@ -341,7 +404,7 @@ export function Profile() {
   const settings = (
     <div className="col" style={{ gap: 12 }}>
       <div className="stop"><Phone size={20} color="var(--brinjal)" /> <span className="grow">+94 77 ••• 4521</span> <button className="btn secondary" style={{ minHeight: 38 }}>{tf("Change")}</button></div>
-      <div className="stop"><KeyRound size={20} color="var(--brinjal)" /> <span className="grow">{tf(u.role === "driver" || u.role === "loader" ? "PIN" : "Password")}</span> <button className="btn secondary" style={{ minHeight: 38 }}>{tf("Change")}</button></div>
+      <ChangeSecret field={u.role === "driver" || u.role === "loader"} tf={tf} />
       <div className="stop" style={{ flexWrap: "wrap" }}><Languages size={20} color="var(--brinjal)" /> <span className="grow">{tf("Language")}</span>
         <span className="row" style={{ gap: 6 }} role="group" aria-label={tf("Language")}>
           {LANGS.map((l) => <button key={l.code} className={`btn ${lang === l.code ? "primary" : "secondary"}`} style={{ minHeight: 38, padding: "0 12px", boxShadow: "none" }} aria-pressed={lang === l.code} onClick={() => dispatch({ type: "lang", lang: l.code })}>{{ en: "English", si: "සිංහල", ta: "தமிழ்" }[l.code]}</button>)}

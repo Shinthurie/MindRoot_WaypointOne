@@ -37,7 +37,9 @@ async function req(path, { method, body, token } = {}) {
 
 export const api = {
   login: (id, secret) => req("/api/auth/login", { body: { id, secret } }),
-  demo: (role, account) => req("/api/auth/demo", { body: { role, account } }),
+  demo: (role) => req("/api/auth/demo", { body: { role } }),
+  activate: (id, temp, secret) => req("/api/auth/activate", { body: { id, temp, secret } }),
+  changePassword: (token, current, next) => req("/api/auth/password", { token, body: { current, next } }),
   me: (token) => req("/api/auth/me", { token }),
   state: (token) => req("/api/state", { token }),
   commands: (token, commands) => req("/api/commands", { token, body: { commands } }),

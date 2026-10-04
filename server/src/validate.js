@@ -65,18 +65,21 @@ export async function validate(dayId, state, a, user) {
 }
 
 /* Database changes that go with some commands (after the command is recorded). */
-export async function effects(a) {
+export async function effects(a, secrets = {}) {
   if (a.type === "accountStatus") await q("UPDATE accounts SET status = $2, failed_attempts = 0, locked_until = NULL WHERE id = $1", [a.id, a.status === "Active" ? "Active" : a.status]);
   if (a.type === "setPeople") await q("UPDATE accounts SET people = $2 WHERE id = $1", [a.id, a.people || []]);
   if (a.type === "addAccount") {
     const x = a.account;
     const role = { Dispatcher: "dispatcher", Driver: "driver", "Store account": "store", "Depot account": "loader" }[x.type] || "admin";
     const field = role === "driver" || role === "loader";
-    const hash = await bcrypt.hash(String(x.temp || (field ? config.seedPin : config.seedPassword)), 10);
+    const hash = await bcrypt.hash(String(secrets.temp || (field ? config.seedPin : config.seedPassword)), 10);
     const veh = x.vehicle ? (await q("SELECT id FROM vehicles WHERE id = $1", [x.vehicle])).rows[0]?.id || null : null;
     const outlet = role === "store" ? (await q("SELECT id FROM outlets WHERE id = $1", [String(x.id).replace("STORE-", "")])).rows[0]?.id || null : null;
     await q(`INSERT INTO accounts (id, role, name, depot, outlet_id, vehicle_id, category, shared, people, status, secret_hash)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Active', $10) ON CONFLICT (id) DO NOTHING`,
-    [x.id, role, x.name, x.depot || null, outlet, veh, x.category || null, role === "store" || role === "loader", x.people || [], hash]);
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $11, $10) ON CONFLICT (id) DO NOTHING`,
+    [x.id, role, x.name, x.depot || null, outlet, veh, x.category || null, role === "store" || role === "loader", x.people || [], hash, secrets.temp ? "Not activated" : "Active"]);
+  }
+  if (a.type === "resetSignIn" && secrets.temp) {
+    await q("UPDATE accounts SET secret_hash = $2, status = 'Not activated', failed_attempts = 0, locked_until = NULL WHERE id = $1", [a.id, await bcrypt.hash(String(secrets.temp), 10)]);
   }
 }

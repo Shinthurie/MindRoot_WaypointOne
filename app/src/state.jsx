@@ -16,6 +16,7 @@ import { storeName, fleetAll, outletsAll, SEED_ACCOUNTS } from "./data/accounts"
 import { applyPlanEdits } from "./data/model";
 import { USERS, KANDY_LOADER, USERS_BY_ID, personalUser, initial, reducer } from "./domain/store";
 import { SERVER_MODE } from "./sync";
+import { clockAt, reduceAt } from "./domain/clock";
 import { useServerState } from "./useServerState";
 export { USERS, storeUpdateText } from "./domain/store";
 
@@ -29,8 +30,9 @@ function load() {
   } catch { /* storage blocked: start fresh */ }
   // A saved sign-in keeps its person, but always uses today's start page for its role (e.g. the loader's Home).
   if (s.user && USERS[s.user.role]) s = { ...s, user: { ...s.user, home: USERS[s.user.role].home } };
-  // Direct links for demos and Figma capture: ?as=driver&lang=si&offline=1&clean=1
-  const q = new URLSearchParams(window.location.search);
+  // Direct links for design capture (?as=driver&time=03:00&published=1…) only work in the stand-alone prototype.
+  // Connected to a server, a link can never sign anyone in or change the shared day: people sign in themselves.
+  const q = new URLSearchParams(SERVER_MODE ? [...new URLSearchParams(window.location.search)].filter(([k]) => ["lang", "frame", "clean"].includes(k)) : window.location.search);
   const as = q.get("as");
   if (as && USERS[as]) s = { ...s, user: USERS[as], lang: USERS[as].lang, person: USERS[as].people ? q.get("person") || USERS[as].people[0] : null };
   if (q.get("lang")) s = { ...s, lang: q.get("lang") };
@@ -41,7 +43,9 @@ function load() {
   s = { ...s, hideDemo: q.get("clean") === "1" };
   if (q.get("frame")) s = { ...s, phonePreview: q.get("frame") === "1" };
   if (q.get("depot")) s = { ...s, depot: q.get("depot") };
-  if (q.get("time") || q.get("date")) s = { ...s, clock: { date: q.get("date") || s.clock.date, time: q.get("time") || s.clock.time } };
+  if (q.get("time") || q.get("date")) s = { ...s, clock: { date: q.get("date") || s.clock.date, time: q.get("time") || s.clock.time, setAt: Date.now() } };
+  // A saved fixed time starts running from now (the clock always moves on, like a real one).
+  if (s.clock && !s.clock.real && !s.clock.setAt) s = { ...s, clock: { ...s.clock, setAt: Date.now() } };
   if (q.get("published")) s = { ...s, published: q.get("published") === "1", publishedBy: q.get("published") === "1" ? { by: "Demo link", at: s.clock.time } : null };
   // Demo links for screens that normally appear only after an action (for design capture):
   // &arrived=OUT074 (driver at a shop → hand-over), &dock=report|decided (Short at the Dock),
@@ -65,8 +69,11 @@ function load() {
 const Ctx = createContext(null);
 
 /* Local mode: this browser keeps the whole day (the design prototype). Server mode: see useServerState. */
+const localReducer = (s, a) => reduceAt(reducer, s, a);
 function useLocalState() {
-  const [state, dispatch] = useReducer(reducer, undefined, load);
+  const [state, raw] = useReducer(localReducer, undefined, load);
+  // Every action carries the moment it happened, so the reducer stays pure.
+  const dispatch = useMemo(() => (a) => raw({ ...a, at: a.at ?? Date.now() }), []);
   return [state, dispatch, null];
 }
 
@@ -132,7 +139,11 @@ export function StateProvider({ children }) {
   }, [toast]);
 
   // Every screen imports the same live plan; rebuild it when the dispatcher edits it.
-  useMemo(() => applyPlanEdits(state.planEdits, state.stopOrders, state.storeEdits, state.clock.date, state.planAlloc), [state.planEdits, state.stopOrders, state.storeEdits, state.clock.date, state.planAlloc]);
+  // The day's clock keeps running: every screen gets the current date and time (state.clock holds the setting).
+  const [tick, setTick] = useState(() => Date.now());
+  useEffect(() => { const id = setInterval(() => setTick(Date.now()), 15000); return () => clearInterval(id); }, []);
+  const clock = useMemo(() => clockAt(state.clock, Math.max(tick, state.clock?.setAt || 0)), [state.clock, tick]);
+  useMemo(() => applyPlanEdits(state.planEdits, state.stopOrders, state.storeEdits, clock.date, state.planAlloc), [state.planEdits, state.stopOrders, state.storeEdits, clock.date, state.planAlloc]);
 
   const accounts = useMemo(
     () => [...SEED_ACCOUNTS, ...state.newAccounts].map((a) => ({
@@ -159,11 +170,11 @@ export function StateProvider({ children }) {
   const peopleOf = (id) => accounts.find((a) => a.id === id)?.people || USERS_BY_ID[id]?.people || [];
 
   const value = useMemo(() => ({
-    ...state, online, dispatch, toast, setToast, accounts, peopleOf, fleet, storeRules, sync, serverMode: SERVER_MODE,
+    ...state, clock, clockSetting: state.clock, online, dispatch, toast, setToast, accounts, peopleOf, fleet, storeRules, sync, serverMode: SERVER_MODE,
     t: (key) => translate(state.lang, key),
     tf: (key, vars) => phrase(state.lang, key, vars),
     fd: (iso) => localDate(state.lang, iso),
-  }), [state, online, toast, accounts, fleet, sync?.live, sync?.waiting]);
+  }), [state, clock, online, toast, accounts, fleet, sync?.live, sync?.waiting]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

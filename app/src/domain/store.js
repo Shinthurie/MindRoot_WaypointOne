@@ -142,7 +142,7 @@ export function reducer(s, a) {
     case "truckUnloaded": { const { [`${a.vehicle}:${a.run}`]: _, ...rest } = s.loadedTrucks; return { ...s, loadedTrucks: rest }; }
     // Bad days portal: put one scenario back to its start.
     case "badReset": {
-      let n = { ...s, clock: { date: SCENARIO_DAY, time: a.time }, published: true, publishedBy: s.publishedBy || { by: "Nimal", at: "19:05" }, simOffline: false, offlineVeh: null };
+      let n = { ...s, clock: { date: SCENARIO_DAY, time: a.time, setAt: a.at ?? null }, published: true, publishedBy: s.publishedBy || { by: "Nimal", at: "19:05" }, simOffline: false, offlineVeh: null };
       if (a.id === "dock") {
         const keep = (k) => !k.startsWith("VEH006:1");
         n = { ...n, loaderReports: n.loaderReports.filter((r) => !(r.vehicle === "VEH006" && r.outlet === "OUT026")), adjusted: {},
@@ -158,7 +158,12 @@ export function reducer(s, a) {
     }
     case "person": return { ...s, person: a.name };
     case "depot": return { ...s, depot: a.depot };
-    case "clock": return { ...s, clock: { ...s.clock, ...a.clock } };
+    // Only the dispatcher changes the day's clock: a set time keeps running from that moment, or real time.
+    case "clock": {
+      if (a.real) return { ...s, clock: { real: true, setAt: a.at ?? null } };
+      const cur = { date: s.clock.date, time: s.clock.time };
+      return { ...s, clock: { date: a.clock?.date || cur.date, time: a.clock?.time || cur.time, setAt: a.at ?? null } };
+    }
     case "publish": return { ...s, published: true, publishedBy: s.published ? s.publishedBy : { by: a.by || "Dispatcher", at: s.clock.time } };
     // Each edit remembers where the order was, when, and whether the plan was already published (loaders must re-check).
     case "planEdit": {
@@ -198,10 +203,12 @@ export function reducer(s, a) {
     // The dispatcher's answer to a store report (send on the next run, or credit) goes back to the store.
     case "storeReportDecision": return { ...s, storeReports: s.storeReports.map((r) => (r.id === a.id ? { ...r, decision: a.decision, decidedBy: a.by, decidedAt: s.clock.time } : r)) };
     case "setPeople": return { ...s, peopleEdits: { ...s.peopleEdits, [a.id]: a.people } };
-    case "addAccount": return { ...s, newAccounts: [...s.newAccounts, a.account] };
     case "storeRules": return { ...s, storeEdits: { ...s.storeEdits, [a.outlet]: a.rules } };
     case "fleetStatus": return { ...s, fleetEdits: { ...s.fleetEdits, [a.vehicle]: a.change } };
     case "accountStatus": return { ...s, accountStatus: { ...s.accountStatus, [a.id]: a.status } };
+    // Admin gave a new temporary password: the person sets their own at the next (first) sign-in.
+    case "resetSignIn": return { ...s, accountStatus: { ...s.accountStatus, [a.id]: "Not activated" } };
+    case "addAccount": return { ...s, newAccounts: [...s.newAccounts, (({ temp, ...acc }) => acc)(a.account || {})] };
     case "log": return { ...s, log: [{ at: s.clock.time, day: s.clock.date, who: a.who, role: a.role, what: a.what }, ...s.log] };
     case "lang": return { ...s, lang: a.lang };
     case "offline": return { ...s, simOffline: a.value, offlineVeh: a.value ? a.vehicle || null : null };
@@ -227,7 +234,8 @@ export function reducer(s, a) {
       const arrivedAt = p.arrivedAt || s.clock.time;
       const startAt = Math.max(mins(arrivedAt), a.open ? mins(a.open) : 0);
       const serviceMin = Math.max(0, mins(s.clock.time) - startAt);
-      const rec = { outcome: a.outcome, missing: a.missing || 0, reason: a.reason || null, at: s.clock.time, synced: a.online, arrivedAt, serviceMin, receivedBy: a.receivedBy || null };
+      const rec = { outcome: a.outcome, missing: a.missing || 0, reason: a.reason || null, at: s.clock.time, synced: a.online, arrivedAt, serviceMin, receivedBy: a.receivedBy || null,
+        photo: a.photo || null, signature: a.signature || null };
       return { ...s, delivered: { ...s.delivered, [k]: rec }, outbox: a.online ? s.outbox : [...s.outbox, k] };
     }
     case "sync": {
@@ -248,7 +256,7 @@ export function reducer(s, a) {
       const own = { user: s.user, person: s.person, lang: s.lang, phonePreview: s.phonePreview, hideDemo: s.hideDemo, guide: s.guide };
       return { ...s, ...a.state, ...own };
     }
-    case "reset": return { ...initial, user: s.user, lang: s.lang, phonePreview: s.phonePreview, person: s.person };
+    case "reset": return { ...initial, clock: { ...initial.clock, setAt: a.at ?? null }, user: s.user, lang: s.lang, phonePreview: s.phonePreview, person: s.person };
     default: return s;
   }
 }

@@ -4,7 +4,7 @@ import { Camera, Check, ClipboardCheck, CloudOff, Info, ListOrdered, MessageSqua
 import { useApp } from "../state";
 import { S1_DATE, downPlan, n, orders, outletOrders, plan, round1, stopKey, toMin, tripOf, unitsOf, vehicleOf } from "../data/model";
 import { outletsAll, storeName } from "../data/accounts";
-import { BrandTile, Chip, MobileFrame, Pic, Stepper, TopBar, nextOperatingDay, useClock, useRuns, useWho } from "../components/ui";
+import { BrandTile, Chip, MobileFrame, Pic, Stepper, TopBar, nextOperatingDay, useClock, useRuns, useWho, PhotoButton } from "../components/ui";
 
 const NAV = [
   { to: "/store", label: "Deliveries", icon: Truck },
@@ -67,7 +67,7 @@ export function deliveryOf(info, outlet, delivered, now, tracked = { VEH003: tru
   if (!info.vehicle) return null;
   if (tracked[info.vehicle]) {
     const d = delivered[stopKey(info.vehicle, outlet)];
-    return d?.synced ? { at: d.at, by: d.receivedBy || null, outcome: d.outcome, missing: d.missing || 0, reason: d.reason } : null;
+    return d?.synced ? { at: d.at, by: d.receivedBy || null, outcome: d.outcome, missing: d.missing || 0, reason: d.reason, photo: d.photo || null, signature: d.signature || null } : null;
   }
   const s = info.stop;
   return s?.leave && toMin(s.leave) <= toMin(now) ? { at: s.eta, by: null, outcome: "all" } : null;
@@ -488,11 +488,12 @@ function ReceiveOrder({ x, arrived, onPick }) {
   const order = x.o;
   const [ok, setOk] = useState(order.units - (x.got.missing || 0)); // the driver's count of missing cases, if any
   const [kind, setKind] = useState(null);
+  const [photo, setPhoto] = useState(null);
   const who = useWho();
   const missing = order.units - ok;
   const receiver = x.got.by || tf("store staff");
   const send = () => who.ask(tf("Report a problem"), (name) => {
-    dispatch({ type: "storeReport", report: { outlet: store.outlet, name: store.name, ref: order.ref, vehicle: x.vehicle, count: missing, kind, what: `${missing} ${order.chilled ? "chilled " : ""}${missing === 1 ? "case" : "cases"} ${kind}`, by: name } });
+    dispatch({ type: "storeReport", report: { outlet: store.outlet, name: store.name, ref: order.ref, vehicle: x.vehicle, count: missing, kind, photo, what: `${missing} ${order.chilled ? "chilled " : ""}${missing === 1 ? "case" : "cases"} ${kind}`, by: name } });
     dispatch({ type: "log", who: name, role: `Store · ${store.outlet}`, what: `Reported ${missing} ${order.chilled ? "chilled " : ""}${missing === 1 ? "case" : "cases"} ${kind} on ${order.ref}` });
     setToast({ text: tf("Sent by {name} · the dispatcher sees it now, with the driver's proof", { name }) });
     nav("/store");
@@ -511,8 +512,12 @@ function ReceiveOrder({ x, arrived, onPick }) {
     <div className="card">
       <div className="section-label" style={{ margin: 0 }}>{tf("Proof from driver · {v}", { v: x.vehicle })}</div>
       <div className="row" style={{ marginTop: 10 }}>
-        <div style={{ flex: 1, height: 110, borderRadius: 12, background: "linear-gradient(135deg,#d9cfe0,#f3ecf5)", display: "flex", alignItems: "center", justifyContent: "center" }} role="img" aria-label="Delivery photo"><Camera color="var(--brinjal)" /></div>
-        <div style={{ flex: 1, height: 110, borderRadius: 12, background: "#fff", border: "1px dashed var(--line-2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "cursive", fontSize: 22, color: "var(--brinjal)" }} role="img" aria-label={`Signed by ${receiver}`}>{receiver}</div>
+        {x.got.photo
+          ? <a href={x.got.photo} target="_blank" rel="noreferrer" style={{ flex: 1 }}><img src={x.got.photo} alt={tf("Delivery photo")} style={{ width: "100%", height: 110, objectFit: "cover", borderRadius: 12 }} /></a>
+          : <div style={{ flex: 1, height: 110, borderRadius: 12, background: "linear-gradient(135deg,#d9cfe0,#f3ecf5)", display: "flex", alignItems: "center", justifyContent: "center" }} role="img" aria-label="No photo"><Camera color="var(--brinjal)" /></div>}
+        {x.got.signature
+          ? <div style={{ flex: 1, height: 110, borderRadius: 12, background: "#fff", border: "1px solid var(--line)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><img src={x.got.signature} alt={`Signed by ${receiver}`} style={{ maxWidth: "100%", maxHeight: 80 }} /><span className="muted xs">{receiver}</span></div>
+          : <div style={{ flex: 1, height: 110, borderRadius: 12, background: "#fff", border: "1px dashed var(--line-2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "cursive", fontSize: 22, color: "var(--brinjal)" }} role="img" aria-label={`Signed by ${receiver}`}>{receiver}</div>}
       </div>
     </div>
   );
@@ -527,7 +532,7 @@ function ReceiveOrder({ x, arrived, onPick }) {
             <Pic icon={SplitIcon} label={tf("Damaged")} selected={kind === "damaged"} onClick={() => setKind("damaged")} />
             {order.chilled && <Pic icon={Thermometer} label={tf("Warm")} selected={kind === "warm"} onClick={() => setKind("warm")} />}
           </div>
-          {kind && <div className="stop"><Camera size={20} /> <b className="grow">{tf("Add a photo")}</b> <span className="tag">{tf("{n} cases {kind}", { n: missing, kind: tf(kind) })}</span></div>}
+          {kind && <PhotoButton value={photo} onChange={setPhoto} icon={Camera} label={`${tf("Add a photo")} · ${tf("{n} cases {kind}", { n: missing, kind: tf(kind) })}`} doneLabel={tf("Photo added")} highlight />}
         </>
       )}
     </>
@@ -546,19 +551,23 @@ function ReceiveOrder({ x, arrived, onPick }) {
 }
 
 export function Dispute() {
-  const { scenario, dispatch, setToast, hideDemo, user, peopleOf, tf } = useApp();
+  const { scenario, dispatch, setToast, user, peopleOf, tf } = useApp();
   const nav = useNavigate();
   if (user?.outlet && user.outlet !== "OUT074") return <Navigate to="/store" replace />;
   const synced = scenario.dead === "synced";
   const signer = peopleOf("STORE-OUT074")[0] || tf("store staff");
   const close = () => { dispatch({ type: "scenario", patch: { dead: "idle" } }); setToast({ text: tf("Report closed · thank you") }); nav("/store"); };
-  const release = () => { dispatch({ type: "scenario", patch: { dead: "synced" } }); dispatch({ type: "offline", value: false }); };
-  const waiting = hideDemo ? <div className="muted small" style={{ textAlign: "center" }}>{tf("Waiting for {v}'s records…", { v: "VEH010" })}</div> : <button className="btn secondary block" onClick={release}>Demo: signal returns for VEH010</button>;
+  // The answer comes from the driver's phone: the proof syncs by itself when VEH010 has signal again.
+  const waiting = <div className="muted small" style={{ textAlign: "center" }}>{tf("Waiting for {v}'s records…", { v: "VEH010" })}</div>;
+  const still = () => {
+    dispatch({ type: "storeReport", report: { outlet: "OUT074", name: storeName.OUT074, ref: "S1-082", vehicle: "VEH010", kind: "stillMissing", what: "Still not found after the driver's proof", by: signer } });
+    setToast({ text: tf("Sent to the dispatcher") });
+  };
   return (
     <StoreFrame title={tf("Deliveries · {date}", { date: storeName.OUT074 })} sub="OUT074 · Puttalam"
       caption={{ kicker: "Bad day 3", title: "Dead Zone · Puttalam", lines: ["The store says “not delivered”. The driver recorded proof offline. When the signal returns, the proof settles it automatically."] }}
-      dock={synced ? <><button className="btn primary block" onClick={close}>{tf("Found it ✓ close report")}</button><button className="btn ghost block">{tf("Still a problem")}</button></> : waiting}
-      actions={synced ? <><button className="btn ghost">{tf("Still a problem")}</button><button className="btn primary" onClick={close}>{tf("Found it ✓ close report")}</button></> : hideDemo ? null : <button className="btn secondary" onClick={release}>Demo: signal returns for VEH010</button>}>
+      dock={synced ? <><button className="btn primary block" onClick={close}>{tf("Found it ✓ close report")}</button><button className="btn ghost block" onClick={still}>{tf("Still a problem")}</button></> : waiting}
+      actions={synced ? <><button className="btn ghost" onClick={still}>{tf("Still a problem")}</button><button className="btn primary" onClick={close}>{tf("Found it ✓ close report")}</button></> : null}>
       {(wide) => (
         <div className={wide ? "store-grid" : "col"} style={wide ? {} : { gap: 12 }}>
           <div className="card">

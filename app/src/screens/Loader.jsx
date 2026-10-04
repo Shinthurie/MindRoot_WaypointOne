@@ -3,7 +3,7 @@ import { NavLink, Navigate, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, ArrowLeftRight, Camera, Check, ClipboardList, Droplets, History, Home, Mic, Monitor, PackageX, Snowflake, Split as SplitIcon, Thermometer, Truck, Undo2, UserPlus, Users, Refrigerator } from "lucide-react";
 import { useApp } from "../state";
 import { orders, plan, reeferDown, runsOf, stopUnits, toMin } from "../data/model";
-import { BrandChip, Chip, LangChip, MobileFrame, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Stepper, TopBar, useClock, } from "../components/ui";
+import { BrandChip, Chip, LangChip, MobileFrame, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Stepper, TopBar, useClock, PhotoButton } from "../components/ui";
 
 /* Field portal: the phone layout on every screen size (phones, big tablets, desktops), with the bottom bar. */
 const useLayout = () => "phone";
@@ -441,7 +441,7 @@ export function LoaderProblem() {
   const stop = stops.find((s) => s.outlet === outlet) || stops[0];
   const [kind, setKind] = useState("broken");
   const [count, setCount] = useState(2);
-  const [photo, setPhoto] = useState(true);
+  const [photo, setPhoto] = useState(null); // a real photo of the damage (small JPEG)
   const send = () => {
     dispatch({ type: "loaderReport", report: { vehicle: veh, run: run?.run, outlet: stop?.outlet, ref: stop?.orders.map((o) => o.ref).join(" + "), count, kind, chilled: !!stop?.chilled, units: stop?.units, what: `${count} ${stop?.chilled ? "chilled " : ""}cases ${kind}`, by: person, photo } });
     dispatch({ type: "log", who: person, role: `Loader · ${user?.depot || "Peliyagoda"} depot`, what: `Reported ${count} ${kind} cases for ${stop?.outlet} on ${veh}` });
@@ -469,7 +469,7 @@ export function LoaderProblem() {
           </div>
           <div className="stop"><b className="grow" style={{ fontSize: 18 }}>{t("howMany")}</b><span className="big" style={{ marginRight: 8 }}>{count}</span><Stepper value={count} onChange={setCount} min={1} /></div>
           <div className="row">
-            <button className={`stop grow ${photo ? "" : "hl"}`} onClick={() => setPhoto(true)}><Camera size={22} /> <b>{t("photo")}</b> {photo && <Check color="var(--done)" />}</button>
+            <PhotoButton value={photo} onChange={setPhoto} icon={Camera} label={t("photo")} doneLabel={`${t("photo")} ✓`} />
             <button className="stop grow"><Mic size={22} /> <b>{t("voiceNote")}</b></button>
           </div>
         </div>

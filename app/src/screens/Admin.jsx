@@ -17,7 +17,8 @@ const isShared = (a) => a.type === "Store account" || a.type === "Depot account"
 
 function tempPassword() {
   const c = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  const pick = () => c[Math.floor(Math.random() * c.length)] + c[Math.floor(Math.random() * c.length)];
+  const rnd = () => crypto.getRandomValues(new Uint32Array(1))[0] % c.length; // secure random, not Math.random
+  const pick = () => c[rnd()] + c[rnd()];
   return `${pick()}-${pick()}-${pick()}`;
 }
 const nextNumber = (ids, re) => Math.max(0, ...ids.map((id) => Number((id.match(re) || [])[1] || 0))) + 1;
@@ -281,9 +282,11 @@ export function AdminUsers() {
   const [q, setQ] = useState("");
 
   const onCreate = ({ rules: storeRulesNew, outlet, ...acc }) => {
-    dispatch({ type: "addAccount", account: acc });
+    const pw = tempPassword();
+    // The temporary password goes to the server once (stored only as a hash) for the person's first sign-in.
+    dispatch({ type: "addAccount", account: { ...acc, temp: pw } });
     if (storeRulesNew) dispatch({ type: "storeRules", outlet, rules: storeRulesNew });
-    setCreated({ ...acc, pw: tempPassword() });
+    setCreated({ ...acc, pw });
     setAdding(false);
     dispatch({ type: "log", who: "Admin", role: "Admin", what: `Created ${acc.type.toLowerCase()} ${acc.id}${acc.vehicle ? ` with vehicle ${acc.vehicle}` : ""}${storeRulesNew ? ` · ${describeRules(storeRulesNew)}` : ""}` });
   };
@@ -352,7 +355,7 @@ export function AdminUsers() {
                   <td style={{ whiteSpace: "nowrap" }}>
                     {a.type === "Store account" && <button className="btn secondary" style={{ minHeight: 34, padding: "0 10px", fontSize: 13, marginRight: 6 }} onClick={() => { setRules(a); setEditing(null); setAdding(false); setCreated(null); }}><SlidersHorizontal size={14} /> Details</button>}
                     {isShared(a) && <button className="btn secondary" style={{ minHeight: 34, padding: "0 10px", fontSize: 13, marginRight: 6 }} onClick={() => { setEditing(a); setRules(null); setAdding(false); setCreated(null); }}><Pencil size={14} /> People</button>}
-                    <RowMenu account={a} onReset={(acc) => { setCreated({ ...acc, reset: true, pw: tempPassword() }); setAdding(false); setEditing(null); setRules(null); dispatch({ type: "log", who: "Admin", role: "Admin", what: `Reset sign-in for ${acc.id}` }); }} />
+                    <RowMenu account={a} onReset={(acc) => { const pw = tempPassword(); dispatch({ type: "resetSignIn", id: acc.id, temp: pw }); setCreated({ ...acc, reset: true, pw }); setAdding(false); setEditing(null); setRules(null); dispatch({ type: "log", who: "Admin", role: "Admin", what: `Reset sign-in for ${acc.id}` }); }} />
                   </td>
                 </tr>
               ))}

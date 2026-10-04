@@ -6,7 +6,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { config } from "./config.js";
 import { q, waitForDb } from "./db.js";
-import { AuthError, demoLogin, login, profile, requireAuth, requireRole } from "./auth.js";
+import { AuthError, activate, changeSecret, demoLogin, login, profile, requireAuth, requireRole } from "./auth.js";
 import { apply, getState, listenerCount, rebuild, subscribe } from "./daystore.js";
 import { checkAlloc, effectiveAlloc, loadDay, runEngine, savePlan } from "./planning.js";
 
@@ -32,7 +32,9 @@ app.get("/api/health", wrap(async (req, res) => {
 
 // ---------- Sign-in ----------
 app.post("/api/auth/login", wrap(async (req, res) => res.json(await login(req.body.id, req.body.secret))));
-app.post("/api/auth/demo", wrap(async (req, res) => res.json(await demoLogin(req.body.role, req.body.account))));
+app.post("/api/auth/activate", wrap(async (req, res) => res.json(await activate(req.body.id, req.body.temp, req.body.secret))));
+app.post("/api/auth/password", requireAuth, wrap(async (req, res) => res.json(await changeSecret(req.user.id, req.body.current, req.body.next))));
+app.post("/api/auth/demo", wrap(async (req, res) => res.json(await demoLogin(req.body.role))));
 app.get("/api/auth/me", requireAuth, wrap(async (req, res) => {
   if (req.user.role === "demo") return res.json({ user: { role: "demo", id: "DEMO", name: "Demo controls" } });
   const { rows } = await q("SELECT * FROM accounts WHERE id = $1", [req.user.id]);

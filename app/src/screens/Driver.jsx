@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
+import { ChangeSecret } from "./Auth";
 import { Fuel, KeyRound, List as ListIcon, LogOut, Route as RouteIcon, UserRound } from "lucide-react";
 import DriverMap from "../components/DriverMap";
 import { LANGS } from "../i18n";
@@ -7,7 +8,7 @@ import { AlertTriangle, ArrowLeftRight, Camera, Car, Check, CloudOff, DoorOpen, 
 import { useApp } from "../state";
 import { fmt, fuelThisWeek, plan, runsOf, stopKey, toMin } from "../data/model";
 import { storeName } from "../data/accounts";
-import { BrandTile, Chip, MobileFrame, OfflineBanner, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Split, Stepper, TopBar, useClock, } from "../components/ui";
+import { BrandTile, Chip, MobileFrame, OfflineBanner, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Split, Stepper, TopBar, useClock, PhotoButton, SignatureButton } from "../components/ui";
 
 /* Field portal: the phone layout on every screen size (phones, big tablets, desktops), with the bottom bar. */
 const useLayout = () => "phone";
@@ -192,8 +193,8 @@ function DeliverPanel({ s, wide }) {
   const [outcome, setOutcome] = useState("all");
   const [missing, setMissing] = useState(1);
   const [reason, setReason] = useState("shopClosed");
-  const [photo, setPhoto] = useState(false);
-  const [signed, setSigned] = useState(false);
+  const [photo, setPhoto] = useState(null); // the delivery photo (small JPEG)
+  const [signed, setSigned] = useState(null); // the receiver's signature (PNG)
   const staff = peopleOf(`STORE-${s.outlet}`);
   const receivers = staff.length ? staff : [`${t("nightStaff")} 1`, `${t("nightStaff")} 2`];
   const [receiver, setReceiver] = useState(receivers[0]);
@@ -202,7 +203,7 @@ function DeliverPanel({ s, wide }) {
   const early = arrivedAt && toMin(arrivedAt) < toMin(s.open) && toMin(clock.time) < toMin(s.open);
   const ready = outcome === "none" ? photo : photo && signed;
   const finish = () => {
-    dispatch({ type: "deliver", vehicle: veh, outlet: s.outlet, open: s.open, outcome, missing: outcome === "some" ? missing : 0, reason: outcome === "none" ? reason : null, online, receivedBy: outcome === "none" ? null : receiver });
+    dispatch({ type: "deliver", vehicle: veh, outlet: s.outlet, open: s.open, outcome, missing: outcome === "some" ? missing : 0, reason: outcome === "none" ? reason : null, online, receivedBy: outcome === "none" ? null : receiver, photo, signature: outcome === "none" ? null : signed });
     dispatch({ type: "log", who: driver, role: `Driver · ${veh}`, what: outcome === "all" ? `Delivered to ${s.outlet}` : outcome === "some" ? `Delivered to ${s.outlet} with ${missing} cases missing` : `Could not deliver to ${s.outlet} (${t(reason)})` });
     setToast({ text: online ? `${s.outlet} sent to dispatcher and store` : `${s.outlet} saved on phone · sends when signal returns` });
     const remaining = t1.stops.filter((x) => x.outlet !== s.outlet && !done(x));
@@ -232,13 +233,9 @@ function DeliverPanel({ s, wide }) {
           </>
         )}
         <div className={wide ? "row" : "col"} style={{ gap: 12 }}>
-          <button className={`stop grow ${photo ? "" : "hl"}`} onClick={() => setPhoto(true)}>
-            <Camera size={24} color="var(--brinjal)" /> <b className="grow" style={{ fontSize: 17 }}>{photo ? t("photo") : t("takePhoto")}</b> {photo && <Check color="var(--done)" />}
-          </button>
+          <PhotoButton value={photo} onChange={setPhoto} icon={Camera} label={t("takePhoto")} doneLabel={t("photo")} highlight />
           {outcome !== "none" && (
-            <button className={`stop grow ${photo && !signed ? "hl" : ""}`} onClick={() => setSigned(true)}>
-              <PenLine size={24} color="var(--brinjal)" /> <b className="grow" style={{ fontSize: 17 }}>{signed ? t("signed") : t("sign")}</b> {signed && <Check color="var(--done)" />}
-            </button>
+            <SignatureButton value={signed} onChange={setSigned} icon={PenLine} label={t("sign")} doneLabel={t("signed")} highlight={!!photo} who={receiver} />
           )}
         </div>
         {outcome !== "none" && (
@@ -604,7 +601,7 @@ function AccountScreen() {
             </span>
           </div>
           <button className="stop" onClick={() => nav("/driver/problem")}><Wrench size={22} color="var(--problem)" /><b className="grow" style={{ fontSize: 16 }}>{t("vehicleProblem")}</b></button>
-          <button className="stop"><KeyRound size={22} color="var(--brinjal)" /><b className="grow" style={{ fontSize: 16 }}>{t("changePin")}</b></button>
+          <ChangeSecret field tf={tf} />
           <button className="btn secondary block" onClick={() => { dispatch({ type: "logout" }); nav("/"); }}><LogOut size={18} /> {t("signOut")}</button>
         </div>
         <DriverNav />

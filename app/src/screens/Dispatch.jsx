@@ -923,7 +923,7 @@ export function Live() {
               })}
             </div>
           )}
-          {problems.length === 0 && risks.length === 0 && <p className="muted small">All quiet. Use the Demo button to trigger a bad day.</p>}
+          {problems.length === 0 && risks.length === 0 && <p className="muted small">All quiet: no problems reported and no truck at risk of being late.</p>}
           {problems.map((p) => (
             <div key={p.key} className="card flat" style={{ marginTop: 10, borderLeft: `4px solid ${p.ok ? "var(--done)" : "var(--problem)"}` }}>
               <b>{p.ok ? "✓ " : "⚠ "}{p.title}</b>
@@ -943,9 +943,6 @@ export function Live() {
               )}
             </div>
           ))}
-          {scenario.dead === "idle" && (
-            <button className="link" onClick={() => { dispatch({ type: "scenario", patch: { dead: "complaint" } }); }}>Demo: VEH010 enters the Puttalam dead zone</button>
-          )}
         </div>
       </div>
     {sms && <SmsSheet sms={sms} onClose={() => setSms(null)} />}
@@ -981,6 +978,7 @@ export function Incident() {
         <div className="panel incident" style={{ maxWidth: 760 }}>
           <div className="row" style={{ gap: 10 }}><Chip kind="problem">Short at the Dock</Chip><span className="muted small">{rep.vehicle} · run {run?.run ?? "–"} · {rep.outlet}{rep.ref ? ` · ${rep.ref}` : ""}</span></div>
           <h3 style={{ margin: "12px 0 4px", fontSize: 22 }}>{rep.count} of {rep.units} {rep.chilled ? "chilled " : ""}cases {rep.kind}</h3>
+          {typeof rep.photo === "string" && <a href={rep.photo} target="_blank" rel="noreferrer"><img src={rep.photo} alt="Photo from the dock" style={{ maxWidth: 260, maxHeight: 180, borderRadius: 12, margin: "6px 0" }} /></a>}
           <div className={`tag ${canReplace ? "warn" : "bad"}`} style={{ fontSize: 13 }}><Timer size={14} /> {rep.vehicle} leaves {run?.start} · {spare} min spare before a stop would be late</div>
           <div className="col" style={{ gap: 10, marginTop: 16 }}>
             <button className={`option ${pick === "A" ? "sel" : ""}`} disabled={!canReplace} onClick={() => setChoice("A")}>

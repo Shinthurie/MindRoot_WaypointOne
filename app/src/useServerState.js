@@ -10,29 +10,24 @@
    - Everyone else's commands arrive on the live stream and are applied to the confirmed state. */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { initial, reducer, sharedOf, LOCAL_KEYS, LOCAL_ACTIONS, USERS } from "./domain/store";
+import { reduceAt } from "./domain/clock";
 import { api, confirmedCache, demoSession, openEvents, outbox, session, uuid } from "./sync";
 
 const pick = (s, keys) => Object.fromEntries(keys.map((k) => [k, s[k]]));
 const LOCAL_KEY = "waypoint-one-state-v9"; // the same key the app's load() reads
 
-/* Demo links (?time=03:00&published=1&offline=1) become demo commands, so every portal sees the same day. */
-function urlCommands() {
-  const q = new URLSearchParams(window.location.search);
-  const out = [];
-  if (q.get("time") || q.get("date")) out.push({ type: "clock", clock: { ...(q.get("date") ? { date: q.get("date") } : {}), ...(q.get("time") ? { time: q.get("time") } : {}) } });
-  if (q.get("published") === "1") out.push({ type: "publish", by: "Demo link" });
-  if (q.get("offline")) out.push({ type: "offline", value: q.get("offline") === "1" });
-  return out;
-}
 
 export function useServerState(load, notify) {
-  const [boot] = useState(() => { const s = load(); return { local: pick(s, LOCAL_KEYS), url: urlCommands() }; });
+  const [boot] = useState(() => {
+    const s = load();
+    // Signed in on this device only counts with a valid server session for that same account.
+    const sess = session.get();
+    const user = s.user && sess?.userId === s.user.id ? s.user : null;
+    return { local: { ...pick(s, LOCAL_KEYS), user, person: user ? s.person : null } };
+  });
   const [local, setLocal] = useState(boot.local);
   const [conf, setConf] = useState(() => confirmedCache.load() || { seq: -1, state: sharedOf(initial) });
-  const [pending, setPending] = useState(() => [
-    ...outbox.load(),
-    ...boot.url.map((action) => ({ id: uuid(), action, demo: true, clientTime: new Date().toISOString() })),
-  ]);
+  const [pending, setPending] = useState(() => outbox.load());
   const [auth, setAuth] = useState(() => session.get()); // { token, userId }
   const [live, setLive] = useState(false);
   const [retry, setRetry] = useState(0);
@@ -47,7 +42,7 @@ export function useServerState(load, notify) {
 
   const view = useMemo(() => {
     let s = { ...initial, ...conf.state, ...local };
-    for (const p of pending) s = reducer(s, p.action);
+    for (const p of pending) s = reduceAt(reducer, s, p.action);
     return { ...s, ...local };
   }, [conf, pending, local]);
 
@@ -66,32 +61,29 @@ export function useServerState(load, notify) {
     demoTok.current = r.token; demoSession.set(r.token);
     return r.token;
   }, []);
-  // The token to read with: the signed-in person's, or the demo viewer's (landing page, bad days portal).
+  // The token to read with: the signed-in person's. The bad days portal (a demo tool) reads with its demo session.
   const readToken = auth?.token && auth.userId === local.user?.id ? auth.token : null;
-
-  // A person picked on a demo tile or demo link gets a real server session for that account.
+  const [onPortal, setOnPortal] = useState(() => window.location.hash.startsWith("#/bad-days"));
   useEffect(() => {
-    const u = local.user;
-    if (!u || (auth && auth.userId === u.id)) return;
-    let cancelled = false;
-    api.demo(u.role, u.id).then((r) => { if (!cancelled) { const s = { token: r.token, userId: u.id }; session.set(s); setAuth(s); } })
-      .catch((e) => notify?.(`Sign-in needed: ${e.message}`));
-    return () => { cancelled = true; };
-  }, [local.user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    const on = () => setOnPortal(window.location.hash.startsWith("#/bad-days"));
+    window.addEventListener("hashchange", on);
+    return () => window.removeEventListener("hashchange", on);
+  }, []);
 
   const refetch = useCallback(async () => {
     try {
-      const tok = readToken || (await getDemoToken());
+      const tok = readToken || (onPortal ? await getDemoToken() : null);
+      if (!tok) return;
       const r = await api.state(tok);
       setConf({ seq: r.seq, state: r.state });
     } catch { /* offline: keep what we have */ }
-  }, [readToken, getDemoToken]);
+  }, [readToken, onPortal, getDemoToken]);
 
   // Live stream of everyone's changes.
   useEffect(() => {
     let close = () => {}, stop = false;
     (async () => {
-      const tok = readToken || (await getDemoToken().catch(() => null));
+      const tok = readToken || (onPortal ? await getDemoToken().catch(() => null) : null);
       if (!tok || stop) return;
       await refetch();
       close = openEvents(tok, (m) => {
@@ -100,13 +92,13 @@ export function useServerState(load, notify) {
         if (m.kind === "command") {
           const c = confRef.current;
           if (c.seq + 1 !== m.seq) { refetch(); }
-          else { const next = { seq: m.seq, state: sharedOf(reducer(c.state, m.action)) }; confRef.current = next; setConf(next); }
+          else { const next = { seq: m.seq, state: sharedOf(reduceAt(reducer, c.state, m.action)) }; confRef.current = next; setConf(next); }
           setPending((p) => p.filter((x) => x.id !== m.id));
         }
       }, setLive);
     })();
     return () => { stop = true; close(); };
-  }, [readToken]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [readToken, onPortal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Send the outbox, oldest first, whenever there is signal.
   useEffect(() => {
@@ -147,13 +139,14 @@ export function useServerState(load, notify) {
       if (a.type === "login") {
         const role = a.user?.role || a.role;
         const vehicle = a.user?.vehicle || (role === "driver" ? USERS.driver.vehicle : null);
-        if (role === "driver" && vehicle) setPending((p) => [...p, { id: uuid(), action: { type: "driverSignedIn", vehicle }, demo: !a.token, clientTime: now }]);
+        if (role === "driver" && vehicle && a.token) setPending((p) => [...p, { id: uuid(), action: { type: "driverSignedIn", vehicle, at: Date.now() }, demo: false, clientTime: now }]);
       }
       return;
     }
-    const { __demo, ...action } = a;
-    setLocal((l) => pick(reducer({ ...view, ...l }, action), LOCAL_KEYS));
-    setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, demo: !!__demo || ["clock", "reset", "badReset", "offline"].includes(action.type), person: view.person, clientTime: now }]);
+    const { __demo, ...rest } = a;
+    const action = { ...rest, at: Date.now() }; // the server replaces this with its own time when it records it
+    setLocal((l) => pick(reduceAt(reducer, { ...view, ...l }, action), LOCAL_KEYS));
+    setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, demo: !!__demo || ["badReset", "offline"].includes(action.type), person: view.person, clientTime: now }]);
   }, [view]);
 
   const syncInfo = { live, waiting: pending.length, seq: conf.seq, online };
