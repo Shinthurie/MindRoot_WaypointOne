@@ -13,6 +13,7 @@ import {
   reeferDown, round1, runMin, runsOf, workshopReefers, buildPlan, checkMove, moveOptions, tripOf, RUN_DATE, IS_S1,
 } from "../data/model";
 import { nextOperatingDay } from "../runs.js";
+import { placeOf, routeUrl } from "../gmaps";
 import { BrandChip, Chip, DayPill, DeskShell, DepotPill, formatDate, useClock, useRuns } from "../components/ui";
 
 export function useDispatchNav() {
@@ -806,7 +807,7 @@ function SmsSheet({ sms, onClose }) {
 }
 
 export function Live() {
-  const { scenario, dispatch, log, delivered, loadedTrucks, storeReports, loaderReports, driverReports, smsSent, user, setToast, stopProgress, fleet, depot, tracked, fleetEdits, published } = useApp();
+  const { scenario, dispatch, log, delivered, loadedTrucks, storeReports, loaderReports, driverReports, smsSent, user, setToast, stopProgress, fleet, depot, tracked, fleetEdits, published, storeEdits } = useApp();
   const [picked, setPicked] = useState(null); // truck selected on the map or in the list
   const [sms, setSms] = useState(null);
   const by = (text) => log.find((e) => e.what.startsWith(text))?.who;
@@ -888,7 +889,8 @@ export function Live() {
                 <div className="small muted">{r.trip.brand} · {r.trip.district} · run {r.trip.run} · {r.done}/{r.trip.stops.length} stops</div>
                 <div className="small" style={{ marginTop: 6 }}>{nextStop ? <>Next: <b>{nextStop.outlet}</b> · planned {nextStop.eta} · window to {nextStop.close}</> : "All stops done · heading back"}</div>
                 {r.risks.length > 0 && <div className="tag warn" style={{ marginTop: 6 }}>about {r.risks[0].predicted} at {r.risks[0].stop.outlet} · {r.risks[0].lateBy} min late</div>}
-                <div className="row" style={{ gap: 6, marginTop: 8 }}>
+                <div className="row" style={{ gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                  {(() => { const url = routeUrl(depot, r.trip.stops.slice(r.done).map((s) => placeOf(s.outlet, s.district, storeEdits))); return url && <a className="btn secondary" style={{ minHeight: 34, fontSize: 13 }} href={url} target="_blank" rel="noreferrer">Route in Google Maps</a>; })()}
                   <button className="btn secondary" style={{ minHeight: 34, fontSize: 13 }} onClick={() => setSms({ to: r.lane.vehicle.id, who: `${r.lane.vehicle.id} driver`, text: "Dispatcher: please call me when you are safely stopped." })}>Message driver</button>
                 </div>
               </div>
@@ -984,7 +986,7 @@ export function Live() {
 
 export function Incident() {
   const { type, id } = useParams();
-  const { dispatch, setToast, user, loaderReports } = useApp();
+  const { dispatch, setToast, user, loaderReports, scenario } = useApp();
   const nav = useNavigate();
   const [choice, setChoice] = useState("A");
   if (type === "loader") {
@@ -1030,6 +1032,8 @@ export function Incident() {
       </DeskShell>
     );
   }
+  // The S1 Reefer Down story only; any other truck problem is handled on the re-plan screen.
+  if (type !== "reefer" || scenario.reefer !== "reported") return <Navigate to="/dispatch/live" replace />;
   const r = reeferDown();
   const m3 = r.affected.reduce((s, o) => s + o.m3, 0);
   return (

@@ -58,7 +58,7 @@ export default function LiveMap({ rows, now, depot = "Peliyagoda", selected, onS
   useEffect(() => {
     if (map.current || !el.current) return;
     map.current = L.map(el.current, { zoomControl: true, attributionControl: true, scrollWheelZoom: false }).setView([7.05, 80.15], 8);
-    L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", { maxZoom: 17, attribution: "© Google Maps" }).addTo(map.current);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 17, attribution: "© OpenStreetMap" }).addTo(map.current);
     layer.current = L.layerGroup().addTo(map.current);
     return () => { map.current?.remove(); map.current = null; };
   }, []);

@@ -221,11 +221,17 @@ docker-compose.yml, Dockerfile, .env.example
 
 Real: accounts and passwords (bcrypt, lockout, first sign-in, password change, admin create/reset), role permissions
 checked by the server, the planning engine, the shared day with live updates, offline outbox with duplicate-free
-replay, delivery photos (phone camera) and signatures, the running clock (dispatcher-controlled).
+replay, delivery photos (phone camera) and signatures, the running clock (dispatcher-controlled), each run's records
+kept when the clock moves, carry-over of every undelivered order, replacement orders for short and missing cases,
+sessions that end when admin switches an account off, and **Google Maps directions**: the driver's *Navigate* (next
+stop) and *Whole route* buttons and the dispatcher's *Route in Google Maps* open Google Maps (no key needed). A store's
+place is the address or Google Maps link admin sets in its store rules, otherwise its town; admin can also set the
+store's phone so *Call shop* dials it.
 
 Not connected yet (shown honestly in the app where it matters): sending SMS (store notices and the one-time codes
-at first sign-in and *Forgot password*: any 6 digits are accepted at first sign-in), voice notes, phone calls from the
-app, and live GPS (positions follow the plan and the drivers' recorded steps). The seeded data has one delivery day
+at first sign-in and *Forgot password*: any 6 digits are accepted at first sign-in), voice notes, and live GPS
+(positions on the in-app map follow the plan and the drivers' recorded steps; the datasets give each shop's district,
+not its exact location). The seeded data has one delivery day
 (S1); real runs take their orders from the stores in the app. Real runs are planned for the Peliyagoda depot (like S1):
 Kandy stores' orders are recorded but not yet planned.
 

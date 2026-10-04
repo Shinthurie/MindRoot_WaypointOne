@@ -3,7 +3,7 @@ import { AlertTriangle, Fuel, Snowflake, Truck, UserX, Wrench, History, Users, C
 import { useApp } from "../state";
 import { VEHICLE_CATEGORIES } from "../data/accounts";
 import { Chip, DeskShell, DepotPill, formatDate, useClock } from "../components/ui";
-import { fuelThisWeek } from "../data/model";
+import { fuelThisWeek, plan } from "../data/model";
 import { useDispatchNav } from "./Dispatch";
 
 const ADMIN_NAV = [
@@ -60,7 +60,9 @@ function FleetView({ mode }) {
   [inDepot, cat, status]);
   const usable = (v) => v.driver && v.status !== "in_workshop";
   const reefers = inDepot.filter((v) => v.reefer);
-  const changed = Object.keys(fleetEdits).length;
+  // Trucks in the workshop that still have stops on the plan: their orders need another truck.
+  const stuck = plan.lanes.filter((l) => l.runs.length && fleetEdits[l.vehicle.id]?.status === "in_workshop").map((l) => l.vehicle.id);
+  const changed = stuck.length;
 
   const setWorkshop = (v, inShop, when) => {
     dispatch({ type: "fleetStatus", vehicle: v.id, change: { status: inShop ? "in_workshop" : "available", back: inShop ? when || null : null, by: user.name } });
@@ -73,7 +75,7 @@ function FleetView({ mode }) {
     <>
       {mode === "dispatcher" && changed > 0 && (
         <div className="banner" style={{ background: "var(--turmeric-tint)", color: "var(--ink)", border: "1px solid #ffe08a" }}>
-          <RotateCcw size={18} /> The fleet changed since tonight's plan ({changed} vehicle{changed > 1 ? "s" : ""}). Run Auto-plan again before publishing.
+          <RotateCcw size={18} /> {stuck.join(", ")} {changed > 1 ? "are" : "is"} in the workshop but still on the plan. Run Auto-plan again, or re-plan without {changed > 1 ? "them" : "it"} from the Live board.
         </div>
       )}
       <div className="kpis" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>

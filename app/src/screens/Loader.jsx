@@ -432,7 +432,7 @@ function WallScreen() {
 /* Report missing, broken or wet cases of one order on the truck being loaded, before it leaves. The dispatcher decides:
    replace from stock, or send it short with a replacement order on the next run. */
 export function LoaderProblem() {
-  const { t, dispatch, setToast, person: lastPerson, user, loadStarts, adjusted } = useApp();
+  const { t, dispatch, setToast, person: lastPerson, user, loadStarts, adjusted, published } = useApp();
   const nav = useNavigate();
   const clock = useClock();
   const { veh = "VEH006" } = useParams();
@@ -455,7 +455,7 @@ export function LoaderProblem() {
     setToast({ text: `Sent by ${person || "Loader"} · ${veh} waits for a decision · dispatcher told` });
     nav("/loader/problems");
   };
-  if (!order) return <PlanNotReady />;
+  if (!published || !order) return <Shell title={t("problemsTab")}><NotReady /></Shell>;
   return (
     <MobileFrame>
       <div className="screen">

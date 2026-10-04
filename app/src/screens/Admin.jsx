@@ -40,11 +40,11 @@ const DEFAULT_RULES = {
 
 /* One rules form, used both when creating a store and when editing it later. */
 function useRulesForm(initial) {
-  const [r, setR] = useState({ ...DEFAULT_RULES.Fresh, ...initial, mall: initial?.mall || "" });
+  const [r, setR] = useState({ ...DEFAULT_RULES.Fresh, ...initial, mall: initial?.mall || "", address: initial?.address || "", phone: initial?.phone || "" });
   const set = (k) => (v) => setR((x) => ({ ...x, [k]: v }));
   const problem = r.open >= r.close ? "The window must close after it opens."
     : r.parking === "mall_dock" && !/^\d\d:\d\d-\d\d:\d\d$/.test(r.mall) ? "Enter the mall window like 10:00-12:00." : null;
-  const rules = { open: r.open, close: r.close, dock: r.dock, parking: r.parking, mall: r.parking === "mall_dock" ? r.mall : null };
+  const rules = { open: r.open, close: r.close, dock: r.dock, parking: r.parking, mall: r.parking === "mall_dock" ? r.mall : null, ...(r.address.trim() ? { address: r.address.trim() } : {}), ...(r.phone.trim() ? { phone: r.phone.trim() } : {}) };
   const Pick = ({ options, value, onChange }) => (
     <div className="row" style={{ flexWrap: "wrap", gap: 6 }}>{options.map(([k, label]) => <button key={k} type="button" className={`filter ${value === k ? "on" : ""}`} onClick={() => onChange(k)}>{label}</button>)}</div>
   );
@@ -67,10 +67,19 @@ function useRulesForm(initial) {
       {r.parking === "mall_dock" && (
         <label><span className="field-label">Mall access window (HH:MM-HH:MM)</span><input className="input" style={{ width: 220 }} value={r.mall} onChange={(e) => set("mall")(e.target.value)} placeholder="10:00-12:00" /></label>
       )}
+      <label>
+        <span className="field-label">Address or Google Maps link (for drivers' directions)</span>
+        <input className="input" value={r.address} onChange={(e) => set("address")(e.target.value)} placeholder="e.g. 12 Main Street, Veyangoda, or https://maps.app.goo.gl/…" />
+        <div className="muted small" style={{ marginTop: 4 }}>Empty: drivers are guided to the store's town.</div>
+      </label>
+      <label>
+        <span className="field-label">Store phone (drivers can call)</span>
+        <input className="input" style={{ width: 220 }} type="tel" value={r.phone} onChange={(e) => set("phone")(e.target.value)} placeholder="+94 77 123 4567" />
+      </label>
       {problem && <div className="banner problem">{problem}</div>}
     </div>
   );
-  const reset = (next) => setR({ ...next, mall: next.mall || "" });
+  const reset = (next) => setR({ ...next, mall: next.mall || "", address: next.address || "", phone: next.phone || "" });
   return { rules, fields, valid: !problem, reset };
 }
 const describeRules = (x) => `window ${x.open}–${x.close}, ${DOCKS.find((d) => d[0] === x.dock)[1].toLowerCase()}, ${ACCESS.find((a) => a[0] === x.parking)[1].toLowerCase()}${x.mall ? ` (mall ${x.mall})` : ""}`;

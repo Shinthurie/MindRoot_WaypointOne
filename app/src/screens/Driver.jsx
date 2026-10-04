@@ -8,6 +8,7 @@ import { AlertTriangle, ArrowLeftRight, Camera, Car, Check, CloudOff, DoorOpen, 
 import { useApp } from "../state";
 import { RUN_DATE, fmt, fuelThisWeek, plan, runMin, runsOf, stopKey, toMin } from "../data/model";
 import { storeName } from "../data/accounts";
+import { directionsTo, placeOf, routeUrl } from "../gmaps";
 import { BrandTile, Chip, MobileFrame, OfflineBanner, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Split, Stepper, TopBar, useClock, PhotoButton, SignatureButton } from "../components/ui";
 
 /* Field portal: the phone layout on every screen size (phones, big tablets, desktops), with the bottom bar. */
@@ -50,7 +51,7 @@ function TripTop({ back }) {
 
 /* Left panel on tablets, the whole screen on phones. */
 function TripList({ active }) {
-  const { t, fleetEdits, driverReports, loadedTrucks, planEdits, dispatch, stopProgress, online, user } = useApp();
+  const { t, fleetEdits, driverReports, loadedTrucks, planEdits, dispatch, stopProgress, online, user, storeEdits } = useApp();
   const nav = useNavigate();
   const clock = useClock();
   const [view, setView] = useState("list");
@@ -78,6 +79,10 @@ function TripList({ active }) {
       {workshop}
       {!cancelled && driverReports.some((r) => r.vehicle === veh && !r.outlet && !r.seenBy) && <div className="banner problem"><Thermometer size={18} /> Truck problem reported · waiting for dispatcher</div>}
       <div className={`banner ${loaded ? "done" : "info"}`}><Package size={18} /> {loaded ? `${t("loadedBy")} ${loaded.by} · ${loaded.at}` : t("notLoaded")}</div>
+      {!cancelled && (() => {
+        const url = routeUrl(user?.depot || "Peliyagoda", t1.stops.filter((s) => !done(s)).map((s) => placeOf(s.outlet, s.district, storeEdits)));
+        return url && <a className="btn secondary block" href={url} target="_blank" rel="noreferrer"><Navigation size={18} /> {t("wholeRoute")}</a>;
+      })()}
       <div className="seg" role="tablist" aria-label={t("navTrip")}>
         <button role="tab" aria-selected={view === "list"} className={view === "list" ? "on" : ""} onClick={() => setView("list")}><ListIcon size={16} /> {t("listView")}</button>
         <button role="tab" aria-selected={view === "map"} className={view === "map" ? "on" : ""} onClick={() => setView("map")}><Map size={16} /> {t("mapView")}</button>
@@ -145,7 +150,8 @@ function useNextAction(s) {
 }
 
 function StopPanel({ s, wide }) {
-  const { t, runStarted, driverReports } = useApp();
+  const { t, runStarted, driverReports, storeEdits } = useApp();
+  const phone = storeEdits?.[s.outlet]?.phone;
   const nav = useNavigate();
   const { t1, veh } = useTrip();
   const started = runStarted[`${veh}:${t1.run}`];
@@ -171,9 +177,12 @@ function StopPanel({ s, wide }) {
         ].map(([Icon, text]) => (
           <div key={text} className="stop"><Icon size={24} color="var(--brinjal)" /> <b style={{ fontSize: 17 }}>{text}</b></div>
         ))}
+        <a className="btn blue block" href={directionsTo(placeOf(s.outlet, s.district, storeEdits))} target="_blank" rel="noreferrer"><Navigation size={18} /> {t("navigate")}</a>
         <div className="row">
-          <button className="btn blue grow" onClick={() => nav(`/driver/map/${s.n}`)}><Map size={18} /> {t("map")}</button>
-          <button className="btn secondary grow"><Phone size={18} /> {t("callShop")}</button>
+          <button className="btn secondary grow" onClick={() => nav(`/driver/map/${s.n}`)}><Map size={18} /> {t("map")}</button>
+          {phone
+            ? <a className="btn secondary grow" href={`tel:${phone.replace(/[^\d+]/g, "")}`}><Phone size={18} /> {t("callShop")}</a>
+            : <button className="btn secondary grow" disabled title={t("noNumber")}><Phone size={18} /> {t("noNumber")}</button>}
         </div>
         {started && (
           <>
@@ -383,6 +392,7 @@ export function DriverSync() {
               </div>
             );
           })}
+          {!stops.length && <div className="card flat muted">{t("planNotReady")}</div>}
           {online && outbox.length === 0 && mine.length > 0 && <div className="banner done"><Check size={20} /> {t("allSent")}</div>}
           {!online && <div className="banner offline"><CloudOff size={18} /> {outbox.length} {t("waiting")}</div>}
         </div>

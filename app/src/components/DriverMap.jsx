@@ -14,7 +14,7 @@ export default function DriverMap({ run, now, depot = "Peliyagoda", doneOutlets 
   useEffect(() => {
     if (map.current || !el.current) return;
     map.current = L.map(el.current, { zoomControl: true, attributionControl: true }).setView(home, 10);
-    L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", { maxZoom: 17, attribution: "© Google Maps" }).addTo(map.current);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 17, attribution: "© OpenStreetMap" }).addTo(map.current);
     layer.current = L.layerGroup().addTo(map.current);
     return () => { map.current?.remove(); map.current = null; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
