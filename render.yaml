@@ -1,0 +1,28 @@
+# Render Blueprint: PostgreSQL + the Waypoint One web service (API and web app in one container, from the Dockerfile).
+# On first start the container creates the tables and seeds the S1 delivery day from data/.
+databases:
+  - name: waypoint-db
+    plan: free
+    databaseName: waypoint
+    user: waypoint
+
+services:
+  - type: web
+    name: waypoint-one
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: waypoint-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "true"
+      - key: SEED_PASSWORD
+        value: Waypoint@2026
+      - key: SEED_PIN
+        value: "246810"
