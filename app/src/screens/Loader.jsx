@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Navigate, useNavigate, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeftRight, Camera, Check, ClipboardList, Droplets, History, Home, Mic, Monitor, PackageX, Snowflake, Split as SplitIcon, Thermometer, Truck, Undo2, UserPlus, Users, Refrigerator } from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, Camera, Check, ClipboardList, Clock, LogOut, Droplets, History, Home, Mic, Monitor, PackageX, Snowflake, Split as SplitIcon, Thermometer, Truck, Undo2, UserPlus, Users, Refrigerator } from "lucide-react";
 import { useApp } from "../state";
 import { orders, plan, reeferDown, runsOf, stopUnits, toMin } from "../data/model";
 import { BrandChip, Chip, LangChip, MobileFrame, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Stepper, TopBar, useClock, PhotoButton } from "../components/ui";
@@ -20,8 +20,10 @@ const tickKey = (veh, run, n) => `${veh}:${run}:${n}`;
 /* Every load at this depot today (each truck's next run), soonest first, with its status. */
 function useLoads() {
   const clock = useClock();
-  const { loaded, user, fleet, loadStarts, loadedTrucks, loaderReports } = useApp();
+  const { loaded, user, fleet, loadStarts, loadedTrucks, loaderReports, published } = useApp();
   const depot = user?.depot || "Peliyagoda";
+  // Nothing to load until the dispatcher publishes the plan.
+  if (!published) return { loads: [], gone: [], clock, depot };
   const byId = Object.fromEntries(fleet.map((v) => [v.id, v]));
   const lanes = plan.lanes.filter((l) => l.runs.length && (byId[l.vehicle.id]?.depot || "Peliyagoda") === depot);
   const now = toMin(clock.time);
@@ -116,7 +118,7 @@ const leavesText = (x, t) => (x.minsLeft >= 0 ? `${t("leavesIn")} ${x.minsLeft} 
 
 /* Home: what's next, today's progress, and the way into loads, log and problems. */
 function HomeScreen() {
-  const { t, user, loaderReports } = useApp();
+  const { t, user, loaderReports, published, dispatch } = useApp();
   const nav = useNavigate();
   const { loads, clock, depot } = useLoads();
   const next = loads.find((x) => x.status !== "loaded");
@@ -127,7 +129,7 @@ function HomeScreen() {
   return (
     <Shell title={`${depot} dock`} sub={`${user?.id || ""} · ${clock.time}`}>
       <Alerts />
-      {next ? (
+      {!published ? <NotReady /> : next ? (
         <button className={`card load-next ${next.minsLeft < 15 ? "urgent" : ""}`} onClick={() => nav(`/loader/load/${next.veh}`)}>
           <div className="muted small" style={{ fontWeight: 800 }}>{t("nextLoad")}</div>
           <div className="row" style={{ gap: 10, marginTop: 4 }}>
@@ -150,6 +152,7 @@ function HomeScreen() {
         <button className="tile" onClick={() => nav("/loader/problems")}><span className="ic" style={{ background: "var(--problem)" }}><AlertTriangle size={22} /></span><b>{t("problemsTab")}</b><small>{open ? `${open} open` : t("reportProblem")}</small></button>
         <button className="tile" onClick={() => nav("/loader/wall")}><span className="ic" style={{ background: "#475569" }}><Monitor size={22} /></span><b>{t("dockWall")}</b><small>{loads.length} {t("todaysLoads").toLowerCase()}</small></button>
       </div>
+      <button className="btn secondary block" onClick={() => { dispatch({ type: "logout" }); nav("/"); }}><LogOut size={18} /> {t("signOut")}</button>
     </Shell>
   );
 }
@@ -586,15 +589,25 @@ export function WhoIsLoading() {
   );
 }
 
-/* Before the dispatcher publishes, loaders see "plan not ready" instead of loads. */
-function Gate({ children }) {
-  const { published, person, user } = useApp();
-  const depot = user?.depot || "Peliyagoda";
-  return published ? children : <PlanNotReady title={person || `${depot} depot`} sub={`${depot} depot · loading dock`} />;
+/* "Plan not ready": until the dispatcher publishes, there are no loads yet. */
+function NotReady() {
+  const { t } = useApp();
+  return (
+    <div className="card flat" style={{ textAlign: "center", padding: "22px 16px" }}>
+      <span className="shape" style={{ width: 64, height: 64, borderRadius: 20, background: "var(--planned)", margin: "0 auto" }}><Clock size={30} /></span>
+      <h3 style={{ margin: "10px 0 4px" }}>{t("planNotReady")}</h3>
+      <p className="muted small" style={{ margin: 0, lineHeight: 1.6 }}>{t("planNotReadyText")}</p>
+    </div>
+  );
 }
-export const LoaderTrucks = () => <Gate><HomeScreen /></Gate>;
+/* Before the dispatcher publishes, today's loads show "plan not ready"; every other loader page works as usual. */
+function Gate({ children }) {
+  const { published, t } = useApp();
+  return published ? children : <Shell title={t("todaysLoads")}><NotReady /></Shell>;
+}
+export const LoaderTrucks = () => <HomeScreen />;
 export const LoaderLoads = () => <Gate><LoadsScreen /></Gate>;
 export const LoadList = () => <Gate><LoadScreen /></Gate>;
 export const LoaderLog = () => <LogScreen />;
-export const LoaderProblems = () => <Gate><ProblemsScreen /></Gate>;
-export const LoaderWall = () => <Gate><WallScreen /></Gate>;
+export const LoaderProblems = () => <ProblemsScreen />;
+export const LoaderWall = () => <WallScreen />;
