@@ -55,14 +55,20 @@ export function useServerState(load, notify) {
 
   // The token to read and send with: the signed-in person's.
   const readToken = auth?.token && auth.userId === local.user?.id ? auth.token : null;
+  // The server ended this session (expired, account switched off, sign-in reset): back to the sign-in page.
+  const ended = useCallback((e) => {
+    session.clear(); setAuth(null);
+    setLocal((l) => pick(reducer({ ...l }, { type: "logout" }), LOCAL_KEYS));
+    notify?.(e?.message || "Please sign in again");
+  }, [notify]);
 
   const refetch = useCallback(async () => {
     try {
       if (!readToken) return;
       const r = await api.state(readToken);
       setConf({ seq: r.seq, state: r.state });
-    } catch { /* offline: keep what we have */ }
-  }, [readToken]);
+    } catch (e) { if (e.status === 401) ended(e); /* otherwise offline: keep what we have */ }
+  }, [readToken, ended]);
 
   // Live stream of everyone's changes.
   useEffect(() => {
@@ -89,7 +95,9 @@ export function useServerState(load, notify) {
   useEffect(() => {
     if (!pending.length || sending.current || !online) return;
     if (!readToken) return; // wait for this person's session
-    const batch = pending.slice(0, 50);
+    // Only this person's own actions go with their sign-in (another person's wait until they sign in again).
+    const batch = pending.filter((p) => !p.by || p.by === auth.userId).slice(0, 50);
+    if (!batch.length) return;
     sending.current = true;
     (async () => {
       try {
@@ -100,7 +108,7 @@ export function useServerState(load, notify) {
         setPending((p) => p.filter((x) => !done.has(x.id)));
         if (r.results.some((x) => x.status === "duplicate") || r.seq !== confRef.current.seq) setTimeout(() => refetch(), 400);
       } catch (e) {
-        if (e.status === 401) { session.clear(); setAuth(null); }
+        if (e.status === 401) ended(e);
         setTimeout(() => setRetry((n) => n + 1), e.status === 0 ? 4000 : 1500);
       } finally {
         sending.current = false;
@@ -121,13 +129,13 @@ export function useServerState(load, notify) {
       if (a.type === "login") {
         const role = a.user?.role || a.role;
         const vehicle = a.user?.vehicle || (role === "driver" ? USERS.driver.vehicle : null);
-        if (role === "driver" && vehicle && a.token) setPending((p) => [...p, { id: uuid(), action: { type: "driverSignedIn", vehicle, at: Date.now() }, clientTime: now }]);
+        if (role === "driver" && vehicle && a.token) setPending((p) => [...p, { id: uuid(), action: { type: "driverSignedIn", vehicle, at: Date.now() }, by: a.user?.id, clientTime: now }]);
       }
       return;
     }
     const action = { ...a, at: Date.now() }; // the server replaces this with its own time when it records it
     setLocal((l) => pick(applyAt({ ...view, ...l }, action), LOCAL_KEYS));
-    setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, person: view.person, clientTime: now }]);
+    setPending((p) => [...(action.type === "reset" ? [] : p), { id: uuid(), action, by: view.user?.id, person: view.person, clientTime: now }]);
   }, [view]);
 
   const syncInfo = { live, waiting: pending.length, seq: conf.seq, online };

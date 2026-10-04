@@ -180,6 +180,19 @@ test("a real run: store orders on the clock's run are planned; unserved orders c
   const alloc = { ...plan.body.alloc, "N-T1-C": null };
   r = await send(disp, { type: "planSet", alloc, summary: plan.body.summary, by: "Nimal" }, { type: "publish", by: "Nimal" });
   assert.deepEqual(r.body.results.map((x) => x.status), ["applied", "applied"]);
+  // Monday morning: the dry order is delivered by its truck's driver.
+  await send(disp, { type: "clock", clock: { date: "2026-10-05", time: "06:00" } });
+  const veh = alloc["N-T1-D"].vehicle;
+  const driver = await signIn(`WP-DRV-${veh.slice(3)}`, config.seedPassword);
+  r = await send(driver, { type: "deliver", vehicle: veh, outlet: "OUT034", outcome: "all", online: true, receivedBy: "Fathima" });
+  assert.equal(r.body.results[0].status, "applied", JSON.stringify(r.body));
+  // The dispatcher looks at the S1 reference day and comes back: Monday's plan and delivery are still there.
+  await send(disp, { type: "clock", clock: { date: "2026-01-08", time: "05:00" } });
+  await send(disp, { type: "clock", clock: { date: "2026-10-05", time: "07:00" } });
+  st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.runDate, "2026-10-05");
+  assert.equal(st.published, true, "the run's plan is kept");
+  assert.ok(st.delivered[`${veh}:OUT034`], "the run's delivery is kept");
   await send(disp, { type: "clock", clock: { date: "2026-10-06", time: "03:00" } });
   r = await send(disp, { type: "log", who: "Nimal", role: "Dispatcher", what: "Tuesday" });
   st = (await call("/api/state", { token: disp })).body.state;
@@ -190,14 +203,16 @@ test("a real run: store orders on the clock's run are planned; unserved orders c
 
 test("a truck breaks down: re-plan without it keeps every other truck's orders", async () => {
   const disp = await signIn("WP-DSP-001", config.seedPassword);
-  // Tuesday 17:00: orders for Wednesday's run.
-  await send(disp, { type: "clock", clock: { date: "2026-10-06", time: "17:00" } });
+  // Tuesday before 4 PM: stores order for Wednesday's run. At 17:00 the dispatcher plans it.
+  await send(disp, { type: "clock", clock: { date: "2026-10-06", time: "12:00" } });
   for (const [ref, outlet] of [["N-R1", "OUT034"], ["N-R2", "OUT026"], ["N-R3", "OUT074"]]) {
     const store = await signIn(`STORE-${outlet}`, config.seedPassword);
     const r = await send(store, { type: "storeOrder", order: { ref, outlet, name: outlet, dry: 60, cold: 40, by: "Store" } });
     assert.equal(r.body.results[0].status, "applied");
   }
+  await send(disp, { type: "clock", clock: { date: "2026-10-06", time: "17:00" } });
   const plan = (await call("/api/plan/auto", { token: disp, body: {} })).body;
+  for (const ref of ["N-R1-D", "N-R1-C", "N-R2-D", "N-R2-C", "N-R3-D", "N-R3-C"]) assert.ok(ref in plan.alloc, `${ref} is in Wednesday's run`);
   let r = await send(disp, { type: "planSet", alloc: plan.alloc, summary: plan.summary, by: "Nimal" }, { type: "publish", by: "Nimal" });
   assert.deepEqual(r.body.results.map((x) => x.status), ["applied", "applied"]);
   const down = Object.values(plan.alloc).find(Boolean).vehicle;
@@ -219,6 +234,7 @@ test("a truck breaks down: re-plan without it keeps every other truck's orders",
 test("one order per store per run; a store changes only its own orders", async () => {
   const s34 = await signIn("STORE-OUT034", config.seedPassword);
   const s26 = await signIn("STORE-OUT026", config.seedPassword);
+  await send(await signIn("WP-DSP-001", config.seedPassword), { type: "clock", clock: { date: "2026-10-06", time: "12:00" } });
   // OUT034 already ordered N-R1 for this run (previous test): a second order is refused, a change is fine.
   let r = await send(s34, { type: "storeOrder", order: { ref: "OUT034-X", outlet: "OUT034", name: "OUT034", dry: 5, cold: 0, by: "Store" } });
   assert.match(r.body.results[0].error, /already has an order/);
@@ -232,4 +248,74 @@ test("one order per store per run; a store changes only its own orders", async (
   // Another store cannot change or cancel it.
   r = await send(s26, { type: "storeOrderCancel", ref: "N-R1", by: "Someone" });
   assert.match(r.body.results[0].error, /belongs to OUT034/);
+});
+
+test("bad day on a real run: not delivered carries over; short and missing cases come back as replacement orders", async () => {
+  const disp = await signIn("WP-DSP-001", config.seedPassword);
+  // Wednesday's run (planned and published in the tests above), 06:00.
+  await send(disp, { type: "clock", clock: { date: "2026-10-07", time: "06:00" } });
+  let st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.published, true);
+  const alloc = { ...st.planAlloc };
+  for (const e of st.planEdits || []) alloc[e.ref] = e.to;
+  const drive = async (ref, outlet, rec) => {
+    const veh = alloc[ref].vehicle;
+    const t = await signIn(`WP-DRV-${veh.slice(3)}`, config.seedPassword);
+    const r = await send(t, { type: "deliver", vehicle: veh, outlet, online: true, ...rec });
+    assert.equal(r.body.results[0].status, "applied", JSON.stringify(r.body));
+    return veh;
+  };
+  // Dock: 2 chilled cases of OUT034 broken; the dispatcher sends the truck short.
+  const loader = await signIn("DEPOT-PELIYAGODA", config.seedPassword);
+  let r = await send(loader, { type: "loaderReport", report: { vehicle: alloc["N-R1-C"].vehicle, outlet: "OUT034", ref: "N-R1-C", count: 2, chilled: true, kind: "broken", what: "2 chilled cases broken", by: "Suresh" } });
+  assert.equal(r.body.results[0].status, "applied", JSON.stringify(r.body));
+  st = (await call("/api/state", { token: disp })).body.state;
+  r = await send(disp, { type: "shortReorder", id: st.loaderReports[0].id, by: "Nimal" });
+  assert.equal(r.body.results[0].status, "applied", JSON.stringify(r.body));
+  // OUT034 receives the rest; OUT026 is closed; OUT074 gets its order but reports 3 cases missing.
+  await drive("N-R1-D", "OUT034", { outcome: "all", receivedBy: "Fathima" });
+  await drive("N-R2-D", "OUT026", { outcome: "none", reason: "shopClosed" });
+  const v74 = await drive("N-R3-D", "OUT074", { outcome: "all", receivedBy: "Kamal" });
+  const s74 = await signIn("STORE-OUT074", config.seedPassword);
+  await send(s74, { type: "storeReport", report: { outlet: "OUT074", name: "OUT074", ref: "N-R3-D", vehicle: v74, count: 3, kind: "missing", what: "3 cases missing", by: "Kamal" } });
+  st = (await call("/api/state", { token: disp })).body.state;
+  r = await send(disp, { type: "storeReportDecision", id: st.storeReports[0].id, decision: "resend", by: "Nimal" });
+  assert.equal(r.body.results[0].status, "applied");
+  st = (await call("/api/state", { token: disp })).body.state;
+  const repl = st.storeOrders.filter((o) => o.ref.startsWith("R-") && o.run === "2026-10-08").map((o) => [o.outlet, o.dry, o.cold]).sort();
+  assert.deepEqual(repl, [["OUT034", 0, 2], ["OUT074", 3, 0]]);
+  assert.ok(st.notifications.some((n) => n.title === "Not delivered · OUT026"), "the dispatcher is told");
+  // Thursday's run: the closed shop's orders and both replacement orders, all first in line.
+  await send(disp, { type: "clock", clock: { date: "2026-10-07", time: "17:00" } });
+  st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.runDate, "2026-10-08");
+  const carried = st.carry.map((o) => o.ref);
+  assert.ok(carried.includes("N-R2-D") && carried.includes("N-R2-C"), `OUT026 carries over: ${carried}`);
+  assert.ok(!carried.includes("N-R1-D") && !carried.includes("N-R3-D"), "delivered orders do not carry");
+  const plan = (await call("/api/plan/auto", { token: disp, body: {} })).body;
+  for (const ref of ["N-R2-D", "N-R2-C"]) assert.ok(plan.alloc[ref], `${ref} is planned first`);
+  assert.ok(Object.keys(plan.alloc).some((k) => k.startsWith("R-")), "replacement orders are planned");
+});
+
+test("safety: a switched-off account is signed out at once; deliveries and reports must match the plan", async () => {
+  const admin = await signIn("WP-ADM-001", config.seedPassword);
+  const drv = await signIn("WP-DRV-020", config.seedPassword);
+  assert.equal((await call("/api/state", { token: drv })).status, 200);
+  let r = await send(admin, { type: "accountStatus", id: "WP-DRV-020", status: "Deactivated" });
+  assert.equal(r.body.results[0].status, "applied");
+  const after = await call("/api/state", { token: drv });
+  assert.equal(after.status, 401, "the open session ends");
+  assert.equal(after.body.code, "deactivated");
+  await send(admin, { type: "accountStatus", id: "WP-DRV-020", status: "Active" });
+  assert.equal((await call("/api/state", { token: drv })).status, 200);
+  // A driver cannot hand over a stop that is not on their truck's plan.
+  r = await send(drv, { type: "deliver", vehicle: "VEH020", outlet: "OUT099", outcome: "all", online: true });
+  assert.match(r.body.results[0].error, /not a stop of VEH020|not published/);
+  // A report cannot claim more cases than the order has.
+  const disp = await signIn("WP-DSP-001", config.seedPassword);
+  const st = (await call("/api/state", { token: disp })).body.state;
+  const o = st.carry[0];
+  const store = await signIn(`STORE-${o.outlet}`, config.seedPassword);
+  r = await send(store, { type: "storeReport", report: { outlet: o.outlet, name: o.outlet, ref: o.ref, count: o.units + 1, kind: "missing", what: "too many", by: "Store" } });
+  assert.match(r.body.results[0].error, /has only/);
 });

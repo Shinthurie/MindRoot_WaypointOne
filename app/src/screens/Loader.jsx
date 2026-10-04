@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavLink, Navigate, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, ArrowLeftRight, Camera, Check, ClipboardList, Clock, LogOut, Droplets, History, Home, Mic, Monitor, PackageX, Snowflake, Split as SplitIcon, Thermometer, Truck, Undo2, UserPlus, Users, Refrigerator } from "lucide-react";
 import { useApp } from "../state";
-import { orders, plan, reeferDown, runMin, runsOf, stopUnits, toMin } from "../data/model";
+import { orders, plan, reeferDown, runMin, runsOf, stopUnits, toMin, unitsOf } from "../data/model";
 import { BrandChip, Chip, LangChip, MobileFrame, OrderTag, Pic, PlanNotReady, SlideConfirm, Speak, Stepper, TopBar, useClock, PhotoButton } from "../components/ui";
 
 /* Field portal: the phone layout on every screen size (phones, big tablets, desktops), with the bottom bar. */
@@ -429,38 +429,43 @@ function WallScreen() {
   );
 }
 
-/* Report a missing, broken or wet item for the truck being loaded, before it leaves.
-   VEH006 · OUT026 is the scripted "Short at the Dock" story; any other report goes to the dispatcher's Live board. */
+/* Report missing, broken or wet cases of one order on the truck being loaded, before it leaves. The dispatcher decides:
+   replace from stock, or send it short with a replacement order on the next run. */
 export function LoaderProblem() {
-  const { t, dispatch, setToast, person: lastPerson, user, loadStarts } = useApp();
+  const { t, dispatch, setToast, person: lastPerson, user, loadStarts, adjusted } = useApp();
   const nav = useNavigate();
   const clock = useClock();
   const { veh = "VEH006" } = useParams();
   const run = loadingRun(veh, runMin(clock)) || runsOf(plan, veh)[0];
   const stops = run ? run.stops : [];
   const person = (run && loadStarts[`${veh}:${run.run}`]?.by) || lastPerson || "Loader"; // whoever is loading this truck
-  const [outlet, setOutlet] = useState(veh === "VEH006" && stops.some((s) => s.outlet === "OUT026") ? "OUT026" : stops[stops.length - 1]?.outlet);
-  const stop = stops.find((s) => s.outlet === outlet) || stops[0];
+  // One button per order (a shop can have a dry and a chilled order on the same stop), last stop first: loaded first.
+  const items = [...stops].reverse().flatMap((s) => s.orders.map((o) => ({ s, o })));
+  const [ref, setRef] = useState(items[0]?.o.ref);
+  const pick = items.find((x) => x.o.ref === ref) || items[0];
+  const stop = pick?.s, order = pick?.o;
+  const units = order ? unitsOf(order, adjusted) : 0;
   const [kind, setKind] = useState("broken");
-  const [count, setCount] = useState(2);
+  const [want, setCount] = useState(1);
+  const count = Math.max(1, Math.min(want, units || 1));
   const [photo, setPhoto] = useState(null); // a real photo of the damage (small JPEG)
   const send = () => {
-    dispatch({ type: "loaderReport", report: { vehicle: veh, run: run?.run, outlet: stop?.outlet, ref: stop?.orders.map((o) => o.ref).join(" + "), count, kind, chilled: !!stop?.chilled, units: stop?.units, what: `${count} ${stop?.chilled ? "chilled " : ""}cases ${kind}`, by: person, photo } });
+    dispatch({ type: "loaderReport", report: { vehicle: veh, run: run?.run, outlet: stop?.outlet, ref: order?.ref, count, kind, chilled: !!order?.chilled, units, what: `${count} ${order?.chilled ? "chilled " : ""}cases ${kind}`, by: person, photo } });
     dispatch({ type: "log", who: person, role: `Loader · ${user?.depot || "Peliyagoda"} depot`, what: `Reported ${count} ${kind} cases for ${stop?.outlet} on ${veh}` });
     setToast({ text: `Sent by ${person || "Loader"} · ${veh} waits for a decision · dispatcher told` });
     nav("/loader/problems");
   };
-  if (!stop) return <PlanNotReady />;
+  if (!order) return <PlanNotReady />;
   return (
-    <MobileFrame caption={{ kicker: "Bad day 1", title: "Short at the Dock · 03:10", lines: ["Two broken cases found before VEH006 leaves. The loader reports with pictures, a count and a photo. No typing."] }}>
+    <MobileFrame>
       <div className="screen">
-        <TopBar title={`⚠ ${t("problem")}`} sub={`${veh} · ${stop.outlet} · ${stop.units}${stop.chilled ? " ❄" : ""}`} back />
+        <TopBar title={`⚠ ${t("problem")}`} sub={`${veh} · ${stop.outlet} · ${order.ref} · ${units}${order.chilled ? " ❄" : ""}`} back />
         <div className="body field fit">
           <b style={{ fontSize: 17 }}>{t("whichStop")}</b>
           <div className="pics" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(96px, 1fr))" }}>
-            {[...stops].reverse().map((s) => (
-              <button key={s.outlet} className={`pic ${s.outlet === stop.outlet ? "sel" : ""}`} onClick={() => setOutlet(s.outlet)} aria-pressed={s.outlet === stop.outlet} aria-label={`Stop ${s.n}, ${s.outlet}`}>
-                <OrderTag refs={s.orders.map((o) => o.ref)} size="sm" /><span className="small">{s.outlet}</span>
+            {items.map(({ s, o }) => (
+              <button key={o.ref} className={`pic ${o.ref === order.ref ? "sel" : ""}`} onClick={() => setRef(o.ref)} aria-pressed={o.ref === order.ref} aria-label={`Stop ${s.n}, ${s.outlet}, ${o.ref}`}>
+                <OrderTag refs={[o.ref]} size="sm" /><span className="small">{s.outlet}{o.chilled ? " ❄" : ""}</span>
               </button>
             ))}
           </div>
@@ -469,7 +474,7 @@ export function LoaderProblem() {
             <Pic icon={SplitIcon} label={t("broken")} selected={kind === "broken"} onClick={() => setKind("broken")} />
             <Pic icon={Droplets} label={t("wet")} selected={kind === "wet"} onClick={() => setKind("wet")} />
           </div>
-          <div className="stop"><b className="grow" style={{ fontSize: 18 }}>{t("howMany")}</b><span className="big" style={{ marginRight: 8 }}>{count}</span><Stepper value={count} onChange={setCount} min={1} /></div>
+          <div className="stop"><b className="grow" style={{ fontSize: 18 }}>{t("howMany")}</b><span className="big" style={{ marginRight: 8 }}>{count}</span><Stepper value={count} onChange={setCount} min={1} max={units} /></div>
           <div className="row">
             <PhotoButton value={photo} onChange={setPhoto} icon={Camera} label={t("photo")} doneLabel={`${t("photo")} ✓`} />
             <button className="stop grow"><Mic size={22} /> <b>{t("voiceNote")}</b></button>

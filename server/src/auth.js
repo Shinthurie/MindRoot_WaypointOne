@@ -82,12 +82,31 @@ export function verify(token) {
 }
 
 /* Express middleware: needs "Authorization: Bearer <token>" (or ?token= for the live event stream). */
-export function requireAuth(req, res, next) {
+/* A session ends as soon as admin switches the account off or resets its sign-in (e.g. a lost phone).
+   The account's status is checked on every request, cached for 30 seconds. */
+const statusCache = new Map();
+async function accountStatus(id) {
+  const hit = statusCache.get(id);
+  if (hit && Date.now() - hit.at < 30000) return hit.status;
+  const status = (await q("SELECT status FROM accounts WHERE id = $1", [id])).rows[0]?.status || null;
+  statusCache.set(id, { status, at: Date.now() });
+  return status;
+}
+export const forgetStatus = (id) => statusCache.delete(id);
+
+export async function requireAuth(req, res, next) {
   const h = req.headers.authorization || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : req.query.token;
   const claims = token && verify(token);
   if (!claims) return res.status(401).json({ error: "Sign in first" });
   req.user = { id: claims.sub, role: claims.role, vehicle: claims.vehicle, outlet: claims.outlet, depot: claims.depot, name: claims.name };
+  if (claims.role !== "demo") {
+    try {
+      const status = await accountStatus(claims.sub);
+      if (!status || status === "Deactivated") return res.status(401).json({ error: "This account is switched off. Ask admin.", code: "deactivated" });
+      if (status === "Not activated") return res.status(401).json({ error: "Your sign-in was reset. Sign in again with the temporary password.", code: "first" });
+    } catch (e) { return next(e); }
+  }
   next();
 }
 export const requireRole = (...roles) => (req, res, next) => (roles.includes(req.user.role) ? next() : res.status(403).json({ error: `Only ${roles.join(" or ")} can do this` }));

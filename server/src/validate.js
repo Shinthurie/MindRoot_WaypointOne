@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { q } from "./db.js";
 import { config } from "./config.js";
+import { forgetStatus } from "./auth.js";
 import { checkAlloc, effectiveAlloc, loadDay, runOrders } from "./planning.js";
 import { isS1Run } from "../../app/src/domain/store.js";
 import { clockAt } from "../../app/src/domain/clock.js";
@@ -43,13 +44,28 @@ export async function validate(dayId, state, a, user) {
       if (!r.ok) throw new Invalid(`The plan breaks ${r.errors.length} rule(s); fix them before publishing: ${r.errors[0]}`, r.errors);
       return;
     }
-    case "deliver":
+    case "deliver": {
       if (!["all", "some", "none"].includes(a.outcome)) throw new Invalid("Hand-over outcome must be all, some or none");
       if ((a.missing || 0) < 0) throw new Invalid("Missing cases cannot be negative");
+      // Only a stop on the published plan can be handed over.
+      if (!state.published) throw new Invalid("The plan for this run is not published yet");
+      const d = await loadDay(dayId);
+      const alloc = effectiveAlloc(state);
+      if (!runOrders(d, state).some((o) => o.outlet === a.outlet && alloc[o.ref]?.vehicle === a.vehicle)) throw new Invalid(`${a.outlet} is not a stop of ${a.vehicle} on this run`);
       return;
+    }
     case "loaderReport":
-      if (!a.report?.vehicle || !(a.report?.count > 0)) throw new Invalid("A dock problem needs the truck and how many cases");
+    case "storeReport": {
+      const r = a.report || {};
+      if (a.type === "loaderReport" && (!r.vehicle || !(r.count > 0))) throw new Invalid("A dock problem needs the truck and how many cases");
+      if (r.count != null && !(r.count > 0)) throw new Invalid("The number of cases must be at least 1");
+      if (r.ref && r.count) {
+        const o = runOrders(await loadDay(dayId), state).find((x) => x.ref === r.ref);
+        const units = o ? state.adjusted?.[o.ref]?.units ?? o.units : null;
+        if (units != null && r.count > units) throw new Invalid(`${r.ref} has only ${units} cases`);
+      }
       return;
+    }
     case "storeOrder": {
       const o = a.order || {};
       if ((o.dry ?? 0) < 0 || (o.cold ?? 0) < 0 || (o.dry ?? 0) + (o.cold ?? 0) <= 0) throw new Invalid("An order needs at least one case");
@@ -88,6 +104,7 @@ export async function validate(dayId, state, a, user) {
 
 /* Database changes that go with some commands (after the command is recorded). */
 export async function effects(a, secrets = {}) {
+  if (a.type === "accountStatus" || a.type === "resetSignIn") forgetStatus(a.id);
   if (a.type === "accountStatus") await q("UPDATE accounts SET status = $2, failed_attempts = 0, locked_until = NULL WHERE id = $1", [a.id, a.status === "Active" ? "Active" : a.status]);
   if (a.type === "setPeople") await q("UPDATE accounts SET people = $2 WHERE id = $1", [a.id, a.people || []]);
   if (a.type === "addAccount") {

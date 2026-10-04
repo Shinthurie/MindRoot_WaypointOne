@@ -340,12 +340,12 @@ export function SignatureButton({ value, onChange, label, doneLabel, highlight, 
   );
 }
 
-export function Stepper({ value, onChange, min = 0 }) {
+export function Stepper({ value, onChange, min = 0, max = Infinity }) {
   return (
     <div className="stepper">
       <button onClick={() => onChange(Math.max(min, value - 1))} aria-label="Less">−</button>
       <span>{value}</span>
-      <button onClick={() => onChange(value + 1)} aria-label="More">+</button>
+      <button onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="More">+</button>
     </div>
   );
 }

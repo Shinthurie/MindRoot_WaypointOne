@@ -2,7 +2,7 @@
    Pure JavaScript (no React, no browser APIs), so the same rules run in the browser (optimistic updates, offline)
    and on the server (the authoritative copy every portal syncs to). */
 import { SEED_ACCOUNTS, storeName } from "../data/accounts";
-import { FAIR_ALLOC, S1_DATE, orders as allOrders, stopKey } from "../data/model";
+import { FAIR_ALLOC, S1_DATE, stopKey } from "../data/model";
 import data from "../data/s1.json";
 import { S1_RUN, buildRunOrders, ordersFromStore, runDateAt } from "./day";
 import { reduceAt } from "./clock";
@@ -132,10 +132,12 @@ export function reducer(s, a) {
     case "shortReorder": {
       const r = s.loaderReports.find((x) => x.id === a.id);
       if (!r) return s;
-      const o = allOrders.find((x) => x.outlet === r.outlet && !!x.chilled === !!r.chilled) || allOrders.find((x) => x.outlet === r.outlet);
+      const list = runOrdersOf(s);
+      const o = list.find((x) => x.ref === r.ref) || list.find((x) => x.outlet === r.outlet && !!x.chilled === !!r.chilled) || list.find((x) => x.outlet === r.outlet);
+      if (!o) return s;
       const count = a.count || r.count;
-      const newRef = `R-${String(s.storeOrders.filter((x) => x.ref.startsWith("R-")).length + 1).padStart(3, "0")}`;
-      const run = nextOperatingDay(s.clock.date);
+      const newRef = nextReplacementRef(s);
+      const run = nextOperatingDay(s.runDate || s.clock.date);
       const newOrder = { ref: newRef, outlet: r.outlet, name: storeName[r.outlet] || r.outlet, dry: r.chilled ? 0 : count, cold: r.chilled ? count : 0,
         by: a.by, at: s.clock.time, day: s.clock.date, run, replaces: o?.ref, reason: `${count} ${r.chilled ? "chilled " : ""}cases ${r.kind} at the depot`, firstInLine: true };
       const adjusted = { ...s.adjusted, [o.ref]: { units: o.units - count, missing: count, newRef, run, reason: newOrder.reason } };
@@ -210,7 +212,25 @@ export function reducer(s, a) {
       return notify({ ...s, storeReports: [r, ...s.storeReports] }, "problem", `Store report · ${r.outlet}`, `${r.what}${r.vehicle ? ` · truck ${r.vehicle}` : ""} · reported by ${r.by}`, "/dispatch/live");
     }
     // The dispatcher's answer to a store report (send on the next run, or credit) goes back to the store.
-    case "storeReportDecision": return { ...s, storeReports: s.storeReports.map((r) => (r.id === a.id ? { ...r, decision: a.decision, decidedBy: a.by, decidedAt: s.clock.time } : r)) };
+    case "storeReportDecision": {
+      const r = s.storeReports.find((x) => x.id === a.id);
+      if (!r || r.decision) return s;
+      let n = { ...s, storeReports: s.storeReports.map((x) => (x.id === a.id ? { ...x, decision: a.decision, decidedBy: a.by, decidedAt: s.clock.time } : x)) };
+      // "Send them on the next run": a replacement order for the missing cases (or the whole order) goes first then.
+      if (a.decision === "resend") {
+        const o = runOrdersOf(s).find((x) => x.ref === r.ref);
+        const count = r.count || o?.units || 0;
+        if (count > 0) {
+          const chilled = o ? !!o.chilled : /-C$/.test(r.ref || "");
+          const ref = nextReplacementRef(s);
+          const run = nextOperatingDay(s.runDate || s.clock.date);
+          const order = { ref, outlet: r.outlet, name: storeName[r.outlet] || r.name || r.outlet, dry: chilled ? 0 : count, cold: chilled ? count : 0,
+            by: a.by, at: s.clock.time, day: s.clock.date, run, replaces: r.ref || null, reason: r.what, firstInLine: true };
+          n = { ...n, storeOrders: [order, ...n.storeOrders], storeReports: n.storeReports.map((x) => (x.id === a.id ? { ...x, newRef: ref, newRun: run } : x)) };
+        }
+      }
+      return n;
+    }
     case "setPeople": return { ...s, peopleEdits: { ...s.peopleEdits, [a.id]: a.people } };
     case "storeRules": return { ...s, storeEdits: { ...s.storeEdits, [a.outlet]: a.rules } };
     case "fleetStatus": return { ...s, fleetEdits: { ...s.fleetEdits, [a.vehicle]: a.change } };
@@ -296,27 +316,55 @@ const DAY_RESET = {
 
 /* This run's orders: the dataset's for S1; otherwise the stores' orders for it plus the carried ones. */
 export const dayOrdersOf = (s) => ((s.runDate || S1_RUN) === S1_RUN ? null : buildRunOrders(s.storeOrders, s.runDate, s.carry || []));
+/* This run's orders on any run (S1: the dataset's). */
+const runOrdersOf = (s) => dayOrdersOf(s) || data.orders;
+/* Replacement orders (sent short, or missing at the store) are numbered R-001, R-002, ... */
+const nextReplacementRef = (s) => `R-${String(s.storeOrders.filter((x) => x.ref.startsWith("R-")).length + 1).padStart(3, "0")}`;
 export const isS1Run = (s) => (s.runDate || S1_RUN) === S1_RUN;
 
 /* Move the state to the run the clock is in. Going forward, every order the finished run did not serve (and any
    store order for a run that was skipped over) goes first on the new run. Going back (e.g. to the S1 day) just
    opens that run. */
+const RUN_KEYS = Object.keys(DAY_RESET);
+const runPart = (s) => Object.fromEntries(RUN_KEYS.map((k) => [k, s[k]]));
+
+/* Orders of a saved run that still need delivering: not on its published plan, or planned but not handed over
+   (no delivery record, or the driver recorded "not delivered"). */
+function unserved(s, r, run) {
+  const plan = { ...(r.planAlloc || {}) };
+  (r.planEdits || []).forEach((e) => { plan[e.ref] = e.to; });
+  return (dayOrdersOf({ ...s, runDate: run, carry: r.carry || [] }) || []).filter((o) => {
+    const a = r.published && plan[o.ref];
+    if (!a) return true;
+    const d = (r.delivered || {})[stopKey(a.vehicle, o.outlet)];
+    return !d || d.outcome === "none";
+  });
+}
+
+/* Move the state to the run the clock is in. Each run's records (plan, loading, deliveries, reports) are kept, so
+   going back to a run (the dispatcher looked at another day) finds everything as it was. Orders the last real run
+   before this one did not deliver go first (S1 is the dataset's reference day: nothing carries from it). */
 export function rollRun(s, now) {
   const run = runDateAt(now);
   const cur = s.runDate || S1_RUN;
   if (run === cur) return s.runDate ? s : { ...s, runDate: cur };
+  const saved = { ...(s.runs || {}), [cur]: { ...runPart(s), carry: s.carry || [] } };
+  const prev = Object.keys(saved).filter((d) => d < run && d !== S1_RUN).sort().pop();
   let carry = [];
-  // Unserved orders carry from one real run to the next. S1 is the dataset's reference day: nothing carries from it.
-  if (run > cur && cur !== S1_RUN) {
-    const plan = { ...(s.planAlloc || (cur === S1_RUN ? FAIR_ALLOC : {})) };
-    (s.planEdits || []).forEach((e) => { plan[e.ref] = e.to; });
-    const prev = cur === S1_RUN ? data.orders : dayOrdersOf(s) || [];
-    const skipped = (s.storeOrders || []).filter((so) => so.run > cur && so.run < run && !so.cancelled).flatMap(ordersFromStore);
-    carry = [...prev.filter((o) => !(s.published && plan[o.ref])), ...skipped]
-      .map((o) => ({ ...o, deferredYesterday: true, daysSince: (o.daysSince || 0) + 1, carriedFrom: o.carriedFrom || cur }));
+  if (run !== S1_RUN && prev) {
+    const skipped = (s.storeOrders || []).filter((so) => so.run > prev && so.run < run && !so.cancelled).flatMap(ordersFromStore);
+    carry = [...unserved(s, saved[prev], prev), ...skipped]
+      .map((o) => ({ ...o, deferredYesterday: true, daysSince: (o.daysSince || 0) + 1, carriedFrom: o.carriedFrom || prev }));
   }
+  const back = saved[run] || {};
+  const { carry: _, ...backFields } = back;
+  // Keep the last 7 runs (and always the S1 reference day).
+  const keys = Object.keys(saved).filter((d) => d !== run);
+  const keep = new Set([...keys.filter((d) => d !== S1_RUN).sort().slice(-7), ...(keys.includes(S1_RUN) ? [S1_RUN] : [])]);
+  const runs = Object.fromEntries(Object.entries(saved).filter(([d]) => keep.has(d)));
   const summary = { run: cur, published: !!s.published, delivered: Object.keys(s.delivered || {}).length };
-  return { ...s, ...DAY_RESET, runDate: run, carry, pastRuns: [...(s.pastRuns || []), summary].slice(-14) };
+  const pastRuns = s.runs?.[cur] ? s.pastRuns || [] : [...(s.pastRuns || []), summary].slice(-14);
+  return { ...s, ...DAY_RESET, ...backFields, runDate: run, carry, runs, pastRuns };
 }
 
 /* Apply an action at a real moment, with the state on the clock's run. Used by the server and by every device. */
