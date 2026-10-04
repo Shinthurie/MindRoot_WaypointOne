@@ -3,10 +3,11 @@
    orders closed and tonight's plan not yet published, so a judge can walk through planning → loading → delivery.
    Usage: tsx db/seed.js            (wipe and reseed)
           tsx db/seed.js --if-empty (only when the database has no delivery day yet; used by docker compose) */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, createReadStream } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "csv-parse/sync";
+import { parse as parseStream } from "csv-parse";
 import bcrypt from "bcryptjs";
 import { pool, q, tx, waitForDb } from "../src/db.js";
 import { config } from "../src/config.js";
@@ -24,6 +25,20 @@ function csv(rel) {
 }
 const nb = (v) => (v === "" || v == null ? null : v);
 const bool = (v) => v === "1" || v === "true" || v === "True";
+
+/* The two history files are large (about 92,000 rows each): read them as a stream and insert in batches,
+   so the seed runs in little memory (Render's free plan has 512 MB). */
+async function insertStream(client, table, cols, rel, map, chunk = 2000) {
+  const path = join(config.dataDir, rel);
+  if (!existsSync(path)) throw new Error(`Missing dataset file: ${path}. Put the shared datasets in ${config.dataDir} (see README).`);
+  let batch = [], n = 0;
+  for await (const r of createReadStream(path).pipe(parseStream({ columns: true, skip_empty_lines: true, trim: true }))) {
+    batch.push(map(r));
+    if (batch.length >= chunk) { await insertMany(client, table, cols, batch, chunk); n += batch.length; batch = []; }
+  }
+  if (batch.length) { await insertMany(client, table, cols, batch, chunk); n += batch.length; }
+  return n;
+}
 
 /* Insert many rows fast: one statement per chunk. */
 async function insertMany(client, table, cols, rows, chunk = 1000) {
@@ -52,8 +67,6 @@ export async function seed({ ifEmpty = false } = {}) {
   const roads = csv(`${G}/road_conditions.csv`);
   const scenarios = csv(`${T}/task2b_peak_day_scenarios.csv`).filter((r) => r.scenario === DAY.id);
   const fleet = csv(`${T}/task2b_peak_day_fleet.csv`).filter((r) => r.scenario === DAY.id);
-  const history = csv(`${R}/deliveries_train.csv`);
-  const legs = csv(`${R}/route_legs_train.csv`);
 
   const [pw, pin] = await Promise.all([bcrypt.hash(config.seedPassword, 10), bcrypt.hash(config.seedPin, 10)]);
 
@@ -77,14 +90,14 @@ export async function seed({ ifEmpty = false } = {}) {
         festival: nb(d.festival), festival_ramp: nb(d.festival_ramp), is_holiday: bool(d.is_holiday), monsoon: bool(d.monsoon), is_operating: bool(d.is_operating) })));
     await insertMany(c, "traffic_speed", ["district", "hour", "monsoon", "speed_index"], traffic.map((t) => ({ district: t.district, hour: t.hour, monsoon: bool(t.monsoon), speed_index: t.speed_index })));
     await insertMany(c, "road_conditions", ["district", "date", "disruption_index"], roads.map((r) => ({ district: r.district, date: r.date, disruption_index: r.disruption_index })));
-    await insertMany(c, "delivery_history", ["delivery_id", "order_date", "dispatch_date", "dispatch_status", "outlet_id", "brand", "district", "depot", "temp_requirement",
-      "order_units", "order_weight_kg", "order_volume_m3", "route_id", "vehicle_id", "planned_arrival"],
-      history.map((h) => ({ delivery_id: h.delivery_id, order_date: h.order_date, dispatch_date: nb(h.dispatch_date), dispatch_status: h.dispatch_status, outlet_id: h.outlet_id,
+    await insertStream(c, "delivery_history", ["delivery_id", "order_date", "dispatch_date", "dispatch_status", "outlet_id", "brand", "district", "depot", "temp_requirement",
+      "order_units", "order_weight_kg", "order_volume_m3", "route_id", "vehicle_id", "planned_arrival"], `${R}/deliveries_train.csv`,
+      (h) => ({ delivery_id: h.delivery_id, order_date: h.order_date, dispatch_date: nb(h.dispatch_date), dispatch_status: h.dispatch_status, outlet_id: h.outlet_id,
         brand: h.brand, district: h.district, depot: h.depot, temp_requirement: h.temp_requirement, order_units: h.order_units, order_weight_kg: h.order_weight_kg,
-        order_volume_m3: h.order_volume_m3, route_id: nb(h.route_id), vehicle_id: nb(h.vehicle_id), planned_arrival: nb(h.planned_arrival_time) })), 2000);
-    await insertMany(c, "route_legs", ["leg_id", "date", "route_id", "depot", "vehicle_id", "brand", "district", "seq", "to_outlet", "distance_km", "planned_arrival", "arrival_time", "leave_time"],
-      legs.map((l) => ({ leg_id: l.leg_id, date: l.date, route_id: l.route_id, depot: l.depot, vehicle_id: l.vehicle_id, brand: l.brand, district: l.district, seq: l.seq,
-        to_outlet: l.to_outlet, distance_km: l.distance_km, planned_arrival: nb(l.planned_arrival_time), arrival_time: nb(l.arrival_time), leave_time: nb(l.leave_outlet_time) })), 2000);
+        order_volume_m3: h.order_volume_m3, route_id: nb(h.route_id), vehicle_id: nb(h.vehicle_id), planned_arrival: nb(h.planned_arrival_time) }));
+    await insertStream(c, "route_legs", ["leg_id", "date", "route_id", "depot", "vehicle_id", "brand", "district", "seq", "to_outlet", "distance_km", "planned_arrival", "arrival_time", "leave_time"], `${R}/route_legs_train.csv`,
+      (l) => ({ leg_id: l.leg_id, date: l.date, route_id: l.route_id, depot: l.depot, vehicle_id: l.vehicle_id, brand: l.brand, district: l.district, seq: l.seq,
+        to_outlet: l.to_outlet, distance_km: l.distance_km, planned_arrival: nb(l.planned_arrival_time), arrival_time: nb(l.arrival_time), leave_time: nb(l.leave_outlet_time) }));
 
     // The delivery day
     await c.query("INSERT INTO delivery_days (id, date, depot, label) VALUES ($1, $2, $3, $4)", [DAY.id, DAY.date, DAY.depot, DAY.label]);
