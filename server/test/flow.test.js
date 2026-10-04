@@ -100,3 +100,56 @@ test("a manual move that breaks a rule is rejected", async () => {
   assert.equal(r.body.results[0].status, "rejected");
   assert.match(r.body.results[0].error, /Move not allowed/);
 });
+
+test("only a dispatcher sets the clock, and it keeps running", async () => {
+  const disp = await signIn("WP-DSP-001", config.seedPassword);
+  const loader = await signIn("DEPOT-PELIYAGODA", config.seedPin);
+  let r = await send(loader, { type: "clock", clock: { time: "04:00" } });
+  assert.equal(r.body.results[0].status, "rejected");
+  r = await send(disp, { type: "clock", clock: { date: "2026-01-08", time: "03:00" } });
+  assert.equal(r.body.results[0].status, "applied");
+  const st = (await call("/api/state", { token: disp })).body.state;
+  assert.equal(st.clock.time, "03:00");
+  assert.ok(st.clock.setAt > 0, "the set time runs on from setAt");
+  r = await send(disp, { type: "clock", real: true });
+  assert.equal((await call("/api/state", { token: disp })).body.state.clock.real, true);
+});
+
+test("no back doors: a demo session cannot be a real account", async () => {
+  const r = await call("/api/auth/demo", { body: { role: "dispatcher", account: "WP-DSP-001" } });
+  assert.equal(r.status, 403);
+  const portal = (await call("/api/auth/demo", { body: { role: "demo" } })).body;
+  assert.equal(portal.user.role, "demo");
+});
+
+test("first sign-in with a temporary password, then a password change", async () => {
+  // WP-DRV-027 is seeded as not activated; its temporary secret is the seed PIN.
+  const first = await call("/api/auth/login", { body: { id: "WP-DRV-027", secret: config.seedPin } });
+  assert.equal(first.status, 409);
+  assert.equal(first.body.code, "first");
+  const weak = await call("/api/auth/activate", { body: { id: "WP-DRV-027", temp: config.seedPin, secret: "111111" } });
+  assert.equal(weak.status, 400);
+  const act = await call("/api/auth/activate", { body: { id: "WP-DRV-027", temp: config.seedPin, secret: "482916" } });
+  assert.equal(act.status, 200);
+  assert.equal(act.body.user.vehicle, "VEH027");
+  const tok = await signIn("WP-DRV-027", "482916");
+  assert.ok(tok);
+  const wrong = await call("/api/auth/password", { token: tok, body: { current: "000000", next: "735184" } });
+  assert.equal(wrong.status, 401);
+  const ok = await call("/api/auth/password", { token: tok, body: { current: "482916", next: "735184" } });
+  assert.equal(ok.status, 200);
+  assert.ok(await signIn("WP-DRV-027", "735184"));
+});
+
+test("admin reset sign-in: temporary password works once and never reaches the shared log", async () => {
+  const admin = await signIn("WP-ADM-001", config.seedPassword);
+  const r = await send(admin, { type: "resetSignIn", id: "WP-DRV-005", temp: "AB-CD-EF" });
+  assert.equal(r.body.results[0].status, "applied");
+  const log = await call("/api/commands?since=0", { token: admin });
+  assert.ok(log.body.commands.some((c) => c.type === "resetSignIn"));
+  const { pool } = await import("../src/db.js");
+  const stored = (await pool.query("SELECT payload FROM commands WHERE type = 'resetSignIn'")).rows[0].payload;
+  assert.equal(stored.temp, undefined, "the temporary password is not stored in the log");
+  const first = await call("/api/auth/login", { body: { id: "WP-DRV-005", secret: "AB-CD-EF" } });
+  assert.equal(first.body.code, "first");
+});
