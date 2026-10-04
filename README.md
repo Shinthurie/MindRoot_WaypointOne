@@ -102,16 +102,36 @@ All 185 seeded accounts work the same way: `WP-DSP-00x` (dispatchers), `WP-DRV-0
 asks you to set your own 6-digit PIN (first sign-in). Admin's *New account* and *Reset sign-in* give a temporary
 password the same way. Everyone can change their own password or PIN on their profile.
 
-### The day's clock
+### The day's clock and the runs
 
 Every portal follows one clock. It **keeps running** like a real clock. Only the **dispatcher** can change it, in the
-**date and time** menu at the top right of Orders or the Live board: *Use real time* (Sri Lanka time), set any date
-and time (it runs on from there). The seeded orders belong to the S1 day (Thu 8 Jan
-2026), so the walkthrough uses those steps.
+**date and time** menu at the top right of Orders or the Live board: *Use real time* (Sri Lanka time), or set any date
+and time (it runs on from there).
 
----
+The system works on the **run** the clock is in (booklet: orders for a run close at 4 PM the day before):
+before 4 PM it is today's run (or the next operating day if today is closed), from 4 PM the next run, which the
+dispatcher plans that evening. When the clock passes into a new run, plans, loading, deliveries and reports start
+fresh, and every order the last run could not serve is carried over and goes first.
 
-## Judge walkthrough (planning → loading → delivery → receipt)
+- **Real runs (any real date):** the orders are the ones stores place in the app. The dispatcher plans them with
+  Auto-plan, publishes, and loaders, drivers and stores carry on from there. This is how the system runs every day.
+- **S1 (Thu 8 Jan 2026)** is the dataset's peak day, kept as the reference day: its 85 orders and fleet status come
+  from the shared datasets. The seeded day starts there (Wed 7 Jan 19:00), and the three bad days are written for it.
+
+### A real day, step by step (today's date)
+
+1. Dispatcher (`WP-DSP-001`): **date and time → Use real time**. The Orders page shows *This run* (the next run if it
+   is past 4 PM, or a Sunday) with no orders yet.
+2. Store managers place orders: e.g. `STORE-OUT034` → **New order** → *Repeat yesterday's order* → **Send order**
+   (also `STORE-OUT026`, `STORE-OUT074`…). Each order appears at once on the dispatcher's Orders page.
+3. Dispatcher: **Auto-plan** → the engine plans exactly these orders → **Use this plan** → **Publish plan**.
+4. Dispatcher sets the time to the run's morning (e.g. 03:00) → loader (`DEPOT-PELIYAGODA`) sees *Today's loads*,
+   says who is loading, checks the reefer and loads each truck.
+5. Dispatcher sets e.g. 06:00 → the truck's driver (`WP-DRV-0xx`, the vehicle number on Today's loads) starts the run,
+   arrives, and hands over with a real photo and signature.
+6. The store sees *Delivered · photo + signature* and confirms in **Check delivery**.
+
+## Judge walkthrough on the S1 reference day (planning → loading → delivery → receipt)
 
 Use two or more browsers (or one normal and one private window) to see the roles update each other live.
 Driver and loader screens are designed for a phone: use a phone or your browser's device toolbar (390 px).
@@ -199,7 +219,8 @@ replay, delivery photos (phone camera) and signatures, the running clock (dispat
 Not connected yet (shown honestly in the app where it matters): sending SMS (store notices and the one-time codes
 at first sign-in and *Forgot password*: any 6 digits are accepted at first sign-in), voice notes, phone calls from the
 app, and live GPS (positions follow the plan and the drivers' recorded steps). The seeded data has one delivery day
-(S1); store orders for later runs are recorded but not yet planned by the engine. The bad days portal (`/#/bad-days`)
+(S1); real runs take their orders from the stores in the app. Real runs are planned for the Peliyagoda depot (like S1):
+Kandy stores' orders are recorded but not yet planned. The bad days portal (`/#/bad-days`)
 is a demo tool that plays every role of a story; switch it off with `DEMO_MODE=false`.
 
 ## Departures from the Designathon submission
