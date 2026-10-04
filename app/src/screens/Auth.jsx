@@ -1,20 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../sync";
-import { ArrowRight, X, Eye, EyeOff, KeyRound, Languages, Lock, LogOut, MapPin, MessageSquareText, Phone, Shirt, ShieldCheck, ShoppingBasket, Store, Truck, Tv, Package, LayoutDashboard, UserCog, UserRound, Check } from "lucide-react";
+import { ArrowRight, X, Eye, EyeOff, KeyRound, Languages, Lock, LogOut, MapPin, MessageSquareText, Phone, Shirt, ShieldCheck, ShoppingBasket, Store, Tv, UserRound, Check } from "lucide-react";
 import { useApp, USERS } from "../state";
 import { LANGS } from "../i18n";
-import { BadDayButtons } from "../components/Guide";
 import { outletsAll } from "../data/accounts";
 import { Codes, Dots, Keypad, MobileFrame, TopBar } from "../components/ui";
 
 // Personal: WP-DRV (driver), WP-DSP (dispatcher), WP-ADM (admin). Shared: STORE-<outlet>, DEPOT-<depot>.
 const ROLE_BY_PREFIX = { "WP-DRV": "driver", "DEPOT-": "loader", "STORE-": "store", "WP-DSP": "dispatcher", "WP-ADM": "admin" };
-const QUICK = [
-  ["dispatcher", LayoutDashboard, "roleDispatcher", "#6d3a8a"], ["loader", Package, "roleLoader", "#ea7a12"], ["driver", Truck, "roleDriver", "#2563eb"],
-  ["store", Store, "roleStore", "#16a34a"], ["admin", UserCog, "roleAdmin", "#475569"],
-];
-const ROLE_COLORS = { dispatcher: "#7c3aed", loader: "#ea7a12", driver: "#2563eb", store: "#16a34a", admin: "#64748b" };
 const LANG_NAMES = { en: "English", si: "සිංහල", ta: "தமிழ்" };
 
 /* Language picker for the sign-in page: full names, so nobody has to guess what "த" means. */
@@ -94,17 +88,6 @@ export function SignIn({ landing = false }) {
       {err && <div className="banner problem" style={{ fontSize: 13 }}>{err.text || t(err.key).replace("{n}", err.n)}</div>}
       <button className="btn primary block signin-go" type="submit" disabled={tries <= 0 || busy}>{t("signIn")} <ArrowRight size={18} /></button>
       <div className="secure-note"><ShieldCheck size={22} /><span><b>{t("secure")}</b><small>{t("secureSub")}</small></span></div>
-      <div className="divider" />
-      <div className="field-label" style={{ margin: 0 }}>{t("demoWorkspaces")}</div>
-      <div className="role-tiles">
-        {QUICK.map(([role, Icon, key]) => (
-          <button type="button" key={role} className="role-tile" onClick={() => enter(role)}><span className="ic" style={{ background: ROLE_COLORS[role] }}><Icon size={18} /></span>{t(key)}</button>
-        ))}
-        <button type="button" className="role-tile" onClick={() => nav("/first")}><span className="ic" style={{ background: "var(--turmeric)", color: "#2a1331" }}><KeyRound size={18} /></span>{t("roleNew")}</button>
-      </div>
-      <div className="divider" />
-      <div className="field-label" style={{ margin: 0 }}>Bad days · see what happens</div>
-      <BadDayButtons />
     </form>
   );
   if (landing) return <Landing form={form} onPickLang={() => setPicked(true)} />;

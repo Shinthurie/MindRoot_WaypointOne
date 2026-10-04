@@ -476,6 +476,7 @@ export function DayPill() {
               ))}
             </div>
             <div className="muted xs">Set by hand for now. Every portal follows this time.</div>
+            <button className="btn secondary" style={{ minHeight: 38 }} onClick={() => { if (window.confirm("Reset the demo day? Everything done today (plan, loading, deliveries, reports) goes back to the start for everyone.")) { dispatch({ type: "reset" }); setOpen(false); } }}>Reset demo day</button>
           </div>
         </>
       )}

@@ -1,9 +1,5 @@
-import { useEffect, useState } from "react";
-import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { Clock, CloudOff, EyeOff, RotateCcw, Truck, Package, Store, LayoutDashboard, UserCog, Refrigerator, Thermometer, WifiOff, KeyRound, LogIn, Smartphone, Monitor } from "lucide-react";
-import { StateProvider, USERS, useApp } from "./state";
-import { LANGS } from "./i18n";
-import { TIMELINE } from "./components/ui";
+import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { StateProvider, useApp } from "./state";
 import { GuideBar, ScenarioJump } from "./components/Guide";
 import { BadDayPanel, BadDaysHome } from "./screens/BadDays";
 import { FirstSignIn, Forgot, Profile, SignIn, Unlock } from "./screens/Auth";
@@ -24,76 +20,6 @@ function Guard({ role, children }) {
   return children;
 }
 
-function DemoPanel() {
-  const { dispatch, simOffline, hideDemo, lang, phonePreview } = useApp();
-  const nav = useNavigate();
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === "d" && e.altKey) dispatch({ type: "hideDemo", value: !hideDemo }); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [hideDemo, dispatch]);
-  if (hideDemo) return null;
-  const as = (role, path, outlet) => {
-    dispatch({ type: "login", role, outlet });
-    if (USERS[role].people && path) dispatch({ type: "person", name: USERS[role].people[0] }); // demo shortcut skips "Who is this?"
-    if (role !== "dispatcher" && role !== "admin") dispatch({ type: "publish", by: "Demo shortcut", __demo: true }); // demo shortcuts jump past tonight's publish
-    nav(path || USERS[role].home);
-    setOpen(false);
-  };
-  return (
-    <>
-      {open && (
-        <div className="demo-sheet" role="dialog" aria-label="Demo controls">
-          <h4>Open a portal</h4>
-          <div className="demo-grid">
-            <button onClick={() => as("dispatcher")}><LayoutDashboard size={15} /> Dispatcher</button>
-            <button onClick={() => as("loader")}><Package size={15} /> Loader</button>
-            <button onClick={() => as("driver")}><Truck size={15} /> Driver</button>
-            <button onClick={() => as("store")}><Store size={15} /> Store manager</button>
-            <button onClick={() => as("store", "/store", "OUT054")}><Store size={15} /> Store with a deferral</button>
-            <button onClick={() => as("admin")}><UserCog size={15} /> Admin</button>
-            <button onClick={() => { dispatch({ type: "logout" }); nav("/"); setOpen(false); }}><LogIn size={15} /> Sign-in page</button>
-          </div>
-          <h4>Time · every portal follows it</h4>
-          <div className="demo-grid">
-            {TIMELINE.map(([label, date, time]) => (
-              <button key={label} onClick={() => dispatch({ type: "clock", clock: { date, time } })}><Clock size={15} /> {time} · {label}</button>
-            ))}
-          </div>
-          <h4>Bad days</h4>
-          <div className="demo-grid">
-            <button onClick={() => { nav("/bad-days/dock"); setOpen(false); }}><Refrigerator size={15} /> 1 · Short at the Dock</button>
-            <button onClick={() => { nav("/bad-days/reefer"); setOpen(false); }}><Thermometer size={15} /> 2 · Reefer Down</button>
-            <button onClick={() => { nav("/bad-days/dead"); setOpen(false); }}><WifiOff size={15} /> 3 · Dead Zone</button>
-            <button onClick={() => { dispatch({ type: "offline", value: !simOffline }); setOpen(false); }}><CloudOff size={15} /> {simOffline ? "Driver: signal back" : "Driver: no signal"}</button>
-          </div>
-          <h4>More screens</h4>
-          <div className="demo-grid">
-            <button onClick={() => { nav("/first"); setOpen(false); }}><KeyRound size={15} /> First sign-in</button>
-            <button onClick={() => { nav("/forgot"); setOpen(false); }}><KeyRound size={15} /> Forgot password</button>
-            <button onClick={() => as("driver", "/unlock")}><KeyRound size={15} /> PIN unlock</button>
-            <button onClick={() => as("loader", "/loader/who")}><Package size={15} /> Who is loading?</button>
-          </div>
-          <h4>View</h4>
-          <div className="demo-grid">
-            <button style={phonePreview ? { borderColor: "var(--brinjal)", background: "var(--brinjal-tint)" } : {}} onClick={() => dispatch({ type: "phonePreview", value: !phonePreview })}><Smartphone size={15} /> Phone preview {phonePreview ? "on" : "off"}</button>
-            <button onClick={() => as("loader", "/loader/wall")}><Monitor size={15} /> Dock wall screen</button>
-          </div>
-          <h4>Language (field screens)</h4>
-          <div className="demo-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
-            {LANGS.map((l) => <button key={l.code} style={lang === l.code ? { borderColor: "var(--brinjal)" } : {}} onClick={() => dispatch({ type: "lang", lang: l.code })}>{l.label}</button>)}
-          </div>
-          <div className="demo-grid">
-            <button onClick={() => { dispatch({ type: "reset" }); setOpen(false); }}><RotateCcw size={15} /> Reset demo</button>
-            <button onClick={() => dispatch({ type: "hideDemo", value: true })}><EyeOff size={15} /> Hide (Alt+D)</button>
-          </div>
-        </div>
-      )}
-      <button className="demo-fab" onClick={() => setOpen(!open)}>Demo</button>
-    </>
-  );
-}
 
 export default function App() {
   return (
@@ -154,7 +80,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <GuideBar />
-        <DemoPanel />
       </HashRouter>
     </StateProvider>
   );
