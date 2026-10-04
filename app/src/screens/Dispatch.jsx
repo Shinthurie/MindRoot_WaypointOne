@@ -16,9 +16,11 @@ import { nextOperatingDay } from "../runs.js";
 import { BrandChip, Chip, DayPill, DeskShell, DepotPill, formatDate, useClock, useRuns } from "../components/ui";
 
 export function useDispatchNav() {
-  const { scenario, depot } = useApp();
+  const { scenario, depot, storeReports, loaderReports, driverReports } = useApp();
   const peak = depot === "Peliyagoda"; // S1 counts only exist for Peliyagoda
-  const incidents = ["dock", "reefer"].filter((k) => scenario[k] === "reported").length + (scenario.dead === "complaint" ? 1 : 0);
+  // Every problem still waiting for the dispatcher: store, dock and driver reports.
+  const incidents = ["dock", "reefer"].filter((k) => scenario[k] === "reported").length + (scenario.dead === "complaint" ? 1 : 0)
+    + storeReports.filter((r) => !r.decision).length + loaderReports.filter((r) => !r.decision).length + driverReports.filter((r) => r.synced && !r.seenBy).length;
   return [
     { to: "/dispatch", label: "Orders", icon: ListChecks, count: peak ? orders.length : null },
     { to: "/dispatch/plan", label: "Plan", icon: LayoutDashboard },

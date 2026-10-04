@@ -205,7 +205,10 @@ export function reducer(s, a) {
     case "storeOrder": return { ...s, storeOrders: [{ ...a.order, at: s.clock.time, day: s.clock.date, run: runFor(s.clock) }, ...s.storeOrders] };
     case "truckLoaded": return notify({ ...s, loadedTrucks: { ...s.loadedTrucks, [`${a.vehicle}:${a.run}`]: { by: a.by, at: s.clock.time } } },
       "done", `Loaded · ${a.vehicle}`, `${a.by} finished loading ${a.vehicle} for run ${a.run}. Ready to leave.`, "/dispatch/live");
-    case "storeReport": return { ...s, storeReports: [{ ...a.report, id: `SR-${s.storeReports.length + 1}`, at: s.clock.time }, ...s.storeReports] };
+    case "storeReport": {
+      const r = { ...a.report, id: `SR-${s.storeReports.length + 1}`, at: s.clock.time };
+      return notify({ ...s, storeReports: [r, ...s.storeReports] }, "problem", `Store report · ${r.outlet}`, `${r.what}${r.vehicle ? ` · truck ${r.vehicle}` : ""} · reported by ${r.by}`, "/dispatch/live");
+    }
     // The dispatcher's answer to a store report (send on the next run, or credit) goes back to the store.
     case "storeReportDecision": return { ...s, storeReports: s.storeReports.map((r) => (r.id === a.id ? { ...r, decision: a.decision, decidedBy: a.by, decidedAt: s.clock.time } : r)) };
     case "setPeople": return { ...s, peopleEdits: { ...s.peopleEdits, [a.id]: a.people } };
@@ -228,7 +231,10 @@ export function reducer(s, a) {
     case "driverReport": {
       const r = { ...a.report, id: `DR-${s.driverReports.length + 1}`, at: s.clock.time, synced: a.online };
       const sms = a.online && r.storeText ? [{ to: r.outlet, text: r.storeText, at: s.clock.time, by: "Driver" }] : [];
-      return { ...s, driverReports: [r, ...s.driverReports], smsSent: [...sms, ...s.smsSent] };
+      const truck = !r.outlet || r.kind === "vehicle";
+      return notify({ ...s, driverReports: [r, ...s.driverReports], smsSent: [...sms, ...s.smsSent] }, "problem",
+        truck ? `Truck problem · ${r.vehicle}` : `Driver report · ${r.vehicle}`,
+        `${r.label}${r.outlet ? ` before ${r.outlet}` : ""}${r.delayMin ? ` · about ${r.delayMin} min late` : ""} · ${r.by}`, truck ? `/dispatch/replan/${r.vehicle}` : "/dispatch/live");
     }
     case "driverReportSeen": return { ...s, driverReports: s.driverReports.map((r) => (r.id === a.id ? { ...r, seenBy: a.by, seenAt: s.clock.time } : r)) };
     case "deliver": {
@@ -242,7 +248,11 @@ export function reducer(s, a) {
       const serviceMin = Math.max(0, mins(s.clock.time) - startAt);
       const rec = { outcome: a.outcome, missing: a.missing || 0, reason: a.reason || null, at: s.clock.time, synced: a.online, arrivedAt, serviceMin, receivedBy: a.receivedBy || null,
         photo: a.photo || null, signature: a.signature || null };
-      return { ...s, delivered: { ...s.delivered, [k]: rec }, outbox: a.online ? s.outbox : [...s.outbox, k] };
+      const n = { ...s, delivered: { ...s.delivered, [k]: rec }, outbox: a.online ? s.outbox : [...s.outbox, k] };
+      // A stop not delivered, or delivered short, is a problem for the dispatcher.
+      if (a.outcome === "none") return notify(n, "problem", `Not delivered · ${a.outlet}`, `${a.vehicle} · ${{ shopClosed: "shop closed", refused: "refused", noAccess: "no access" }[a.reason] || a.reason || "not delivered"} · goes first on the next run`, "/dispatch/live");
+      if (a.missing) return notify(n, "problem", `Delivered short · ${a.outlet}`, `${a.vehicle} · ${a.missing} cases missing · signed by ${a.receivedBy || "the store"}`, "/dispatch/live");
+      return n;
     }
     case "sync": {
       // a.keys: only these records (a truck whose signal came back); none given = everything waiting.
