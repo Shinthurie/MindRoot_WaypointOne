@@ -5,6 +5,8 @@ import { q } from "./db.js";
 import { config } from "./config.js";
 import { checkAlloc, effectiveAlloc, loadDay, runOrders } from "./planning.js";
 import { isS1Run } from "../../app/src/domain/store.js";
+import { clockAt } from "../../app/src/domain/clock.js";
+import { runFor } from "../../app/src/runs.js";
 
 export class Invalid extends Error { constructor(message, details) { super(message); this.status = 422; this.details = details; } }
 
@@ -51,6 +53,20 @@ export async function validate(dayId, state, a, user) {
     case "storeOrder": {
       const o = a.order || {};
       if ((o.dry ?? 0) < 0 || (o.cold ?? 0) < 0 || (o.dry ?? 0) + (o.cold ?? 0) <= 0) throw new Invalid("An order needs at least one case");
+      const all = state.storeOrders || [];
+      if (all.some((x) => x.ref === o.ref)) throw new Invalid(`There is already an order ${o.ref}`);
+      // One order per store per run (an order too big for one truck goes as several pieces).
+      const run = runFor(clockAt(state.clock));
+      if (!o.split && !o.replaces && all.some((x) => x.outlet === o.outlet && x.run === run && !x.cancelled && !x.replaces && !x.split)) {
+        throw new Invalid(`${o.outlet} already has an order for this run: change that order instead`);
+      }
+      return;
+    }
+    case "storeOrderUpdate":
+    case "storeOrderCancel": {
+      const x = (state.storeOrders || []).find((o) => o.ref === a.ref);
+      if (!x) throw new Invalid(`Unknown order ${a.ref}`);
+      if (user?.role === "store" && x.outlet !== user.outlet) throw new Invalid(`Order ${a.ref} belongs to ${x.outlet}`);
       return;
     }
     case "fleetStatus": {

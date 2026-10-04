@@ -302,7 +302,9 @@ export function PlaceOrder() {
   const store = useStore();
   const brand = store.brand;
   const DRY = ITEMS[brand].dry, COLD = ITEMS[brand].cold;
-  const editing = navState?.edit ? storeOrders.find((o) => o.ref === navState.edit && !o.cancelled && o.outlet === store.outlet) : null;
+  // One order per store per run: if this run already has one, the form changes that order.
+  const already = storeOrders.find((o) => o.outlet === store.outlet && o.run === runs.orderRun && !o.cancelled && !o.replaces);
+  const editing = navState?.edit ? storeOrders.find((o) => o.ref === navState.edit && !o.cancelled && o.outlet === store.outlet) : already || null;
   const [dry, setDry] = useState(editing?.items?.dry || DRY.map((d) => d[1]));
   const [cold, setCold] = useState(editing?.items?.cold || COLD.map((d) => d[1]));
   const who = useWho();
@@ -326,9 +328,12 @@ export function PlaceOrder() {
     // A too-big order goes as several whole orders, each one small enough for a truck.
     const pieces = size.flatMap((s) => Array.from({ length: s.parts }, (_, i) => ({ k: s.k, cases: Math.floor(s.cases / s.parts) + (i < s.cases % s.parts ? 1 : 0) })));
     const groups = tooBig.length ? pieces.filter((p) => p.cases).map((p) => ({ dry: p.k === "dry" ? p.cases : 0, cold: p.k === "cold" ? p.cases : 0 })) : [{ dry: sum(dry), cold: sum(cold), items: { dry, cold } }];
+    // The order number is the store and the run (e.g. OUT074-1005), so two stores never get the same number.
+    const base = `${store.outlet}-${runs.orderRun.slice(5).replace("-", "")}`;
+    const taken = storeOrders.filter((o) => o.ref.startsWith(base)).length;
     const refs = groups.map((g, i) => {
-      const ref = `N-${String(storeOrders.length + i + 1).padStart(3, "0")}`;
-      dispatch({ type: "storeOrder", order: { ref, outlet: store.outlet, name: store.name, dry: g.dry, cold: g.cold, items: g.items || null, by: name } });
+      const ref = groups.length > 1 || taken ? `${base}-${taken + i + 1}` : base;
+      dispatch({ type: "storeOrder", order: { ref, outlet: store.outlet, name: store.name, dry: g.dry, cold: g.cold, items: g.items || null, by: name, ...(groups.length > 1 ? { split: true } : {}) } });
       return ref;
     });
     dispatch({ type: "log", who: name, role: `Store · ${store.outlet}`, what: `Sent ${refs.length > 1 ? `${refs.length} orders (${refs.join(", ")})` : `order ${refs[0]}`} for the ${fd(runs.orderRun)} run: ${sum(dry)} dry + ${sum(cold)} chilled cases` });
@@ -365,6 +370,7 @@ export function PlaceOrder() {
       {(wide) => (
         <>
           {cutoff}
+          {editing && !navState?.edit && <div className="banner info">{tf("You already ordered for the {date} run. Change that order here.", { date: fd(run) })}</div>}
           {brand !== "Fresh" && <div className="card flat small">{tf(brand === "Style" ? "Style orders once a week for your delivery day. Order more before seasonal peaks." : "Tech orders as needed. Heavy and fragile items: one line per item.")}</div>}
           {repeat}
           <div className={wide ? "store-grid" : "col"} style={wide ? { gridTemplateColumns: "1fr 1fr" } : { gap: 12 }}>

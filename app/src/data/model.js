@@ -53,7 +53,9 @@ const daysBefore = (iso) => { const [y, m, d] = iso.split("-").map(Number); cons
 export const fuelBeforeToday = (vid) => {
   const f = fuelWeek[vid];
   if (!f) return null;
-  // On the S1 day we know the real use from Monday to yesterday (route records); other days use last week's daily average.
+  // On the S1 day we know the real use from Monday to yesterday (route records). A real run has no logged trips yet,
+  // so the full weekly quota is left (the same as the server's rule check).
+  if (RUN_DATE !== S1_DATE) return 0;
   return fuelDate === S1_DATE && f.weekSoFarL != null ? f.weekSoFarL : (f.usedL / 6) * daysBefore(fuelDate);
 };
 export const fuelLeftEstimate = (vid) => {

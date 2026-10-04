@@ -215,3 +215,21 @@ test("a truck breaks down: re-plan without it keeps every other truck's orders",
   assert.equal(st.fleetEdits[down].status, "in_workshop");
   assert.equal((await call("/api/plan/check", { token: disp })).body.ok, true);
 });
+
+test("one order per store per run; a store changes only its own orders", async () => {
+  const s34 = await signIn("STORE-OUT034", config.seedPassword);
+  const s26 = await signIn("STORE-OUT026", config.seedPassword);
+  // OUT034 already ordered N-R1 for this run (previous test): a second order is refused, a change is fine.
+  let r = await send(s34, { type: "storeOrder", order: { ref: "OUT034-X", outlet: "OUT034", name: "OUT034", dry: 5, cold: 0, by: "Store" } });
+  assert.match(r.body.results[0].error, /already has an order/);
+  r = await send(s34, { type: "storeOrderUpdate", ref: "N-R1", patch: { dry: 70 } });
+  assert.equal(r.body.results[0].status, "applied");
+  // An order too big for one truck goes as pieces; a used order number is refused.
+  r = await send(s34, { type: "storeOrder", order: { ref: "OUT034-P2", outlet: "OUT034", name: "OUT034", dry: 5, cold: 0, by: "Store", split: true } });
+  assert.equal(r.body.results[0].status, "applied");
+  r = await send(s26, { type: "storeOrder", order: { ref: "N-R1", outlet: "OUT026", name: "OUT026", dry: 5, cold: 0, by: "Store", split: true } });
+  assert.match(r.body.results[0].error, /already an order N-R1/);
+  // Another store cannot change or cancel it.
+  r = await send(s26, { type: "storeOrderCancel", ref: "N-R1", by: "Someone" });
+  assert.match(r.body.results[0].error, /belongs to OUT034/);
+});
