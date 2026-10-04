@@ -6,7 +6,8 @@ the same order, and field work carries on without signal.
 
 Team MindRoot · Tech-Triathlon 2026 (Rootcode) · Hackathon
 
-- **Deployed system:** see the submission form (public URL). Accounts below.
+- **Deployed system:** https://mindroot-waypointone-app.onrender.com (accounts below). It runs on a free plan:
+  after 15 minutes without visitors the first page can take about a minute to wake up.
 - **Architecture and data model:** [docs/architecture.md](docs/architecture.md), [docs/data-model.md](docs/data-model.md)
 - **AI tool disclosure:** [docs/AI_disclosure.md](docs/AI_disclosure.md)
 
